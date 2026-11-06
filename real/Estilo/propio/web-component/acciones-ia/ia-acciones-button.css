@@ -1,0 +1,377 @@
+/* Acciones IA — look del boton dentro de ButtonBar (shadow). IA-255/257 */
+/* Glow = disco conico centrado + overflow:hidden en wrap fit-content
+   (patron .ia-btn-border-wrap / .ia-btn-border-glow del prototipo que funcionaba). */
+
+:root, :host {
+    /* Colores con equivalente en colors.css: referencian el token real */
+    --ia-color-descubrimiento: var(--color-purple-500, #6352C7);
+    --ia-color-hover: var(--color-purple-50, #F1EFFA);
+    --ia-estrella-verde: var(--color-green-600, #71A850);
+    --ia-estrella-amarilla: var(--color-yellow-400, #F5D83E);
+    /* Sin equivalente en colors.css: no coinciden con ningun tono existente en la escala purple o cyan */
+    --ia-color-marco: #C6C0EB;
+    --ia-estrella-cian: #30AAC6;
+}
+
+@keyframes ia-wcbb-border-rotate {
+    from { transform: translate(-50%, -50%) rotate(0deg); }
+    to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+@keyframes ia-twinkle-big {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.7; transform: scale(0.88); }
+}
+
+@keyframes ia-twinkle-green {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.82); }
+}
+
+@keyframes ia-twinkle-yellow {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.6; transform: scale(0.85); }
+}
+
+.wcbb-btn-wrap.ia-btn-border-wrap,
+.wcbb-btn-wrap:has(wc-button.btn-ia),
+.wcbb-btn-wrap:has(.btn-ia) {
+    position: relative;
+    display: inline-flex;
+    align-items: stretch;
+    align-self: center;
+    flex: 0 0 auto;
+    flex-shrink: 0;
+    width: fit-content !important;
+    max-width: max-content !important;
+    border-radius: 6px;
+    padding: 1.5px;
+    overflow: hidden;
+    background: var(--ia-color-marco);
+    isolation: isolate;
+    min-height: 30px;
+    box-sizing: border-box;
+}
+
+/* Disco giratorio: hijo real .ia-btn-border-glow (no ::before) */
+.wcbb-btn-wrap.ia-btn-border-wrap > .ia-btn-border-glow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 250%;
+    height: 250%;
+    margin: 0;
+    padding: 0;
+    border-radius: 0;
+    pointer-events: none;
+    z-index: 0;
+    background: conic-gradient(
+        from 0deg,
+        transparent 0%, transparent 40%,
+        var(--ia-estrella-cian) 50%, var(--ia-estrella-verde) 60%, var(--ia-estrella-amarilla) 70%, var(--ia-color-descubrimiento) 80%,
+        transparent 90%, transparent 100%
+    );
+    transform-origin: center center;
+    animation: ia-wcbb-border-rotate 2.4s linear infinite;
+}
+
+.ia-acciones-bar.is-loading .wcbb-btn-wrap.ia-btn-border-wrap > .ia-btn-border-glow {
+    animation-duration: 0.5s;
+}
+
+/* Sin ::before residual */
+.wcbb-btn-wrap.ia-btn-border-wrap::before,
+.wcbb-btn-wrap:has(wc-button.btn-ia)::before,
+.wcbb-btn-wrap:has(.btn-ia)::before {
+    content: none !important;
+    display: none !important;
+}
+.wcbb-btn-wrap:has(wc-button.btn-ia) wc-button,
+.wcbb-btn-wrap:has(.btn-ia) wc-button {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    height: 100%;
+}
+
+.wcbb-btn-wrap.ia-btn-border-wrap .wcb-btn,
+.wcbb-btn-wrap:has(wc-button.btn-ia) .wcb-btn,
+.wcbb-btn-wrap:has(.btn-ia) .wcb-btn {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 30px;
+    min-height: 30px;
+    max-height: none;
+    padding: 0 10px;
+    box-sizing: border-box;
+    background: #fff;
+    border: none;
+    border-radius: 5px;
+    font-weight: 700;
+    font-size: 0.8125rem;
+    letter-spacing: 0.01em;
+    color: var(--ia-color-descubrimiento);
+    white-space: nowrap;
+}
+
+.wcbb-btn-wrap:has(wc-button.btn-ia) .wcb-btn:hover,
+.wcbb-btn-wrap:has(.btn-ia) .wcb-btn:hover {
+    background: var(--ia-color-hover);
+}
+
+.wcbb-btn-wrap:has(wc-button.btn-ia) .wcb-icon,
+.wcbb-btn-wrap:has(.btn-ia) .wcb-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: var(--wcb-icon-size-md);
+    height: var(--wcb-icon-size-md);
+    line-height: 0;
+}
+
+.wcbb-btn-wrap:has(wc-button.btn-ia) .wcb-icon svg,
+.wcbb-btn-wrap:has(.btn-ia) .wcb-icon svg {
+    display: block;
+    width: var(--wcb-icon-size-md);
+    height: var(--wcb-icon-size-md);
+}
+
+.wcbb-btn-wrap:has(wc-button.btn-ia) .wcb-icon .s-big,
+.wcbb-btn-wrap:has(.btn-ia) .wcb-icon .s-big {
+    animation: ia-twinkle-big 2.4s ease-in-out infinite;
+    transform-origin: 60% 50%;
+}
+
+.wcbb-btn-wrap:has(wc-button.btn-ia) .wcb-icon .s-green,
+.wcbb-btn-wrap:has(.btn-ia) .wcb-icon .s-green {
+    animation: ia-twinkle-green 2.4s ease-in-out infinite 0.4s;
+    transform-origin: 20% 38%;
+}
+
+.wcbb-btn-wrap:has(wc-button.btn-ia) .wcb-icon .s-yellow,
+.wcbb-btn-wrap:has(.btn-ia) .wcb-icon .s-yellow {
+    animation: ia-twinkle-yellow 2.4s ease-in-out infinite 0.8s;
+    transform-origin: 26% 80%;
+}
+
+/* Ocultar caret externo si alguna config lo llega a pintar */
+.wcbb-btn-wrap:has(wc-button.btn-ia) .wcbb-caret,
+.wcbb-btn-wrap:has(.btn-ia) .wcbb-caret {
+    display: none !important;
+}
+
+/* --- D-015 / IA-330 / ES-7713: modo minimizado — trigger inline dentro del campo.
+   Equivale a .ia-inline-trigger del design system (pantallas/es7713-acciones-ia-campos).
+   Reglas light-DOM espejo en ensureMinimizadoLightCss() de acciones-ia.js.
+   TODO cuelga de .ia-acciones-bar--minimizado: la barra Acciones IA normal
+   (comunicados, entrevistas, cuaderno) no se ve afectada. --- */
+
+/* Hueco reservado dentro del campo: 24px de icono + 8px de margen */
+.ia-acciones-field-host.ia-acciones-field--minimizado {
+    position: relative;
+}
+
+.ia-acciones-field-host.ia-acciones-field--minimizado input,
+.ia-acciones-field-host.ia-acciones-field--minimizado textarea,
+.ia-acciones-field-host.ia-acciones-field--minimizado .wcrt-editor,
+.ia-acciones-field-host.ia-acciones-field--minimizado [contenteditable="true"] {
+    padding-right: 2rem;
+    box-sizing: border-box;
+}
+
+/* display:block es imprescindible: si el campo queda inline-block, el hueco del
+   descender alarga el ancla por debajo del borde real y el icono se sale.
+   Es la misma regla que .campo-ia-anchor input/textarea del design system. */
+.ia-acciones-field-host.ia-acciones-field--minimizado > input,
+.ia-acciones-field-host.ia-acciones-field--minimizado > textarea,
+.ia-acciones-field-host.ia-acciones-field--minimizado > [contenteditable="true"] {
+    display: block;
+}
+
+.ia-acciones-field-host.ia-acciones-field--activo input,
+.ia-acciones-field-host.ia-acciones-field--activo textarea,
+.ia-acciones-field-host.ia-acciones-field--activo .wcrt-editor,
+.ia-acciones-field-host.ia-acciones-field--activo [contenteditable="true"] {
+    outline: none;
+    border-color: var(--ia-color-descubrimiento) !important;
+    box-shadow: 0 0 0 2px rgba(99, 82, 199, 0.22);
+}
+
+/* Ancla del design system: area (textarea / contenteditable) abajo a la derecha;
+   campo de linea (input) a la derecha, centrado en vertical. */
+button-bar.ia-acciones-bar.ia-acciones-bar--minimizado,
+.ia-acciones-bar.ia-acciones-bar--minimizado {
+    position: absolute;
+    /* 8px: valor del design system. El glifo (14px escalado a .7) deja holgura dentro de la
+       caja de 24px, asi que el hueco visible es mayor que 8px; es intencionado. Reducirlo
+       para pegar el icono al borde saca la caja por debajo de la linea inferior del campo. */
+    right: 8px;
+    bottom: 8px;
+    top: auto;
+    left: auto;
+    z-index: 3;
+    width: 24px !important;
+    min-width: 24px !important;
+    max-width: 24px !important;
+    height: 24px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    border-radius: 50%;
+    box-shadow: none !important;
+    overflow: visible !important;
+    pointer-events: auto !important;
+    transition: background-color .15s ease;
+}
+
+
+/* Campo de una linea: centrado vertical (.campo-ia-anchor--linea del design system). */
+.ia-acciones-field-host.ia-acciones-field--linea > .ia-acciones-bar.ia-acciones-bar--minimizado {
+    top: 50%;
+    bottom: auto;
+    transform: translateY(-50%);
+}
+
+.ia-acciones-bar.ia-acciones-bar--minimizado:hover {
+    background: var(--ia-color-hover) !important;
+}
+
+/* mostrarOnFocus:true (legacy) — el icono no esta en pantalla hasta que el campo toma foco.
+   Con mostrarOnFocus:false no se pone --on-focus y el icono esta siempre visible. */
+.ia-acciones-bar.ia-acciones-bar--minimizado.ia-acciones-bar--on-focus:not(.ia-acciones-bar--visible) {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none !important;
+}
+
+.ia-acciones-bar.ia-acciones-bar--minimizado.ia-acciones-bar--visible {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto !important;
+}
+
+/* Dentro del shadow del ButtonBar: trigger plano, sin marco conico giratorio
+   ni pildora blanca (eso se queda para la barra Acciones IA normal). */
+:host(.ia-acciones-bar--minimizado) .wcbb-btn-wrap:has(wc-button.btn-ia),
+:host(.ia-acciones-bar--minimizado) .wcbb-btn-wrap:has(.btn-ia),
+:host(.ia-acciones-bar--minimizado) .wcbb-btn-wrap.ia-inline-trigger-wrap,
+:host(.ia-acciones-bar--minimizado) .wcbb-btn-wrap.ia-btn-border-wrap {
+    width: 24px !important;
+    min-width: 24px !important;
+    max-width: 24px !important;
+    height: 24px !important;
+    /* La regla base del wrap lleva min-height:30px para la barra Acciones IA normal.
+       Sin anularlo, la caja queda 24x30 y con border-radius:50% se ve como un ovalo. */
+    min-height: 0 !important;
+    max-height: none !important;
+    align-self: center !important;
+    border-radius: 50% !important;
+    padding: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+    align-items: center;
+    justify-content: center;
+}
+
+:host(.ia-acciones-bar--minimizado) .wcbb-btn-wrap > .ia-btn-border-glow {
+    display: none !important;
+}
+
+:host(.ia-acciones-bar--minimizado) .wcbb-btn-wrap wc-button,
+:host(.ia-acciones-bar--minimizado) .wcbb-btn-wrap:has(wc-button.btn-ia) .wcb-btn,
+:host(.ia-acciones-bar--minimizado) .wcbb-btn-wrap:has(.btn-ia) .wcb-btn {
+    width: 24px !important;
+    min-width: 24px !important;
+    height: 24px !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    border-radius: 50% !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    justify-content: center;
+    gap: 0;
+}
+
+:host(.ia-acciones-bar--minimizado) .wcbb-btn-wrap:has(wc-button.btn-ia) .wcb-btn:hover,
+:host(.ia-acciones-bar--minimizado) .wcbb-btn-wrap:has(.btn-ia) .wcb-btn:hover {
+    background: var(--ia-color-hover) !important;
+}
+
+:host(.ia-acciones-bar--minimizado) .wcbb-btn-wrap:has(wc-button.btn-ia) .wcb-label,
+:host(.ia-acciones-bar--minimizado) .wcbb-btn-wrap:has(.btn-ia) .wcb-label {
+    display: none !important;
+}
+
+/* Glifo de 14px atenuado en reposo; pleno con foco del campo o hover. */
+:host(.ia-acciones-bar--minimizado) .wcb-icon {
+    width: 14px !important;
+    height: 14px !important;
+    margin: 0 !important;
+    opacity: 0.45;
+    transform: scale(0.7);
+    transform-origin: center center;
+    transition: opacity .15s ease, transform .15s ease;
+}
+
+:host(.ia-acciones-bar--minimizado) .wcb-icon svg {
+    display: block;
+    width: 14px !important;
+    height: 14px !important;
+}
+
+:host(.ia-acciones-bar--minimizado.ia-acciones-bar--visible) .wcb-icon,
+:host(.ia-acciones-bar--minimizado:hover) .wcb-icon,
+:host(.ia-acciones-bar--minimizado:focus-within) .wcb-icon {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* El trigger inline del design system lleva el glifo quieto: el parpadeo de las
+   estrellas se queda solo en el boton Acciones IA normal. */
+:host(.ia-acciones-bar--minimizado) .wcb-icon .s-big,
+:host(.ia-acciones-bar--minimizado) .wcb-icon .s-green,
+:host(.ia-acciones-bar--minimizado) .wcb-icon .s-yellow {
+    animation: none !important;
+}
+
+/* Solo modo minimizado: ocultar overflow "..." y caret; no afecta Acciones IA normal */
+:host(.ia-acciones-bar--minimizado) .wcbb-more-btn {
+    display: none !important;
+    width: 0 !important;
+    min-width: 0 !important;
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
+
+:host(.ia-acciones-bar--minimizado) .wcbb-spacer,
+:host(.ia-acciones-bar--minimizado) .wcbb-group-spacer,
+:host(.ia-acciones-bar--minimizado) .wcbb-caret {
+    display: none !important;
+    width: 0 !important;
+    flex: 0 0 0 !important;
+}
+
+:host(.ia-acciones-bar--minimizado) .wcbb-bar {
+    width: 24px !important;
+    max-width: 24px !important;
+    height: 24px !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}

@@ -1,0 +1,259 @@
+/* ============================================================================
+   FONTS.CSS  ::  fuente unica de tipografia de los Web Components
+   ----------------------------------------------------------------------------
+   Fase 1 (ESTRUCTURA): centraliza la tipografia SIN cambiar el aspecto. Los
+   pasos y los roles son nuevos y todavia nadie los consume, asi que nada se
+   mueve. El cambio visual llega en la fase 2, migrando componente a componente.
+
+   Dos capas:
+     1. PRIMITIVOS: el nombre describe el VALOR. La escala usa pasos 100..900
+        igual que la escala de tono de colors.css, para que las dos dimensiones
+        se lean con la misma gramatica. La escala es la decision; el token solo
+        dice donde vive cada valor en ella. Cada paso va marcado con las
+        declaraciones sueltas que absorbe hoy (<< ABSORBE).
+     2. SEMANTICOS (rol): el nombre describe PARA QUE SIRVE, y el paso de la
+        escala desaparece. Es la capa que consultan diseno, producto y una IA:
+        para saber el tamano de un subtitulo se lee aqui, no dentro de un
+        componente. Ese fue el detonante de este archivo.
+
+   REGLAS DE LA CAPA SEMANTICA
+     - Un rol nunca nombra un componente: 'title', no 'card-title'.
+     - Un rol nunca nombra un estado de mensaje: el tamano de un error es el de
+       un texto auxiliar ('help'); lo que cambia es el color.
+     - Cada rol declara voz + tamano + peso + interlineado + interletra, para
+       que elegir el rol resuelva el tratamiento completo de una vez.
+
+   LA REJILLA DE 4 GOBIERNA LA CAJA, NO EL GLIFO
+     El sistema usa rejilla de 4 para espacio, altura, icono y radio: ahi es
+     donde paga, porque hace que las piezas encajen. Hoy no la hay, y por eso la
+     altura de control tiene siete valores para un mismo concepto (30, 32, 36,
+     37, 38, 40, 44px) y existe un archivo entero para parchearlo.
+
+     El TAMANO DE FUENTE no esta en esa rejilla, y no es una excepcion: es otra
+     clase de escala. La diferencia de tamano que percibe el ojo es
+     multiplicativa, no aditiva, asi que una escala de tipo se construye por
+     RAZON. Esta usa una razon aproximada de 1.2, derivada de la distribucion
+     real del codigo (23 tamanos sueltos colapsan a 6):
+
+       12 -> 14 -> 16 -> 20 -> 24 -> 28    (x1.17  x1.14  x1.25  x1.20  x1.17)
+
+     Lo que SI tiene que caer en la rejilla de 4 es la CAJA: tamano x
+     interlineado, que es la altura real de la linea. Los interlineados de abajo
+     estan calculados para eso, y dan 16 / 20 / 24 / 28 / 32 / 36. Asi el texto
+     se alinea solo con el espaciado, sin forzar la fuente a un multiplo de 4.
+
+   UNIDAD
+     rem para tamano. Sigue la preferencia de tamano de fuente del navegador,
+     que px ignora, y a diferencia de em no acumula al anidar ni depende de lo
+     que el host heredo (importante con Shadow DOM). px se reserva para lo que
+     NO debe crecer con el texto: borde, radio, anillo de foco.
+     em SOLO para interletra, donde el ajuste debe ser proporcional al propio
+     tamano de letra.
+
+   Orden de carga: este archivo se importa justo despues de colors.css, al
+   inicio de internal-layout.css.
+   Selector :root, :host igual que colors.css (para Shadow DOM: los componentes
+   inyectan su CSS dentro del shadow root, donde :root no matchea nada; y la
+   biblioteca lo enlaza en el light DOM, donde :host no matchea. La lista doble
+   es lo unico que funciona en ambos contextos).
+   ============================================================================ */
+
+/* Carga de las dos voces. Variable font, subset latin (cubre espanol: acentos,
+   ene, dieresis), un solo archivo por familia para todo el rango de peso en
+   vez de un archivo por peso suelto. Self-host en Estilo/fonts/, junto a los
+   demas archivos de fuente del proyecto: un @font-face aqui atraviesa el
+   Shadow DOM porque fonts.css ya es lo que cada componente importa, mientras
+   que un <link> a Google Fonts solo llegaria al light DOM.
+
+   --font-family-ui y --font-family-reading (la voz de lectura, renombrada tras
+   corregir una colision de nombres con el rol 'body') ya apuntan a estas fuentes
+   reales mas abajo: no solo se declaran, tambien se activan. */
+@font-face {
+    font-family: 'Nunito';
+    font-style: normal;
+    font-weight: 200 1000;
+    font-display: swap;
+    src: url("../../fonts/nunito-variable-latin.woff2") format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+    font-family: 'Roboto';
+    font-style: normal;
+    font-weight: 100 900;
+    font-stretch: 100%;
+    font-display: swap;
+    src: url("../../fonts/roboto-variable-latin.woff2") format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+:root, :host {
+
+    /* == 1. PRIMITIVOS ====================================================== */
+
+    /* Familias. Las dos voces ya estaban decididas en diseno: Nunito para la
+       interfaz, Roboto para lectura y datos. Las dos se cargan via @font-face
+       arriba (self-host, variable font, subset latin) y ya estan activas: los
+       tokens de mas abajo apuntan primero a la fuente real, con la pila del
+       sistema como fallback si la carga fallara. Verificado en navegador:
+       document.fonts reporta las dos como 'loaded'. */
+    --font-family-base: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --font-family-ui:      'Nunito', var(--font-family-base);
+    --font-family-reading: 'Roboto', var(--font-family-base);
+    --font-family-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Courier New", monospace;
+
+    /* Escala de tamano, por razon (~1.2). Base 16px, asi que 1rem = 16px.
+       La equivalencia en camiseta (XS..2XL) va anotada porque diseno piensa en
+       esos terminos; el numero permite insertar un paso (250) sin renombrar. */
+    --font-size-100: 0.75rem;   /* 12px  XS   << ABSORBE  12 / 12.48 (9 decl) */
+    --font-size-200: 0.875rem;  /* 14px  S    << ABSORBE  12.8 / 13 / 13.6 / 14 / 14.4 (36 decl, el mayor) */
+    --font-size-300: 1rem;      /* 16px  M    << ABSORBE  15 / 15.2 / 16 (11 decl) */
+    --font-size-400: 1.25rem;   /* 20px  L    << ABSORBE  17.6 / 18 / 20 (6 decl) */
+    --font-size-500: 1.5rem;    /* 24px  XL   << ABSORBE  22.4 / 24 (7 decl) */
+    --font-size-600: 1.75rem;   /* 28px  2XL  << ABSORBE  28 (1 decl) */
+
+    /* Pesos. Hoy en uso: 400 (x3), 500 (x11), 600 (x14), 700 (x9), mas un
+       keyword 'bold' suelto en internal-layout.css:643 que debe pasar a 700.
+       El 800 es nuevo, solo para 'display': Nunito lo soporta de forma nativa
+       (variable font hasta 900), asi que no hay coste de carga. */
+    --font-weight-regular:   400;
+    --font-weight-medium:    500;
+    --font-weight-semibold:  600;
+    --font-weight-bold:      700;
+    --font-weight-extrabold: 800;
+
+    /* Interlineado, EMPAREJADO con el paso de tamano: mismo numero.
+       No hay nombres sueltos (tight/base/loose) porque obligarian a decidir la
+       combinacion cada vez, y ninguna combinacion libre garantiza que la caja
+       caiga en la rejilla. La regla queda sin excepcion y sin decision:
+       si usas --font-size-200, usas --line-height-200.
+
+       Adimensional siempre: en px el interlineado no escala con el tamano
+       heredado (internal-layout.css:736 es el unico caso en px del sistema y
+       debe migrar). */
+    --line-height-100: 1.333; /* 12 -> caja 16 */
+    --line-height-200: 1.429; /* 14 -> caja 20 */
+    --line-height-300: 1.5;   /* 16 -> caja 24 */
+    --line-height-400: 1.4;   /* 20 -> caja 28 */
+    --line-height-500: 1.333; /* 24 -> caja 32 */
+    --line-height-600: 1.286; /* 28 -> caja 36 */
+
+    /* Interletra. A diferencia del interlineado, NO se empareja con el paso: el
+       tracking lo decide el PAPEL. Solo los titulos se aprietan (una fuente
+       grande se ve suelta); el resto usa el espaciado natural de la fuente, que
+       el disenador tipografico ya resolvio bien. Apretar o abrir texto pequeno
+       resta legibilidad mas de lo que aporta.
+
+       Referencia: action-result.css:124 ya lleva -0.5px en su titulo de 24px.
+       Esa decision ya existia, tomada a mano y nunca sistematizada. */
+    --letter-spacing-tighter: -0.02em; /* display 24 -> -0.48px */
+    --letter-spacing-tight:   -0.01em; /* title 16   -> -0.16px */
+    --letter-spacing-none:     0;      /* todo lo demas */
+
+    /* == 2. SEMANTICOS (rol) :: apuntan a los primitivos ==================== */
+    /* Ocho roles sobre seis pasos. Cuatro roles comparten el paso 200 (14px) y
+       se distinguen por PESO y por VOZ, no por tamano: es lo que evita inflar
+       la escala. Cada comentario dice la divergencia real que el rol resuelve. */
+
+    /* Mensaje principal de una vista completa: resultado de una operacion,
+       estado vacio. No es la cabecera de una pieza, es el mensaje de la pantalla.
+       Hoy: action-result a 18 / 24 / 28px segun variante. */
+    --font-family-display:    var(--font-family-ui);
+    --font-size-display:      var(--font-size-500);         /* 24  XL */
+    --font-weight-display:    var(--font-weight-extrabold); /* 800 */
+    --line-height-display:    var(--line-height-500);       /* caja 32 */
+    --letter-spacing-display: var(--letter-spacing-tighter);
+
+    /* Cabecera de una pieza: modal, panel lateral, tarjeta, zona de subida.
+       Hoy: 7 tamanos distintos en 8 componentes (13 - 28px). */
+    --font-family-title:    var(--font-family-ui);
+    --font-size-title:      var(--font-size-300);      /* 16  M */
+    --font-weight-title:    var(--font-weight-bold);   /* 700 */
+    --line-height-title:    var(--line-height-300);    /* caja 24 */
+    --letter-spacing-title: var(--letter-spacing-tight);
+
+    /* Cabecera de una seccion DENTRO de una pieza. Mismo tamano que el cuerpo,
+       distinto peso: aqui la jerarquia la marca el peso, no el tamano. */
+    --font-family-section:    var(--font-family-ui);
+    --font-size-section:      var(--font-size-200);        /* 14  S */
+    --font-weight-section:    var(--font-weight-semibold); /* 600 */
+    --line-height-section:    var(--line-height-200);      /* caja 20 */
+    --letter-spacing-section: var(--letter-spacing-none);
+
+    /* Etiqueta de campo, cabecera de tabla, label de boton.
+       Mismo tratamiento que 'section' a proposito: menos variaciones de cosas
+       que hacen lo mismo. Se distinguen por contexto de uso, no por token.
+       Hoy: 5 tamanos en 6 componentes (11 - 14px). */
+    --font-family-label:    var(--font-family-ui);
+    --font-size-label:      var(--font-size-200);        /* 14  S */
+    --font-weight-label:    var(--font-weight-semibold); /* 600 */
+    --line-height-label:    var(--line-height-200);      /* caja 20 */
+    --letter-spacing-label: var(--letter-spacing-none);
+
+    /* La linea bajo un titulo. ESTE es el caso que motivo el archivo: hoy son
+       8 tamanos distintos en 5 componentes (12 - 16px), y para saber cual usar
+       habia que abrir dynamic-form.css.
+       Nota de color (fase 2): el subtitulo NO lleva gris apagado. Usa
+       --rf-color-text como el titulo; la distincion la dan peso y tamano. */
+    --font-family-subtitle:    var(--font-family-ui);
+    --font-size-subtitle:      var(--font-size-200);       /* 14  S */
+    --font-weight-subtitle:    var(--font-weight-regular);
+    --line-height-subtitle:    var(--line-height-200);     /* caja 20 */
+    --letter-spacing-subtitle: var(--letter-spacing-none);
+
+    /* Texto corrido y datos: celda de tabla, mensaje de banner, opcion de lista.
+       14px es la densidad de una herramienta de gestion con tablas y
+       formularios, y es la convencion de los SaaS densos. */
+    --font-family-body:    var(--font-family-reading);
+    --font-size-body:      var(--font-size-200);       /* 14  S */
+    --font-weight-body:    var(--font-weight-regular);
+    --line-height-body:    var(--line-height-200);     /* caja 20 */
+    --letter-spacing-body: var(--letter-spacing-none);
+
+    /* Lo que el usuario escribe: input, textarea, select, area editable.
+       Hoy vale lo mismo que 'body', y el nombre existe igual: son papeles
+       distintos que hoy coinciden. Lo que senala "esto es un campo" es la caja
+       (borde, fondo, padding), no la tipografia.
+
+       ATENCION al cambiarlo: por debajo de 16px, iOS Safari amplia la pagina al
+       enfocar un campo. Se acepta porque el uso prioritario es escritorio, donde
+       16px se ve desproporcionado frente al resto de la interfaz (casi toda a
+       14px). Si el uso en tablet crece, re-apuntar a --font-size-300 aqui y
+       ningun componente que ya lo consuma necesita cambiar. */
+    --font-family-input:    var(--font-family-body);
+    --font-size-input:      var(--font-size-body);
+    --font-weight-input:    var(--font-weight-body);
+    --line-height-input:    var(--line-height-body);
+    --letter-spacing-input: var(--letter-spacing-body);
+
+    /* Texto auxiliar: ayuda bajo un campo, contador, tamano de fichero, estado
+       vacio, Y MENSAJE DE ERROR (el error lo marca el color, no el tamano: por
+       eso no existe un rol 'error').
+       Hoy: 7 tamanos en 6 componentes (11 - 15.2px). */
+    --font-family-help:    var(--font-family-body);
+    --font-size-help:      var(--font-size-100);       /* 12  XS */
+    --font-weight-help:    var(--font-weight-regular);
+    --line-height-help:    var(--line-height-100);     /* caja 16 */
+    --letter-spacing-help: var(--letter-spacing-none);
+
+    /* Monoespaciado: codigo, XML, JSON, fuente HTML del editor.
+       Hoy hay 3 pilas distintas para el mismo rol. 14px y no 12 porque una
+       monoespaciada aparenta menor tamano que una proporcional al mismo valor. */
+    --font-family-code:    var(--font-family-mono);
+    --font-size-code:      var(--font-size-200);       /* 14  S */
+    --font-weight-code:    var(--font-weight-regular);
+    --line-height-code:    var(--line-height-200);     /* caja 20 */
+    --letter-spacing-code: var(--letter-spacing-none);
+
+    /* == 3. NOTA SOBRE LO QUE NO SE TOCA EN ESTA FASE ======================= */
+    /* --rf-font-size (internal-layout.css) conserva su literal 0.95rem (15.2px)
+       a proposito. Lo consumen 7 sitios y el rol 'body' quedo en 14px, asi que
+       aliasarlo aqui moveria esos 7 sitios y romperia la promesa de que esta
+       fase no cambia ni un pixel. Su migracion a --font-size-body es un
+       check-in de la fase 2, con motivo escrito.
+
+       El tracking del label del boton (+0.01em de md hacia arriba) tampoco vive
+       aqui: "desde md" es una regla sobre los tamanos del boton, que son
+       geometria propia de ese componente, no pasos del sistema. Va en
+       button.css como --button-letter-spacing-{xs..xl}. */
+}

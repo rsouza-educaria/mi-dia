@@ -1,0 +1,234 @@
+@import url("icon-catalog.css");
+
+/* ════════════════════════════════════════════════════════════════════════════
+   WC-ICON — Sistema de estilos
+   ─────────────────────────────────────────────────────────────────────────
+   Índice:
+     01. Variables CSS
+     02. Host (wc-icon)
+     03. Caja contenedora (.wci-box)
+     04. Glifo / máscara (.wci-glyph)
+     05. Tamaños (.wci-size-*)
+     06. Formas (.wci-shape-*)
+     07. Avatar (text / initials)
+   ════════════════════════════════════════════════════════════════════════════ */
+
+
+/* ── 01. VARIABLES CSS ───────────────────────────────────────────────────── */
+
+:root, :host {
+    /* Tamaños de caja: ancho = alto (cuadrado) */
+    --wci-box-xs: 20px;
+    --wci-box-sm: 28px;
+    --wci-box-md: 36px;
+    --wci-box-lg: 44px;
+    --wci-box-xl: 52px;
+    --wci-box-2xl: 64px;
+    --wci-box-3xl: 80px;
+    /* Tamaños del icono interno, ajustados a la grilla de 4px */
+    --wci-icon-xs: 12px;
+    --wci-icon-sm: 16px;
+    --wci-icon-md: 20px;
+    --wci-icon-lg: 24px;
+    --wci-icon-xl: 28px;
+    --wci-icon-2xl: 36px;
+    --wci-icon-3xl: 44px;
+    /* Formas */
+    --wci-radius-square: var(--radius-none);
+    --wci-radius-rounded: var(--radius-sm);
+    --wci-radius-circle: var(--radius-circle);
+}
+
+
+/* ── 02. HOST ────────────────────────────────────────────────────────────── */
+
+wc-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle;
+}
+
+
+/* ── 03. CAJA CONTENEDORA ────────────────────────────────────────────────── */
+
+wc-icon .wci-box {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border: 1px solid transparent;
+    border-radius: var(--wci-radius-rounded);
+    background-color: transparent;
+    overflow: hidden;
+    /* Tamaño por defecto (md) */
+    width:  var(--wci-box-md);
+    height: var(--wci-box-md);
+}
+
+
+/* ── 04. GLIFO / MÁSCARA ─────────────────────────────────────────────────── */
+
+wc-icon .wci-glyph {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    pointer-events: none;
+}
+
+    wc-icon .wci-glyph::before {
+        content: "";
+        display: block;
+        /* Tamaño por defecto (md) */
+        width: var(--wci-icon-md);
+        height: var(--wci-icon-md);
+        background-color: var(--wci-color, #285A92);
+        -webkit-mask-image: var(--wci-icon-url, linear-gradient(transparent, transparent));
+        mask-image: var(--wci-icon-url, linear-gradient(transparent, transparent));
+        -webkit-mask-repeat: no-repeat;
+        -webkit-mask-position: center;
+        -webkit-mask-size: contain;
+        mask-repeat: no-repeat;
+        mask-position: center;
+        mask-size: contain;
+        transition: background-color 0.2s ease;
+        flex-shrink: 0;
+    }
+
+
+/* ── 05. TAMAÑOS ─────────────────────────────────────────────────────────── */
+
+wc-icon .wci-size-xs {
+    width:  var(--wci-box-xs);
+    height: var(--wci-box-xs);
+}
+wc-icon .wci-size-xs .wci-glyph::before {
+    width:  var(--wci-icon-xs);
+    height: var(--wci-icon-xs);
+}
+
+wc-icon .wci-size-sm {
+    width:  var(--wci-box-sm);
+    height: var(--wci-box-sm);
+}
+wc-icon .wci-size-sm .wci-glyph::before {
+    width:  var(--wci-icon-sm);
+    height: var(--wci-icon-sm);
+}
+
+wc-icon .wci-size-md {
+    width:  var(--wci-box-md);
+    height: var(--wci-box-md);
+}
+wc-icon .wci-size-md .wci-glyph::before {
+    width:  var(--wci-icon-md);
+    height: var(--wci-icon-md);
+}
+
+wc-icon .wci-size-lg {
+    width:  var(--wci-box-lg);
+    height: var(--wci-box-lg);
+}
+wc-icon .wci-size-lg .wci-glyph::before {
+    width:  var(--wci-icon-lg);
+    height: var(--wci-icon-lg);
+}
+
+wc-icon .wci-size-xl {
+    width:  var(--wci-box-xl);
+    height: var(--wci-box-xl);
+}
+wc-icon .wci-size-xl .wci-glyph::before {
+    width:  var(--wci-icon-xl);
+    height: var(--wci-icon-xl);
+}
+
+wc-icon .wci-size-2xl {
+    width:  var(--wci-box-2xl);
+    height: var(--wci-box-2xl);
+}
+wc-icon .wci-size-2xl .wci-glyph::before {
+    width:  var(--wci-icon-2xl);
+    height: var(--wci-icon-2xl);
+}
+
+wc-icon .wci-size-3xl {
+    width:  var(--wci-box-3xl);
+    height: var(--wci-box-3xl);
+}
+wc-icon .wci-size-3xl .wci-glyph::before {
+    width:  var(--wci-icon-3xl);
+    height: var(--wci-icon-3xl);
+}
+
+
+/* ── 06. FORMAS ──────────────────────────────────────────────────────────── */
+
+wc-icon .wci-shape-square {
+    border-radius: var(--wci-radius-square);
+}
+
+wc-icon .wci-shape-rounded {
+    border-radius: var(--wci-radius-rounded);
+}
+
+wc-icon .wci-shape-circle {
+    border-radius: var(--wci-radius-circle);
+}
+
+
+/* ── 07. AVATAR (text / initials) ────────────────────────────────────────── */
+/*
+   Mismas cajas, formas y colores que el icono: el texto toma --wci-color.
+   --wci-font-* = tamano de la fuente por size (igual con 1, 2 o 3 caracteres).
+*/
+
+:root, :host {
+    --wci-font-xs: 9px;
+    --wci-font-sm: 12px;
+    --wci-font-md: 14px;
+    --wci-font-lg: 16px;
+    --wci-font-xl: 20px;
+    --wci-font-2xl: 24px;
+    --wci-font-3xl: 30px;
+}
+
+wc-icon .wci-initials {
+    font-family: var(--font-family-ui);
+    font-weight: var(--font-weight-semibold, 600);
+    font-size: var(--wci-font-md);
+    line-height: 1;
+    color: var(--wci-color, #285A92);
+    user-select: none;
+    pointer-events: none;
+    white-space: nowrap;
+    font-weight: 700;
+}
+
+wc-icon .wci-size-xs  .wci-initials { font-size: var(--wci-font-xs); }
+wc-icon .wci-size-sm  .wci-initials { font-size: var(--wci-font-sm); }
+wc-icon .wci-size-md  .wci-initials { font-size: var(--wci-font-md); }
+wc-icon .wci-size-lg  .wci-initials { font-size: var(--wci-font-lg); }
+wc-icon .wci-size-xl  .wci-initials { font-size: var(--wci-font-xl); }
+wc-icon .wci-size-2xl .wci-initials { font-size: var(--wci-font-2xl); }
+wc-icon .wci-size-3xl .wci-initials { font-size: var(--wci-font-3xl); }
+
+/* La fuente es la misma con 1, 2 o 3 caracteres: si el texto es mas ancho que la caja,
+   sobresale por los lados (centrado) en vez de recortarse o encogerse. */
+wc-icon .wci-box.wci-has-initials {
+    overflow: visible;
+}
+
+
+/* ── icon-original: Muestra el SVG con sus colores propios ──────────────── */
+
+wc-icon[icon-original] .wci-glyph::before {
+    -webkit-mask-image: none !important;
+    mask-image: none !important;
+    background-image: var(--wci-icon-url) !important;
+    background-color: transparent !important;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}

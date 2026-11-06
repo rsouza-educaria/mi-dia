@@ -1,0 +1,149 @@
+/* =========================================================================
+   DYNAMIC TAB
+   ========================================================================= */
+
+@import url("internal-layout.css");
+
+:host {
+    display: block;
+    width: 100%;
+}
+
+.tabs-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.tabs-header {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+
+.tabs-body {
+    width: 100%;
+}
+
+.tab-panel {
+    width: 100%;
+}
+
+    .tab-panel slot {
+        display: block;
+        width: 100%;
+    }
+
+
+/* =========================================================================
+   MODO TABS � fichas de papel elevadas + indicador M3
+   ========================================================================= */
+
+:host([mode="tabs"]) .tabs-header {
+    position: relative; /* contexto de apilamiento para los z-index */
+    gap: 2px;
+    margin-bottom: 16px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: visible;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    align-items: flex-end;
+    padding-top: 6px;
+}
+
+    :host([mode="tabs"]) .tabs-header::before {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: var(--rf-color-border, #e5e7eb);
+        z-index: 0; /* debajo de todo */
+    }
+
+    :host([mode="tabs"]) .tabs-header::-webkit-scrollbar {
+        display: none;
+    }
+
+/* La ficha */
+:host([mode="tabs"]) .tab-wrap {
+    position: relative;
+    z-index: 1; /* por encima del ::before del header */
+    display: inline-flex;
+    align-items: stretch;
+    flex-shrink: 0;
+    border-radius: var(--wcb-radius-rounded, 10px) var(--wcb-radius-rounded, 10px) 0 0;
+    border: 1px solid transparent;
+    border-bottom: none;
+    background: transparent;
+    transition: transform 0.18s cubic-bezier(0.4, 0, 0.2, 1), background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
+    --wcb-radius: var(--wcb-radius-rounded, 10px) var(--wcb-radius-rounded, 10px) 0 0;
+    --wcb-padding-md: 0 20px;
+    --wcb-min-height-md: 44px;
+    --wcb-shadow-none: none;
+    --wcb-shadow-hover: none;
+    --wcb-hover-brightness: 1;
+    opacity: 0.58;
+}
+
+    /* Hover inactiva: elevaci�n 3D */
+    :host([mode="tabs"]) .tab-wrap:not(.is-active):hover {
+        opacity: 1;
+        transform: translateY(-3px);
+        background: var(--rf-bg-white, #ffffff);
+        border-color: var(--rf-color-border, #e5e7eb);
+        box-shadow: 0 -3px 10px rgba(0, 0, 0, 0.07), 0 -1px 4px rgba(0, 0, 0, 0.04);
+    }
+
+    /* Ficha activa */
+    :host([mode="tabs"]) .tab-wrap.is-active {
+        opacity: 1;
+        background: var(--rf-bg-white, #ffffff);
+        border-color: var(--rf-color-border, #e5e7eb);
+        box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    /* Indicador: z-index 2 para quedar encima del ::before del header */
+    :host([mode="tabs"]) .tab-wrap::after {
+        content: '';
+        position: absolute;
+        bottom: -1px; /* se superpone al ::before del header */
+        left: 0;
+        right: 0;
+        height: 3px;
+        border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+        background: var(--wcb-color-primary, #5298D1);
+        transform: scaleX(0);
+        transform-origin: center;
+        transition: transform 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+        pointer-events: none;
+        z-index: 2; /* encima del ::before del header */
+    }
+
+    :host([mode="tabs"]) .tab-wrap.is-active::after {
+        transform: scaleX(1);
+    }
+
+
+/* =========================================================================
+   MODO BUTTONS (por defecto) � sin cambios
+   ========================================================================= */
+
+:host([mode="buttons"]) .tabs-header,
+:host(:not([mode="tabs"])) .tabs-header {
+    gap: 8px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    align-items: center;
+    overflow: visible;
+    padding-top: 0;
+}
+
+.button-group {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}

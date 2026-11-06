@@ -1,0 +1,822 @@
+/* ════════════════════════════════════════════════════════════════════════════
+   CATÁLOGO DE ICONOS — Fuente de verdad única
+   ─────────────────────────────────────────────────────────────────────────
+   Para añadir un icono nuevo basta con añadir una entrada aquí; funcionará
+   automáticamente en wc-icon y en wc-button.
+
+   Variable: --wci-icon-url
+   ════════════════════════════════════════════════════════════════════════════ */
+
+wc-icon .wci-glyph.mini_ficha::before,
+wc-button .wcb-btn.mini_ficha .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/mini_ficha.svg");
+}
+
+wc-icon .wci-glyph.planificador_familias::before,
+wc-button .wcb-btn.planificador_familias .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/calendario_personas.svg");
+}
+
+wc-icon .wci-glyph.planificador_alumnos::before,
+wc-button .wcb-btn.planificador_alumnos .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/calendario_reloj.svg");
+}
+
+wc-icon .wci-glyph.mini_ficha_alumno::before,
+wc-button .wcb-btn.mini_ficha_alumno .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/mini_ficha_alumno.svg");
+}
+
+wc-icon .wci-glyph.print::before,
+wc-icon .wci-glyph.imprimir::before,
+wc-button .wcb-btn.print .wcb-mask-icon::before,
+wc-button .wcb-btn.imprimir .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/imprimir.svg");
+}
+
+wc-icon .wci-glyph.ver_ficha::before,
+wc-button .wcb-btn.ver_ficha .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/ver_ficha.svg");
+}
+
+wc-icon .wci-glyph.preview::before,
+wc-icon .wci-glyph.ver::before,
+wc-button .wcb-btn.preview .wcb-mask-icon::before,
+wc-button .wcb-btn.ver .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/ver.svg");
+}
+
+wc-icon .wci-glyph.eliminar::before,
+wc-button .wcb-btn.eliminar .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/eliminar.svg");
+}
+
+wc-icon .wci-glyph.ia_alexia::before,
+wc-button .wcb-btn.ia_alexia .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/icon-ia-color.svg");
+}
+
+wc-icon .wci-glyph.ia_alexia_mujer::before,
+wc-button .wcb-btn.ia_alexia_mujer .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/icon-ia-mujer.svg");
+}
+
+wc-icon .wci-glyph.aniadir::before,
+wc-button .wcb-btn.aniadir .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/mas.svg");
+}
+
+wc-icon .wci-glyph.aceptar::before,
+wc-button .wcb-btn.aceptar .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/thumb.svg");
+}
+
+wc-icon .wci-glyph.redactar::before,
+wc-icon .wci-glyph.editar::before,
+wc-button .wcb-btn.redactar .wcb-mask-icon::before,
+wc-button .wcb-btn.editar .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/pencil.svg");
+}
+
+wc-icon .wci-glyph.actualizar::before,
+wc-button .wcb-btn.actualizar .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/refresh.svg");
+}
+
+wc-icon .wci-glyph.cancelar::before,
+wc-button .wcb-btn.cancelar .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/cruz.svg");
+}
+
+wc-icon .wci-glyph.realizar::before,
+wc-button .wcb-btn.realizar .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/check.svg");
+}
+
+wc-icon .wci-glyph.agenda::before,
+wc-button .wcb-btn.agenda .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/agenda.svg");
+}
+
+wc-icon .wci-glyph.comunicado::before,
+wc-button .wcb-btn.comunicado .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/comunicado.svg");
+}
+
+wc-icon .wci-glyph.incidencias::before,
+wc-button .wcb-btn.incidencias .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/justificar.svg");
+}
+
+wc-icon .wci-glyph.evaluar::before,
+wc-button .wcb-btn.evaluar .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/evaluar.svg");
+}
+
+wc-icon .wci-glyph.justificar::before,
+wc-button .wcb-btn.justificar .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/justificar_incidencia.svg");
+}
+
+wc-icon .wci-glyph.importar::before,
+wc-button .wcb-btn.importar .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/import_file.svg");
+}
+
+/* descargar (nuevo) + download/descargas (aliases) */
+wc-icon .wci-glyph.descargar::before,
+wc-icon .wci-glyph.download::before,
+wc-icon .wci-glyph.descargas::before,
+wc-button .wcb-btn.descargar .wcb-mask-icon::before,
+wc-button .wcb-btn.download .wcb-mask-icon::before,
+wc-button .wcb-btn.descargas .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/descargas.svg");
+}
+
+/* excel_exportar (nombre canónico) + export_excel (alias legado de wc-button) */
+wc-icon .wci-glyph.excel_exportar::before,
+wc-button .wcb-btn.excel_exportar .wcb-mask-icon::before,
+wc-button .wcb-btn.export_excel .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/excel_exportar.svg");
+}
+
+wc-icon .wci-glyph.excel_importar::before,
+wc-button .wcb-btn.excel_importar .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/excel_importar.svg");
+}
+
+wc-icon .wci-glyph.excel::before,
+wc-button .wcb-btn.excel .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/excel.svg");
+}
+
+wc-icon .wci-glyph.edicion_masiva::before,
+wc-button .wcb-btn.edicion_masiva .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/edicion_masiva.svg");
+}
+
+wc-icon .wci-glyph.alta_rapida::before,
+wc-button .wcb-btn.alta_rapida .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/alta_rapida.svg");
+}
+
+wc-icon .wci-glyph.calcular_hermanos::before,
+wc-button .wcb-btn.calcular_hermanos .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/calculadora.svg");
+}
+
+wc-icon .wci-glyph.administrar_numeros_matricula::before,
+wc-button .wcb-btn.administrar_numeros_matricula .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/configuracion.svg");
+}
+
+wc-icon .wci-glyph.reincorporar_alumno::before,
+wc-button .wcb-btn.reincorporar_alumno .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/reincorporar_alumno.svg");
+}
+
+wc-icon .wci-glyph.cuaderno_profesor::before,
+wc-button .wcb-btn.cuaderno_profesor .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/cuaderno.svg");
+}
+
+wc-icon .wci-glyph.pasar_lista::before,
+wc-button .wcb-btn.pasar_lista .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/pasar_lista.svg");
+}
+
+wc-icon .wci-glyph.mas::before,
+wc-button .wcb-btn.mas .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/ellipsis.svg");
+}
+
+wc-icon .wci-glyph.relacion_alumnos::before,
+wc-button .wcb-btn.relacion_alumnos .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/alumnos.svg");
+}
+
+wc-icon .wci-glyph.cerrar::before,
+wc-button .wcb-btn.cerrar .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/cruz.svg");
+}
+
+wc-icon .wci-glyph.bold::before,
+wc-button .wcb-btn.bold .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/bold.svg");
+}
+
+wc-icon .wci-glyph.italic::before,
+wc-button .wcb-btn.italic .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/italic.svg");
+}
+
+wc-icon .wci-glyph.underline::before,
+wc-button .wcb-btn.underline .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/underline.svg");
+}
+
+wc-icon .wci-glyph.strike::before,
+wc-button .wcb-btn.strike .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/strike.svg");
+}
+
+wc-icon .wci-glyph.codeBlock::before,
+wc-button .wcb-btn.codeBlock .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/codeBlock.svg");
+}
+
+wc-icon .wci-glyph.bulletList::before,
+wc-button .wcb-btn.bulletList .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/bulletList.svg");
+}
+
+wc-icon .wci-glyph.orderedList::before,
+wc-button .wcb-btn.orderedList .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/orderedList.svg");
+}
+
+wc-icon .wci-glyph.blockquote::before,
+wc-button .wcb-btn.blockquote .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/blockquote.svg");
+}
+
+wc-icon .wci-glyph.alignLeft::before,
+wc-button .wcb-btn.alignLeft .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/alignLeft.svg");
+}
+
+wc-icon .wci-glyph.alignCenter::before,
+wc-button .wcb-btn.alignCenter .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/alignCenter.svg");
+}
+
+wc-icon .wci-glyph.alignRight::before,
+wc-button .wcb-btn.alignRight .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/alignRight.svg");
+}
+
+wc-icon .wci-glyph.alignJustify::before,
+wc-button .wcb-btn.alignJustify .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/alignJustify.svg");
+}
+
+wc-icon .wci-glyph.textColor::before,
+wc-button .wcb-btn.textColor .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/textColor.svg");
+}
+
+wc-icon .wci-glyph.bgColor::before,
+wc-button .wcb-btn.bgColor .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/bgColor.svg");
+}
+
+wc-icon .wci-glyph.undo::before,
+wc-button .wcb-btn.undo .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/undo.svg");
+}
+
+wc-icon .wci-glyph.redo::before,
+wc-button .wcb-btn.redo .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/redo.svg");
+}
+
+wc-icon .wci-glyph.sourceCode::before,
+wc-button .wcb-btn.sourceCode .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/sourceCode.svg");
+}
+
+wc-icon .wci-glyph.link::before,
+wc-button .wcb-btn.link .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/link.svg");
+}
+
+wc-icon .wci-glyph.image::before,
+wc-button .wcb-btn.image .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/image.svg");
+}
+
+wc-icon .wci-glyph.horizontalRule::before,
+wc-button .wcb-btn.horizontalRule .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/horizontalRule.svg");
+}
+
+wc-icon .wci-glyph.clearFormat::before,
+wc-button .wcb-btn.clearFormat .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/clearFormat.svg");
+}
+
+wc-icon .wci-glyph.tableInsert::before,
+wc-button .wcb-btn.tableInsert .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/tableInsert.svg");
+}
+
+wc-icon .wci-glyph.tableAddRowBefore::before,
+wc-button .wcb-btn.tableAddRowBefore .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/tableAddRowBefore.svg");
+}
+
+wc-icon .wci-glyph.tableAddRowAfter::before,
+wc-button .wcb-btn.tableAddRowAfter .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/tableAddRowAfter.svg");
+}
+
+wc-icon .wci-glyph.tableDeleteRow::before,
+wc-button .wcb-btn.tableDeleteRow .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/tableDeleteRow.svg");
+}
+
+wc-icon .wci-glyph.tableAddColBefore::before,
+wc-button .wcb-btn.tableAddColBefore .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/tableAddColBefore.svg");
+}
+
+wc-icon .wci-glyph.tableAddColAfter::before,
+wc-button .wcb-btn.tableAddColAfter .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/tableAddColAfter.svg");
+}
+
+wc-icon .wci-glyph.tableDeleteCol::before,
+wc-button .wcb-btn.tableDeleteCol .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/tableDeleteCol.svg");
+}
+
+wc-icon .wci-glyph.tableMergeCells::before,
+wc-button .wcb-btn.tableMergeCells .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/tableMergeCells.svg");
+}
+
+wc-icon .wci-glyph.tableSplitCell::before,
+wc-button .wcb-btn.tableSplitCell .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/tableSplitCell.svg");
+}
+
+wc-icon .wci-glyph.tableDelete::before,
+wc-button .wcb-btn.tableDelete .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/tableDelete.svg");
+}
+
+wc-icon .wci-glyph.tableBorderToggle::before,
+wc-button .wcb-btn.tableBorderToggle .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/tableBorderToggle.svg");
+}
+
+wc-icon .wci-glyph.enviar::before,
+wc-button .wcb-btn.enviar .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/send.svg");
+}
+
+wc-icon .wci-glyph.agenda-destinatarios::before,
+wc-button .wcb-btn.agenda-destinatarios .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/address-book.svg");
+}
+
+wc-icon .wci-glyph.guardar::before,
+wc-button .wcb-btn.guardar .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/guardar.svg");
+}
+
+wc-icon .wci-glyph.mis-alumnos::before,
+wc-button .wcb-btn.mis-alumnos .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/mis-alumnos.svg");
+}
+
+wc-icon .wci-glyph.mis-areas::before,
+wc-button .wcb-btn.mis-areas .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/mis-areas.svg");
+}
+
+wc-icon .wci-glyph.mis-comunicados::before,
+wc-button .wcb-btn.mis-comunicados .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/mis-comunicados.svg");
+}
+
+wc-icon .wci-glyph.mis-cumple::before,
+wc-button .wcb-btn.mis-cumple .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/mis-cumple.svg");
+}
+
+wc-icon .wci-glyph.mis-encuestas::before,
+wc-button .wcb-btn.mis-encuestas .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/mis-encuestas.svg");
+}
+
+wc-icon .wci-glyph.mis-entrevistas::before,
+wc-button .wcb-btn.mis-entrevistas .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/mis-entrevistas.svg");
+}
+
+wc-icon .wci-glyph.mis-galerias::before,
+wc-button .wcb-btn.mis-galerias .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/mis-galerias.svg");
+}
+
+wc-icon .wci-glyph.mis-secciones::before,
+wc-button .wcb-btn.mis-secciones .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/mis-secciones.svg");
+}
+
+wc-icon .wci-glyph.descargas::before,
+wc-button .wcb-btn.descargas .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/descargas.svg");
+}
+
+/* descargar (nuevo independiente de descargas) */
+wc-icon .wci-glyph.descargar::before,
+wc-button .wcb-btn.descargar .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/descargar.svg");
+}
+
+wc-icon .wci-glyph.ficha::before,
+wc-button .wcb-btn.ficha .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/ficha.svg");
+}
+
+wc-icon .wci-glyph.envelope::before,
+wc-button .wcb-btn.envelope .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/envelope.svg");
+}
+
+wc-icon .wci-glyph.envelope-open::before,
+wc-button .wcb-btn.envelope-open .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/envelope-open.svg");
+}
+
+wc-icon .wci-glyph.ia_alexia_white::before,
+wc-button .wcb-btn.ia_alexia_white .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/icon-ia-white.svg");
+}
+
+wc-icon .wci-glyph.area::before,
+wc-button .wcb-btn.area .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/area.svg");
+}
+
+wc-icon .wci-glyph.subarea::before,
+wc-button .wcb-btn.subarea .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/subarea.svg");
+}
+
+wc-icon .wci-glyph.aspecto_area::before,
+wc-button .wcb-btn.aspecto_area .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/aspecto_area.svg");
+}
+
+wc-icon .wci-glyph.anuncio::before,
+wc-button .wcb-btn.anuncio .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/anuncio.svg");
+}
+
+wc-icon .wci-glyph.encuesta::before,
+wc-button .wcb-btn.encuesta .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/encuesta.svg");
+}
+
+wc-icon .wci-glyph.encuesta_enviada::before,
+wc-button .wcb-btn.encuesta_enviada .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/encuesta_enviada.svg");
+}
+
+wc-icon .wci-glyph.copiar::before,
+wc-button .wcb-btn.copiar .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/copiar.svg");
+}
+
+wc-icon .wci-glyph.pegar::before,
+wc-button .wcb-btn.pegar .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/pegar.svg");
+}
+
+wc-icon .wci-glyph.ausencia::before,
+wc-button .wcb-btn.ausencia .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/ausencia.svg");
+}
+
+wc-icon .wci-glyph.retraso::before,
+wc-button .wcb-btn.retraso .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/retraso.svg");
+}
+
+wc-icon .wci-glyph.conducta::before,
+wc-button .wcb-btn.conducta .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/conducta.svg");
+}
+
+wc-icon .wci-glyph.expulsion::before,
+wc-button .wcb-btn.expulsion .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/expulsion.svg");
+}
+
+wc-icon .wci-glyph.sin_material::before,
+wc-button .wcb-btn.sin_material .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/sin_material.svg");
+}
+
+wc-icon .wci-glyph.no_entrega_tarea::before,
+wc-button .wcb-btn.no_entrega_tarea .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/no_entrega_tarea.svg");
+}
+
+wc-icon .wci-glyph.uso_movil::before,
+wc-button .wcb-btn.uso_movil .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/uso_movil.svg");
+}
+
+wc-icon .wci-glyph.reiniciar::before,
+wc-button .wcb-btn.reiniciar .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/reiniciar.svg");
+}
+
+wc-icon .wci-glyph.template::before,
+wc-button .wcb-btn.template .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/template.svg");
+}
+
+wc-icon .wci-glyph.volver::before,
+wc-button .wcb-btn.volver .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/volver.svg");
+}
+
+wc-icon .wci-glyph.pagina_completa::before,
+wc-button .wcb-btn.pagina_completa .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/pagina_completa.svg");
+}
+
+wc-icon .wci-glyph.programacion_didactica::before,
+wc-button .wcb-btn.programacion_didactica .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/programacion_didactica.svg");
+}
+
+wc-icon .wci-glyph.cuaderno_pie::before,
+wc-button .wcb-btn.cuaderno_pie .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/cuaderno_pie.svg");
+}
+
+wc-icon .wci-glyph.cuaderno_pie_relleno::before,
+wc-button .wcb-btn.cuaderno_pie_relleno .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/cuaderno_pie_relleno.svg");
+}
+
+wc-icon .wci-glyph.tareas::before,
+wc-button .wcb-btn.tareas .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/tareas.svg");
+}
+
+wc-icon .wci-glyph.actividades::before,
+wc-button .wcb-btn.actividades .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/actividades.svg");
+}
+
+wc-icon .wci-glyph.anotaciones::before,
+wc-button .wcb-btn.anotaciones .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/anotaciones.svg");
+}
+
+wc-icon .wci-glyph.power_point::before,
+wc-button .wcb-btn.power_point .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/power_point.svg");
+}
+
+wc-icon .wci-glyph.power_point_exportar::before,
+wc-button .wcb-btn.power_point_exportar .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/power_point_exportar.svg");
+}
+
+wc-icon .wci-glyph.power_point_importar::before,
+wc-button .wcb-btn.power_point_importar .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/power_point_importar.svg");
+}
+
+wc-icon .wci-glyph.word::before,
+wc-button .wcb-btn.word .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/word.svg");
+}
+
+wc-icon .wci-glyph.word_exportar::before,
+wc-button .wcb-btn.word_exportar .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/word_exportar.svg");
+}
+
+wc-icon .wci-glyph.word_importar::before,
+wc-button .wcb-btn.word_importar .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/word_importar.svg");
+}
+
+wc-icon .wci-glyph.candado_cerrado::before,
+wc-button .wcb-btn.candado_cerrado .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/candado_cerrado.svg");
+}
+
+wc-icon .wci-glyph.sin_resultados::before,
+wc-button .wcb-btn.sin_resultados .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/sin_resultados.svg");
+}
+
+wc-icon .wci-glyph.sin_datos::before,
+wc-button .wcb-btn.sin_datos .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/sin_datos.svg");
+}
+
+wc-icon .wci-glyph.lupa-busqueda::before,
+wc-button .wcb-btn.lupa-busqueda .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/lupa-busqueda.svg");
+}
+
+wc-icon .wci-glyph.calendario_reloj::before,
+wc-button .wcb-btn.calendario_reloj .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/calendario_reloj.svg");
+}
+
+wc-icon .wci-glyph.calendario_personas::before,
+wc-button .wcb-btn.calendario_personas .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/calendario_personas.svg");
+}
+
+wc-icon .wci-glyph.plus::before,
+wc-button .wcb-btn.plus .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/plus.svg");
+}
+
+wc-icon .wci-glyph.menos::before,
+wc-button .wcb-btn.menos .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/menos.svg");
+}
+
+wc-icon .wci-glyph.estrella::before,
+wc-button .wcb-btn.estrella .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/estrella.svg");
+}
+
+wc-icon .wci-glyph.engranaje::before,
+wc-button .wcb-btn.engranaje .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/engranaje.svg");
+}
+
+wc-icon .wci-glyph.desplazar::before,
+wc-button .wcb-btn.desplazar .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/desplazar.svg");
+}
+
+wc-icon .wci-glyph.acercar::before,
+wc-button .wcb-btn.acercar .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/acercar.svg");
+}
+
+wc-icon .wci-glyph.alejar::before,
+wc-button .wcb-btn.alejar .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/alejar.svg");
+}
+
+wc-icon .wci-glyph.rotar_izquierda::before,
+wc-button .wcb-btn.rotar_izquierda .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/rotar_izquierda.svg");
+}
+
+wc-icon .wci-glyph.rotar_derecha::before,
+wc-button .wcb-btn.rotar_derecha .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/rotar_derecha.svg");
+}
+
+wc-icon .wci-glyph.ampliar::before,
+wc-button .wcb-btn.ampliar .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/ampliar.svg");
+}
+
+wc-icon .wci-glyph.reducir::before,
+wc-button .wcb-btn.reducir .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/reducir.svg");
+}
+
+wc-icon .wci-glyph.registro_horario::before,
+wc-button .wcb-btn.registro_horario .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/registro_horario.svg");
+}
+
+wc-icon .wci-glyph.campana::before,
+wc-button .wcb-btn.campana .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/campana.svg");
+}
+
+wc-icon .wci-glyph.inc_campana::before,
+wc-button .wcb-btn.inc_campana .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/campana.svg");
+}
+
+wc-icon .wci-glyph.inc_retraso::before,
+wc-button .wcb-btn.inc_retraso .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/retraso.svg");
+}
+
+wc-icon .wci-glyph.inc_ausencia::before,
+wc-button .wcb-btn.inc_ausencia .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/ausencia.svg");
+}
+
+wc-icon .wci-glyph.inc_biberon::before,
+wc-button .wcb-btn.inc_biberon .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/inc_biberon.svg");
+}
+
+wc-icon .wci-glyph.inc_bien::before,
+wc-button .wcb-btn.inc_bien .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/inc_bien.svg");
+}
+
+wc-icon .wci-glyph.inc_crema::before,
+wc-button .wcb-btn.inc_crema .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/inc_crema.svg");
+}
+
+wc-icon .wci-glyph.inc_default::before,
+wc-button .wcb-btn.inc_default .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/inc_default.svg");
+}
+
+wc-icon .wci-glyph.inc_deposiciones::before,
+wc-button .wcb-btn.inc_deposiciones .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/inc_deposiciones.svg");
+}
+
+wc-icon .wci-glyph.inc_dormir::before,
+wc-button .wcb-btn.inc_dormir .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/inc_dormir.svg");
+}
+
+wc-icon .wci-glyph.inc_enfermedad::before,
+wc-button .wcb-btn.inc_enfermedad .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/inc_enfermedad.svg");
+}
+
+wc-icon .wci-glyph.inc_libro::before,
+wc-button .wcb-btn.inc_libro .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/inc_libro.svg");
+}
+
+wc-icon .wci-glyph.inc_mal::before,
+wc-button .wcb-btn.inc_mal .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/inc_mal.svg");
+}
+
+wc-icon .wci-glyph.inc_material::before,
+wc-button .wcb-btn.inc_material .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/inc_material.svg");
+}
+
+wc-icon .wci-glyph.inc_ropa::before,
+wc-button .wcb-btn.inc_ropa .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/inc_ropa.svg");
+}
+
+wc-icon .wci-glyph.inc_ropa_inf::before,
+wc-button .wcb-btn.inc_ropa_inf .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/inc_ropa_inf.svg");
+}
+
+wc-icon .wci-glyph.inc_toallitas::before,
+wc-button .wcb-btn.inc_toallitas .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/inc_toallitas.svg");
+}
+
+wc-icon .wci-glyph.inc_regular::before,
+wc-button .wcb-btn.inc_regular .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/inc_regular.svg");
+}
+
+wc-icon .wci-glyph.inc_comida::before,
+wc-button .wcb-btn.inc_comida .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/inc_comida.svg");
+}
+
+wc-icon .wci-glyph.inc_observacion::before,
+wc-button .wcb-btn.inc_observacion .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/inc_observacion.svg");
+}
+
+wc-icon .wci-glyph.historial::before,
+wc-button .wcb-btn.historial .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/historial.svg");
+}
+
+wc-icon .wci-glyph.nuevo-grupo-de-columnas::before,
+wc-button .wcb-btn.nuevo-grupo-de-columnas .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/nuevo-grupo-de-columnas.svg");
+}
+
+wc-icon .wci-glyph.nueva-columna::before,
+wc-button .wcb-btn.nueva-columna .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/nueva-columna.svg");
+}
+
+wc-icon .wci-glyph.items-evaluables::before,
+wc-button .wcb-btn.items-evaluables .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/items-evaluables.svg");
+}
+
+wc-icon .wci-glyph.otros-cuadernos::before,
+wc-button .wcb-btn.otros-cuadernos .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/otros-cuadernos.svg");
+}
+
+wc-icon .wci-glyph.funcion_matematica::before,
+wc-button .wcb-btn.funcion_matematica .wcb-mask-icon::before {
+    --wci-icon-url: url("../images/acciones/svg/funcion_matematica.svg");
+}

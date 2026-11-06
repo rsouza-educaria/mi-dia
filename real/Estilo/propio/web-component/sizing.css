@@ -1,0 +1,39 @@
+/* ============================================================================
+   SIZING.CSS  ::  escala unica de tamano de caja para los Web Components
+   ----------------------------------------------------------------------------
+   Mismo patron de dos capas que fonts.css: PRIMITIVOS (el nombre describe el
+   VALOR) y, mas adelante, SEMANTICOS por componente (--wcb-min-height-sm,
+   --wci-box-sm...) que apuntaran aqui en vez de repetir el numero.
+
+   Por que existe: button.css (--wcb-min-height-*/--wcb-min-width-*) y
+   icon.css (--wci-box-*) ya usan EXACTAMENTE esta misma progresion
+   (20-28-36-44-52), cada uno hardcodeada por su lado, sin una fuente comun.
+   Mismo sintoma que fonts.css documenta para tipografia ("23 tamanos sueltos
+   colapsan a 6"), aqui ya habia colapsado solo en dos sitios distintos sin
+   que nadie los uniera.
+
+   REJILLA DE 4
+     La progresion sube de 4 en 4 (o multiplo): 16-20-28-36-44-52-64. Es la
+     misma rejilla que fonts.css cita para espacio/altura/icono/radio (a
+     diferencia del tamano de fuente, que usa razon, no rejilla).
+
+   NOMBRADO
+     xs/sm/md/lg/xl (+ 2xs/2xl en los extremos) en vez de pasos 100..600:
+     coincide con el nombrado que button.css e icon.css ya usan cada uno por
+     su lado, asi que consumirlo no cambia el sufijo, solo la fuente del
+     numero.
+
+   Orden de carga: igual que fonts.css, se importa al inicio de
+   internal-layout.css, justo despues de fonts.css.
+   Selector :root, :host igual que colors.css/fonts.css (Shadow DOM + light DOM).
+   ============================================================================ */
+
+:root, :host {
+    --size-2xs: 16px;
+    --size-xs:  20px;
+    --size-sm:  28px;
+    --size-md:  36px;
+    --size-lg:  44px;
+    --size-xl:  52px;
+    --size-2xl: 64px;
+}

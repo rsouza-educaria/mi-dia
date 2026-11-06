@@ -1,0 +1,24 @@
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_1110_1460)">
+<g mask="url(#huecos_1110_1460)">
+<path d="M6.58574 0H4V20.6598H6.58574V0Z" fill="#285A92" stroke-width="0.5" stroke-miterlimit="10" stroke="#285A92"/>
+</g>
+<g transform="translate(-1.2 -5.27) scale(1.22)">
+<path d="M12.818 23.9689C16.8629 23.9519 20.1283 20.6592 20.1113 16.6142C20.0944 12.5693 16.8016 9.30394 12.7566 9.32088C8.71169 9.33783 5.44635 12.6307 5.4633 16.6756C5.48024 20.7206 8.77305 23.9858 12.818 23.9689Z" stroke-width="0.25" stroke-miterlimit="10" stroke="#517AA6"/>
+<path d="M12.0985 13.6113V15.8427H9.86719V17.4308H12.0985V19.6623H13.6867V17.4308H15.9181V15.8427H13.6867V13.6113H12.0985Z" fill="#285A92"/>
+<mask id="stroke0_1110_1460" fill="white">
+<path d="M12.0985 13.6113V15.8427H9.86719V17.4308H12.0985V19.6623H13.6867V17.4308H15.9181V15.8427H13.6867V13.6113H12.0985Z"/>
+</mask>
+<path d="M12.0985 13.6113V15.8427H9.86719V17.4308H12.0985V19.6623H13.6867V17.4308H15.9181V15.8427H13.6867V13.6113H12.0985Z" stroke-width="2" stroke="#285A92" mask="url(#stroke0_1110_1460)"/>
+</g>
+</g>
+<defs>
+<clipPath id="clip0_1110_1460">
+<rect width="24" height="24" fill="white"/>
+</clipPath>
+<mask id="huecos_1110_1460" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24">
+<rect width="24" height="24" fill="white"/>
+<path d="M12.818 23.9689C16.8629 23.9519 20.1283 20.6592 20.1113 16.6142C20.0944 12.5693 16.8016 9.30394 12.7566 9.32088C8.71169 9.33783 5.44635 12.6307 5.4633 16.6756C5.48024 20.7206 8.77305 23.9858 12.818 23.9689Z" transform="translate(-1.2 -5.27) scale(1.22)" fill="black"/>
+</mask>
+</defs>
+</svg>

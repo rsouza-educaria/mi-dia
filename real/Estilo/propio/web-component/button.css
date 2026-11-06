@@ -1,0 +1,1772 @@
+﻿@import url("icon-catalog.css");
+
+/* ════════════════════════════════════════════════════════════════════════════
+   WC-BUTTON — Sistema de estilos
+   ─────────────────────────────────────────────────────────────────────────
+   Índice:
+     01. Variables CSS
+     02. Host (wc-button)
+     03. Botón base (.wcb-btn)
+     04. Dirección del contenido (icon-pos)
+     04b. Alineación del contenido (label-align)
+     05. Iconos (.wcb-icon, .wcb-mask-icon, .wcb-caret)
+     06. Tamaños (.wcb-size-*)
+     07. Formas (.wcb-shape-*)
+     08. Variantes Solid (.wcb-variant-*)
+     09. Variantes Outline (.wcb-variant-outline-*)
+     10. Variantes Soft (.wcb-variant-soft-*)
+     11. Variantes Ghost (.wcb-variant-ghost*)
+     12. Variante Link (.wcb-variant-link)
+     13. Variantes Gradient (.wcb-variant-gradient-*)
+     14. TEXT-OUT [text-out]
+         14a. Base + layout
+         14b. Variantes Solid
+         14c. Variantes Outline
+         14d. Variantes Soft
+         14e. Variantes Ghost
+         14f. Variantes Gradient
+         14g. Tamaños
+     15. Mask-icon en botón con clase CSS (.wcb-has-mask)
+   ════════════════════════════════════════════════════════════════════════════ */
+
+
+/* ── 01. VARIABLES CSS ───────────────────────────────────────────────────── */
+
+:root, :host {
+    /* Colores semánticos */
+    --wcb-color-primary: var(--rf-color-primary, #5298D1);
+    --wcb-color-secondary: var(--color-grey-700, #5C5C5C);
+    --wcb-color-success: var(--rf-color-success, #10b981);
+    --wcb-color-danger: var(--rf-color-error, #ef4444);
+    --wcb-color-warning: var(--rf-color-warning, #d97706);
+    --wcb-color-warning-text: var(--color-yellow-900, #7A4E14); /* warning como texto/borde sobre fondo claro (AA); el amarillo solo sirve de fondo */
+    --wcb-color-info: var(--color-cyan-600, #1E7AA5); /* cyan DS; 4.79:1 sobre blanco (AA); distinto del alert info, que es azul */
+    --wcb-color-dark: var(--color-grey-800, #1f2937);
+    --wcb-color-light: var(--color-grey-200, #f3f4f6);
+    --wcb-color-panel: var(--color-blue-800, #24558e);
+    ;
+    /* Shapes */
+    --wcb-radius-square: var(--radius-none); /* recto total, distinto del default */
+    --wcb-radius-rounded: var(--radius-sm); /* boton estandar: 4px */
+    --wcb-radius-pill: var(--radius-full);
+    --wcb-radius: var(--wcb-radius-rounded);
+    /* Tipografía */
+    --wcb-font-family: var(--font-family-ui);
+    --wcb-font-weight: var(--font-weight-semibold); /* 600, hasta segunda orden */
+    --wcb-letter-spacing-xs: 0;
+    --wcb-letter-spacing-sm: 0;
+    --wcb-letter-spacing-md: 0.01em;
+    --wcb-letter-spacing-lg: 0.01em;
+    --wcb-letter-spacing-xl: 0.01em;
+    /* Tamaños: padding | font-size | min-height | icon-size | gap */
+    --wcb-padding-xs: 0 8px; /* vertical 0: height fija gobierna, el centrado es del flex (align-items) */
+    --wcb-font-size-xs: var(--font-size-100); /* 12px, era 0.72rem (11.52px) */
+    --wcb-min-height-xs: 20px; /* era 22px, no caía en la rejilla de 4; progresión 20-28-36-44-52 */
+    --wcb-icon-size-xs: 12px;
+    --wcb-gap-xs: 4px;
+    --wcb-padding-sm: 0 12px; /* vertical 0: height fija gobierna */
+    --wcb-font-size-sm: var(--font-size-100); /* 12px, era 0.8rem (12.8px) */
+    --wcb-min-height-sm: 28px;
+    --wcb-icon-size-sm: 14px;
+    --wcb-gap-sm: 5px;
+    --wcb-padding-md: 0 16px; /* vertical 0: height fija gobierna (era la causa del "39px" real) */
+    --wcb-font-size-md: var(--font-size-200); /* 14px, era 0.9rem (14.4px) */
+    --wcb-min-height-md: 36px;
+    --wcb-icon-size-md: 16px;
+    --wcb-gap-md: 7px;
+    --wcb-padding-lg: 0 24px; /* vertical 0: height fija gobierna */
+    --wcb-font-size-lg: var(--font-size-300); /* 16px, sin cambio */
+    --wcb-min-height-lg: 44px;
+    --wcb-icon-size-lg: 18px;
+    --wcb-gap-lg: 8px;
+    --wcb-padding-xl: 0 32px; /* vertical 0: height fija gobierna */
+    --wcb-font-size-xl: var(--font-size-300); /* 16px, era 1.1rem (17.6px) */
+    --wcb-min-height-xl: 52px;
+    --wcb-icon-size-xl: 20px;
+    --wcb-gap-xl: 10px;
+    /* Marco de icono (text-out), cuadrado: mismos valores que --wcb-min-height-* (el botón de texto no se toca) */
+    --wcb-min-width-xs: 20px;
+    --wcb-min-width-sm: 28px;
+    --wcb-min-width-md: 36px;
+    --wcb-min-width-lg: 44px;
+    --wcb-min-width-xl: 52px;
+    --wcb-text-out-label-size: var(--font-size-100); /* 0.75rem = 12px: rotulo del text-out */
+    /* Estados */
+    --wcb-opacity-disabled: 0.45;
+    --wcb-hover-brightness: 0.90;
+    --wcb-active-brightness: 0.82;
+    --wcb-focus-ring-width: 3px;
+    --wcb-transition: all 0.18s ease-in-out;
+    /* Sombras */
+    --wcb-shadow-none: none;
+    --wcb-shadow-sm: 0 1px 3px rgba(0,0,0,.10);
+    --wcb-shadow-md: 0 2px 6px rgba(0,0,0,.15);
+    --wcb-shadow-lg: 0 4px 14px rgba(0,0,0,.18);
+    --wcb-shadow-hover: var(--wcb-shadow-sm);
+}
+
+
+/* ── 02. HOST ────────────────────────────────────────────────────────────── */
+
+/*wc-button {
+    display: inline-block;
+    vertical-align: middle;
+    position: relative;
+}
+*/
+wc-button[full-width] {
+    display: flex;
+    width: 100%;
+}
+
+
+/* ── 03. BOTÓN BASE ──────────────────────────────────────────────────────── */
+
+.wcb-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    width: 100%;
+    border: 1px solid transparent;
+    border-radius: var(--wcb-radius);
+    font-family: var(--wcb-font-family);
+    font-weight: var(--wcb-font-weight);
+    letter-spacing: var(--wcb-letter-spacing-md); /* tamaño por defecto (md) */
+    line-height: 1;
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+    outline: none;
+    text-decoration: none;
+    box-shadow: var(--wcb-shadow-none);
+    transition: var(--wcb-transition);
+    overflow: hidden;
+    /* Tamaño por defecto (md) */
+    padding: var(--wcb-padding-md);
+    font-size: var(--wcb-font-size-md);
+    height: var(--wcb-min-height-md); /* era min-height; con padding vertical 0, height fija gobierna siempre */
+    gap: var(--wcb-gap-md);
+}
+
+    .wcb-btn:focus-visible {
+        outline: var(--wcb-focus-ring-width) solid currentColor;
+        outline-offset: 2px;
+        opacity: 0.85;
+    }
+
+    .wcb-btn:hover:not(:disabled) {
+        filter: brightness(var(--wcb-hover-brightness));
+    }
+
+    .wcb-btn:active:not(:disabled) {
+        filter: brightness(var(--wcb-active-brightness));
+        transform: translateY(1px);
+        box-shadow: var(--wcb-shadow-none);
+    }
+
+    .wcb-btn.is-disabled,
+    .wcb-btn:disabled {
+        opacity: var(--wcb-opacity-disabled);
+        cursor: not-allowed;
+        pointer-events: none;
+    }
+
+/* ── 04. DIRECCIÓN DEL CONTENIDO ─────────────────────────────────────────── */
+
+.wcb-dir-left {
+    flex-direction: row;
+}
+
+.wcb-dir-right {
+    flex-direction: row-reverse;
+}
+
+.wcb-dir-top {
+    flex-direction: column;
+}
+
+.wcb-dir-bottom {
+    flex-direction: column-reverse;
+}
+
+
+/* ── 04b. ALINEACIÓN DEL CONTENIDO (label-align) ────────────────────────── */
+
+.wcb-align-left {
+    justify-content: flex-start !important;
+}
+
+.wcb-align-right {
+    justify-content: flex-end !important;
+}
+
+/* spread: texto en un extremo, icono en el otro */
+.wcb-align-spread {
+    justify-content: space-between !important;
+}
+
+/* Con icon-pos="right" (row-reverse) el eje se invierte: compensar */
+.wcb-dir-right.wcb-align-left {
+    justify-content: flex-end !important;
+}
+
+.wcb-dir-right.wcb-align-right {
+    justify-content: flex-start !important;
+}
+
+
+/* ── 05. ICONOS ──────────────────────────────────────────────────────────── */
+
+.wcb-icon,
+.wcb-mask-icon {
+    display: contents;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+    .wcb-icon svg,
+    .wcb-mask-icon svg {
+        display: block;
+        width: 1em;
+        height: 1em;
+    }
+
+/* ── 06. TAMAÑOS ─────────────────────────────────────────────────────────── */
+
+.wcb-size-xs {
+    padding: var(--wcb-padding-xs);
+    font-size: var(--wcb-font-size-xs);
+    height: var(--wcb-min-height-xs);
+    letter-spacing: var(--wcb-letter-spacing-xs);
+    gap: var(--wcb-gap-xs);
+}
+
+.wcb-size-sm {
+    padding: var(--wcb-padding-sm);
+    font-size: var(--wcb-font-size-sm);
+    height: var(--wcb-min-height-sm);
+    letter-spacing: var(--wcb-letter-spacing-sm);
+    gap: var(--wcb-gap-sm);
+}
+
+.wcb-size-md {
+    padding: var(--wcb-padding-md);
+    font-size: var(--wcb-font-size-md);
+    height: var(--wcb-min-height-md);
+    letter-spacing: var(--wcb-letter-spacing-md);
+    gap: var(--wcb-gap-md);
+}
+
+.wcb-size-lg {
+    padding: var(--wcb-padding-lg);
+    font-size: var(--wcb-font-size-lg);
+    height: var(--wcb-min-height-lg);
+    letter-spacing: var(--wcb-letter-spacing-lg);
+    gap: var(--wcb-gap-lg);
+}
+
+.wcb-size-xl {
+    padding: var(--wcb-padding-xl);
+    font-size: var(--wcb-font-size-xl);
+    height: var(--wcb-min-height-xl);
+    letter-spacing: var(--wcb-letter-spacing-xl);
+    gap: var(--wcb-gap-xl);
+}
+
+.wcb-size-xs .wcb-icon svg {
+    width: var(--wcb-icon-size-xs);
+    height: var(--wcb-icon-size-xs);
+}
+
+.wcb-size-sm .wcb-icon svg {
+    width: var(--wcb-icon-size-sm);
+    height: var(--wcb-icon-size-sm);
+}
+
+.wcb-size-md .wcb-icon svg {
+    width: var(--wcb-icon-size-md);
+    height: var(--wcb-icon-size-md);
+}
+
+.wcb-size-lg .wcb-icon svg {
+    width: var(--wcb-icon-size-lg);
+    height: var(--wcb-icon-size-lg);
+}
+
+.wcb-size-xl .wcb-icon svg {
+    width: var(--wcb-icon-size-xl);
+    height: var(--wcb-icon-size-xl);
+}
+
+/* Iguala el icono por clase (.wcb-mask-icon, em relativo al font-size del botón) al
+   tamaño en px fijo de .wcb-icon svg de arriba: sin esto, un botón que alterna entre
+   icono normal y loading (spinner, que usa .wcb-icon) cambia de ancho unos px al
+   entrar/salir de loading, corriendo visualmente el contenido vecino (p.ej. el
+   right-title de una fila de tree-list). */
+.wcb-size-xs .wcb-mask-icon::before {
+    width: var(--wcb-icon-size-xs);
+    height: var(--wcb-icon-size-xs);
+}
+
+.wcb-size-sm .wcb-mask-icon::before {
+    width: var(--wcb-icon-size-sm);
+    height: var(--wcb-icon-size-sm);
+}
+
+.wcb-size-md .wcb-mask-icon::before {
+    width: var(--wcb-icon-size-md);
+    height: var(--wcb-icon-size-md);
+}
+
+.wcb-size-lg .wcb-mask-icon::before {
+    width: var(--wcb-icon-size-lg);
+    height: var(--wcb-icon-size-lg);
+}
+
+.wcb-size-xl .wcb-mask-icon::before {
+    width: var(--wcb-icon-size-xl);
+    height: var(--wcb-icon-size-xl);
+}
+
+
+/* ── 07. FORMAS ──────────────────────────────────────────────────────────── */
+
+.wcb-shape-square {
+    --wcb-radius: var(--wcb-radius-square);
+}
+
+.wcb-shape-rounded {
+    --wcb-radius: var(--wcb-radius-rounded);
+}
+
+.wcb-shape-pill {
+    --wcb-radius: var(--wcb-radius-pill);
+}
+
+
+/* ── 08. VARIANTES SOLID ─────────────────────────────────────────────────── */
+
+.wcb-variant-primary {
+    background: var(--wcb-color-primary);
+    border-color: var(--wcb-color-primary);
+    color: #fff;
+}
+
+.wcb-variant-secondary {
+    background: var(--rf-bg-white, #ffffff);
+    border-color: var(--rf-color-border-light);
+    color: var(--wcb-color-primary);
+}
+
+    .wcb-variant-secondary:hover:not(:disabled) {
+        filter: none;
+        background: color-mix(in srgb, var(--wcb-color-primary) 8%, #ffffff);
+        border-color: color-mix(in srgb, var(--wcb-color-primary) 35%, transparent);
+    }
+
+.wcb-variant-success {
+    background: var(--wcb-color-success);
+    border-color: var(--wcb-color-success);
+    color: #fff;
+}
+
+.wcb-variant-danger {
+    background: var(--wcb-color-danger);
+    border-color: var(--wcb-color-danger);
+    color: #fff;
+}
+
+.wcb-variant-warning {
+    background: var(--wcb-color-warning);
+    border-color: var(--wcb-color-warning);
+    color: var(--rf-color-text, #1f2937); /* texto oscuro: el aviso es amarillo, con blanco no pasa AA */
+}
+
+.wcb-variant-info {
+    background: var(--wcb-color-info);
+    border-color: var(--wcb-color-info);
+    color: #fff;
+}
+
+.wcb-variant-dark {
+    background: var(--wcb-color-dark);
+    border-color: var(--wcb-color-dark);
+    color: #fff;
+}
+
+.wcb-variant-light {
+    background: var(--wcb-color-light);
+    border-color: var(--rf-color-border-light);
+    color: var(--rf-color-text, #1f2937);
+}
+
+    .wcb-variant-light:hover:not(:disabled) {
+        filter: none;
+        background: #e5e7eb;
+        border-color: #c9cdd2;
+    }
+
+.wcb-variant-white {
+    background: var(--rf-bg-white, #ffffff);
+    border-color: var(--rf-color-border-light); /* El borde que solicitaste */
+    color: var(--rf-color-text, #1f2937); /* Texto oscuro para contraste */
+}
+
+    .wcb-variant-white:hover:not(:disabled) {
+        filter: none; /* Anula el filtro por defecto para aplicar un fondo personalizado */
+        background: var(--rf-bg-light, #f9fafb);
+        border-color: var(--rf-color-border, #d1d5db);
+    }
+
+.wcb-variant-panel {
+    background: var(--wcb-color-panel);
+    border-color: var(--wcb-color-panel);
+    color: #fff;
+}
+
+/* ── 09. VARIANTES OUTLINE ───────────────────────────────────────────────── */
+
+.wcb-variant-outline-primary {
+    background: transparent;
+    border-color: var(--rf-color-border-light);
+    color: var(--wcb-color-primary);
+}
+
+.wcb-variant-outline-secondary {
+    background: transparent;
+    border-color: var(--rf-color-border-light);
+    color: var(--wcb-color-secondary);
+}
+
+.wcb-variant-outline-success {
+    background: transparent;
+    border-color: var(--rf-color-border-light);
+    color: var(--wcb-color-success);
+}
+
+.wcb-variant-outline-danger {
+    background: transparent;
+    border-color: var(--rf-color-border-light);
+    color: var(--wcb-color-danger);
+}
+
+.wcb-variant-outline-warning {
+    background: transparent;
+    border-color: var(--rf-color-border-light);
+    color: var(--wcb-color-warning-text); /* texto yellow-900: AA sobre blanco */
+}
+
+.wcb-variant-outline-info {
+    background: transparent;
+    border-color: var(--rf-color-border-light);
+    color: var(--wcb-color-info);
+}
+
+.wcb-variant-outline-dark {
+    background: transparent;
+    border-color: var(--rf-color-border-light);
+    color: var(--wcb-color-dark);
+}
+
+.wcb-variant-outline-panel {
+    background: transparent;
+    border-color: var(--rf-color-border-light);
+    color: var(--wcb-color-panel);
+}
+
+[class*="wcb-variant-outline-"]:hover:not(:disabled) {
+    filter: none;
+}
+
+.wcb-variant-outline-primary:hover:not(:disabled) {
+    background: var(--wcb-color-primary);
+    color: #fff;
+}
+
+.wcb-variant-outline-secondary:hover:not(:disabled) {
+    background: var(--wcb-color-secondary);
+    color: #fff;
+}
+
+.wcb-variant-outline-success:hover:not(:disabled) {
+    background: var(--wcb-color-success);
+    color: #fff;
+}
+
+.wcb-variant-outline-danger:hover:not(:disabled) {
+    background: var(--wcb-color-danger);
+    color: #fff;
+}
+
+.wcb-variant-outline-warning:hover:not(:disabled) {
+    background: var(--wcb-color-warning);
+    color: var(--rf-color-text, #1f2937); /* texto oscuro sobre amarillo (AA) */
+}
+
+.wcb-variant-outline-info:hover:not(:disabled) {
+    background: var(--wcb-color-info);
+    color: #fff;
+}
+
+.wcb-variant-outline-dark:hover:not(:disabled) {
+    background: var(--wcb-color-dark);
+    color: #fff;
+}
+
+.wcb-variant-outline-panel:hover:not(:disabled) {
+    background: var(--wcb-color-panel);
+    color: #fff;
+}
+
+/* ── 10. VARIANTES SOFT ──────────────────────────────────────────────────── */
+
+.wcb-variant-soft-primary {
+    background: color-mix(in srgb, var(--wcb-color-primary) 12%, transparent);
+    border-color: transparent;
+    color: var(--wcb-color-primary);
+}
+
+.wcb-variant-soft-secondary {
+    background: color-mix(in srgb, var(--wcb-color-secondary) 12%, transparent);
+    border-color: transparent;
+    color: var(--wcb-color-secondary);
+}
+
+.wcb-variant-soft-success {
+    background: color-mix(in srgb, var(--wcb-color-success) 12%, transparent);
+    border-color: transparent;
+    color: var(--wcb-color-success);
+}
+
+.wcb-variant-soft-danger {
+    background: color-mix(in srgb, var(--wcb-color-danger) 12%, transparent);
+    border-color: transparent;
+    color: var(--wcb-color-danger);
+}
+
+.wcb-variant-soft-warning {
+    background: color-mix(in srgb, var(--wcb-color-warning) 12%, transparent);
+    border-color: transparent;
+    color: var(--wcb-color-warning-text);
+}
+
+.wcb-variant-soft-info {
+    background: color-mix(in srgb, var(--wcb-color-info) 12%, transparent);
+    border-color: transparent;
+    color: var(--wcb-color-info);
+}
+
+.wcb-variant-soft-dark {
+    background: color-mix(in srgb, var(--wcb-color-dark) 12%, transparent);
+    border-color: transparent;
+    color: var(--wcb-color-dark);
+}
+
+[class*="wcb-variant-soft-"]:hover:not(:disabled) {
+    filter: none;
+}
+
+.wcb-variant-soft-primary:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--wcb-color-primary) 22%, transparent);
+}
+
+.wcb-variant-soft-secondary:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--wcb-color-secondary) 22%, transparent);
+}
+
+.wcb-variant-soft-success:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--wcb-color-success) 22%, transparent);
+}
+
+.wcb-variant-soft-danger:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--wcb-color-danger) 22%, transparent);
+}
+
+.wcb-variant-soft-warning:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--wcb-color-warning) 22%, transparent);
+}
+
+.wcb-variant-soft-info:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--wcb-color-info) 22%, transparent);
+}
+
+.wcb-variant-soft-dark:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--wcb-color-dark) 22%, transparent);
+}
+
+/* Variante Soft White (ideal para fondos oscuros) */
+.wcb-variant-soft-white {
+    /* Mantenemos el fondo semitransparente blanco */
+    background: color-mix(in srgb, var(--rf-bg-white, #ffffff) 15%, transparent);
+    border-color: var(--rf-color-border-light);
+    /* CAMBIO: Texto oscuro para que se lea siempre */
+    color: var(--rf-color-text, #1f2937);
+}
+
+    .wcb-variant-soft-white:hover:not(:disabled) {
+        background: rgba(0, 0, 0, 0.05);
+    }
+
+/* Variante Soft Transparent (completamente transparente, revela fondo al hacer hover) */
+.wcb-variant-soft-transparent {
+    background: transparent;
+    border-color: transparent;
+    color: var(--rf-color-text, #1f2937);
+}
+
+    .wcb-variant-soft-transparent:hover:not(:disabled) {
+        background: rgba(0, 0, 0, 0.05);
+    }
+
+
+/* ── 11. VARIANTES GHOST ─────────────────────────────────────────────────── */
+
+.wcb-variant-ghost {
+    background: transparent;
+    border-color: transparent;
+    color: var(--rf-color-text, #1f2937);
+}
+
+    .wcb-variant-ghost:hover:not(:disabled) {
+        filter: none;
+        background: var(--rf-bg-light, #f3f4f6);
+    }
+
+.wcb-variant-ghost-primary {
+    background: transparent;
+    border-color: transparent;
+    color: var(--wcb-color-primary);
+}
+
+.wcb-variant-ghost-secondary {
+    background: transparent;
+    border-color: transparent;
+    color: var(--wcb-color-secondary);
+}
+
+.wcb-variant-ghost-success {
+    background: transparent;
+    border-color: transparent;
+    color: var(--wcb-color-success);
+}
+
+.wcb-variant-ghost-danger {
+    background: transparent;
+    border-color: transparent;
+    color: var(--wcb-color-danger);
+}
+
+.wcb-variant-ghost-warning {
+    background: transparent;
+    border-color: transparent;
+    color: var(--wcb-color-warning-text);
+}
+
+.wcb-variant-ghost-info {
+    background: transparent;
+    border-color: transparent;
+    color: var(--wcb-color-info);
+}
+
+.wcb-variant-ghost-dark {
+    background: transparent;
+    border-color: transparent;
+    color: var(--wcb-color-dark);
+}
+
+[class*="wcb-variant-ghost-"]:hover:not(:disabled) {
+    filter: none;
+}
+
+.wcb-variant-ghost-primary:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--wcb-color-primary) 10%, transparent);
+}
+
+.wcb-variant-ghost-secondary:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--wcb-color-secondary) 10%, transparent);
+}
+
+.wcb-variant-ghost-success:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--wcb-color-success) 10%, transparent);
+}
+
+.wcb-variant-ghost-danger:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--wcb-color-danger) 10%, transparent);
+}
+
+.wcb-variant-ghost-warning:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--wcb-color-warning) 10%, transparent);
+}
+
+.wcb-variant-ghost-info:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--wcb-color-info) 10%, transparent);
+}
+
+.wcb-variant-ghost-dark:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--wcb-color-dark) 10%, transparent);
+}
+
+
+/* ── 12. VARIANTE LINK ───────────────────────────────────────────────────── */
+
+.wcb-variant-link {
+    background: transparent;
+    border-color: transparent;
+    color: var(--wcb-color-primary);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    padding-left: 4px;
+    padding-right: 4px;
+}
+
+    .wcb-variant-link:hover:not(:disabled) {
+        filter: none;
+        box-shadow: none;
+        opacity: 0.75;
+    }
+
+
+/* ── 13. VARIANTES GRADIENT ──────────────────────────────────────────────── */
+
+.wcb-variant-gradient-primary {
+    background: linear-gradient(135deg, var(--wcb-color-primary) 0%, color-mix(in srgb, var(--wcb-color-primary) 60%, #1e3a5f) 100%);
+    border-color: transparent;
+    color: #fff;
+}
+
+.wcb-variant-gradient-success {
+    background: linear-gradient(135deg, var(--wcb-color-success) 0%, color-mix(in srgb, var(--wcb-color-success) 60%, #065f46) 100%);
+    border-color: transparent;
+    color: #fff;
+}
+
+.wcb-variant-gradient-danger {
+    background: linear-gradient(135deg, var(--wcb-color-danger) 0%, color-mix(in srgb, var(--wcb-color-danger) 60%, #7f1d1d) 100%);
+    border-color: transparent;
+    color: #fff;
+}
+
+.wcb-variant-gradient-warning {
+    background: linear-gradient(135deg, var(--wcb-color-warning) 0%, color-mix(in srgb, var(--wcb-color-warning) 60%, #92400e) 100%);
+    border-color: transparent;
+    color: #fff;
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   14. TEXT-OUT  [text-out]
+   ─────────────────────────────────────────────────────────────────────────
+   Icono enmarcado (.wcb-icon-frame) apilado sobre un label externo (.wcb-label).
+   El .wcb-btn actúa como contenedor transparente; todo el estilo visual
+   (color, borde, hover, active) recae sobre .wcb-icon-frame.
+
+   Familias soportadas: solid · outline · soft · ghost · gradient
+   ════════════════════════════════════════════════════════════════════════════ */
+
+
+/* ── 14a. BASE + LAYOUT ──────────────────────────────────────────────────── */
+
+/* Host */
+wc-button[text-out] {
+    min-width: 74px;
+    max-width: 74px;
+    flex-shrink: 0;
+    box-sizing: border-box;
+    cursor: pointer;
+}
+
+    /* Botón interno: contenedor transparente, sin estilos propios */
+    wc-button[text-out] .wcb-btn {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        background: transparent;
+        border: none;
+        box-shadow: none;
+        min-height: auto;
+        height: auto; /* .wcb-btn base ahora fija height (no min-height); acá hace falta anularla para que quepan ícono+label apilados */
+        gap: 6px;
+        overflow: visible;
+    }
+
+        /* Anular efectos del .wcb-btn base — los gestiona .wcb-icon-frame */
+        wc-button[text-out] .wcb-btn:hover,
+        wc-button[text-out] .wcb-btn:hover:not(:disabled),
+        wc-button[text-out] .wcb-btn:active {
+            filter: none;
+            box-shadow: none;
+            transform: none;
+            background: transparent;
+            border-color: transparent;
+        }
+
+    /* Marco del icono */
+    wc-button[text-out] .wcb-icon-frame {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid var(--rf-color-border-light, #e5e7eb);
+        border-radius: var(--wcb-radius);
+        background: var(--rf-bg-white, #fff);
+        color: var(--wcb-color-primary);
+        transition: var(--wcb-transition);
+        flex-shrink: 0;
+        width: var(--wcb-min-width-lg);
+        height: var(--wcb-min-height-md);
+    }
+
+        wc-button[text-out] .wcb-icon-frame svg {
+            width: 1.5em;
+            height: 1.5em;
+            display: block;
+        }
+
+    /* Label externo */
+    wc-button[text-out] .wcb-label {
+        font-family: var(--font-family-label);
+        font-size: var(--wcb-text-out-label-size);
+        font-weight: var(--font-weight-label);
+        line-height: var(--line-height-label);
+        letter-spacing: var(--letter-spacing-label);
+        color: var(--rf-color-label);
+        text-align: center;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 100%;
+        pointer-events: none;
+    }
+
+    /* Disabled */
+    wc-button[text-out] .wcb-btn:disabled .wcb-icon-frame,
+    wc-button[text-out] .wcb-btn.is-disabled .wcb-icon-frame {
+        opacity: var(--wcb-opacity-disabled);
+    }
+
+    /* Sin variante: hover neutro */
+    wc-button[text-out]:not([variant]):not([disabled]) .wcb-btn:not(:disabled):hover .wcb-icon-frame {
+        background: var(--rf-bg-light, #f3f4f6);
+        border-color: var(--rf-color-border, #d1d5db);
+    }
+
+
+    /* ── 14b. VARIANTES SOLID ────────────────────────────────────────────────── */
+    /*
+   Fondo sólido sobre el frame.
+   Hover: brightness (idéntico a los botones sólidos normales).
+*/
+
+    wc-button[text-out][variant="primary"] .wcb-icon-frame {
+        background: var(--wcb-color-primary);
+        border-color: var(--wcb-color-primary);
+        color: #fff;
+    }
+
+    wc-button[text-out][variant="secondary"] .wcb-icon-frame {
+        background: var(--wcb-color-secondary);
+        border-color: var(--wcb-color-secondary);
+        color: #fff;
+    }
+
+    wc-button[text-out][variant="success"] .wcb-icon-frame {
+        background: var(--wcb-color-success);
+        border-color: var(--wcb-color-success);
+        color: #fff;
+    }
+
+    wc-button[text-out][variant="danger"] .wcb-icon-frame {
+        background: var(--wcb-color-danger);
+        border-color: var(--wcb-color-danger);
+        color: #fff;
+    }
+
+    wc-button[text-out][variant="warning"] .wcb-icon-frame {
+        background: var(--wcb-color-warning);
+        border-color: var(--wcb-color-warning);
+        color: var(--rf-color-text, #1f2937); /* icono oscuro sobre amarillo (AA) */
+    }
+
+    wc-button[text-out][variant="info"] .wcb-icon-frame {
+        background: var(--wcb-color-info);
+        border-color: var(--wcb-color-info);
+        color: #fff;
+    }
+
+    wc-button[text-out][variant="dark"] .wcb-icon-frame {
+        background: var(--wcb-color-dark);
+        border-color: var(--wcb-color-dark);
+        color: #fff;
+    }
+
+    wc-button[text-out][variant="light"] .wcb-icon-frame {
+        background: var(--wcb-color-light);
+        border-color: var(--rf-color-border, #d1d5db);
+        color: var(--rf-color-text, #1f2937);
+    }
+
+    /* Hover solid: brightness universal (excluye light) */
+    wc-button[text-out]:not([variant="light"]):not([disabled]) .wcb-btn:not(:disabled):hover .wcb-icon-frame {
+        filter: brightness(var(--wcb-hover-brightness));
+        box-shadow: var(--wcb-shadow-hover);
+    }
+
+    wc-button[text-out]:not([variant="light"]):not([disabled]) .wcb-btn:not(:disabled):active .wcb-icon-frame {
+        filter: brightness(var(--wcb-active-brightness));
+        transform: translateY(1px);
+        box-shadow: var(--wcb-shadow-none);
+    }
+
+    /* Light: hover sin brightness */
+    wc-button[text-out][variant="light"]:not([disabled]) .wcb-btn:not(:disabled):hover .wcb-icon-frame {
+        filter: none;
+        background: #e5e7eb;
+        border-color: #c9cdd2;
+    }
+
+    /* Label: colorea el texto según la variante */
+    wc-button[text-out][variant="primary"] .wcb-label {
+        color: var(--wcb-color-primary);
+    }
+
+    wc-button[text-out][variant="secondary"] .wcb-label {
+        color: var(--wcb-color-secondary);
+    }
+
+    wc-button[text-out][variant="success"] .wcb-label {
+        color: var(--wcb-color-success);
+    }
+
+    wc-button[text-out][variant="danger"] .wcb-label {
+        color: var(--wcb-color-danger);
+    }
+
+    wc-button[text-out][variant="warning"] .wcb-label {
+        color: var(--wcb-color-warning);
+    }
+
+    wc-button[text-out][variant="info"] .wcb-label {
+        color: var(--wcb-color-info);
+    }
+
+    wc-button[text-out][variant="dark"] .wcb-label {
+        color: var(--wcb-color-dark);
+    }
+
+    wc-button[text-out][variant="white"] .wcb-icon-frame {
+        background: var(--rf-bg-white, #ffffff);
+        border-color: var(--rf-color-border-light);
+        color: var(--rf-color-text, #1f2937);
+    }
+
+    wc-button[text-out][variant="white"]:not([disabled]) .wcb-btn:not(:disabled):hover .wcb-icon-frame {
+        filter: none;
+        background: var(--rf-bg-light, #f9fafb);
+        border-color: var(--rf-color-border, #d1d5db);
+    }
+
+    wc-button[text-out][variant="white"] .wcb-label {
+        color: var(--rf-color-text, #1f2937);
+    }
+
+    /* ── 14c. VARIANTES OUTLINE ──────────────────────────────────────────────── */
+    /*
+   Fondo blanco + borde gris (como las outline normales) + texto de color.
+   Hover: rellena con el color de variante (idéntico a outline normal).
+*/
+
+    wc-button[text-out][variant="outline-primary"] .wcb-icon-frame {
+        background: var(--rf-bg-white, #fff);
+        border-color: var(--rf-color-border-light);
+        color: var(--wcb-color-primary);
+    }
+
+    wc-button[text-out][variant="outline-secondary"] .wcb-icon-frame {
+        background: var(--rf-bg-white, #fff);
+        border-color: var(--rf-color-border-light);
+        color: var(--wcb-color-secondary);
+    }
+
+    wc-button[text-out][variant="outline-success"] .wcb-icon-frame {
+        background: var(--rf-bg-white, #fff);
+        border-color: var(--rf-color-border-light);
+        color: var(--wcb-color-success);
+    }
+
+    wc-button[text-out][variant="outline-danger"] .wcb-icon-frame {
+        background: var(--rf-bg-white, #fff);
+        border-color: var(--rf-color-border-light);
+        color: var(--wcb-color-danger);
+    }
+
+    wc-button[text-out][variant="outline-warning"] .wcb-icon-frame {
+        background: var(--rf-bg-white, #fff);
+        border-color: var(--rf-color-border-light);
+        color: var(--wcb-color-warning);
+    }
+
+    wc-button[text-out][variant="outline-info"] .wcb-icon-frame {
+        background: var(--rf-bg-white, #fff);
+        border-color: var(--rf-color-border-light);
+        color: var(--wcb-color-info);
+    }
+
+    wc-button[text-out][variant="outline-dark"] .wcb-icon-frame {
+        background: var(--rf-bg-white, #fff);
+        border-color: var(--rf-color-border-light);
+        color: var(--wcb-color-dark);
+    }
+
+    wc-button[text-out][variant="outline-primary"]:not([disabled]) .wcb-btn:not(:disabled):hover .wcb-icon-frame {
+        filter: none;
+        background: var(--wcb-color-primary);
+        border-color: var(--wcb-color-primary);
+        color: #fff;
+        box-shadow: var(--wcb-shadow-hover);
+    }
+
+    wc-button[text-out][variant="outline-secondary"]:not([disabled]) .wcb-btn:not(:disabled):hover .wcb-icon-frame {
+        filter: none;
+        background: var(--wcb-color-secondary);
+        border-color: var(--wcb-color-secondary);
+        color: #fff;
+        box-shadow: var(--wcb-shadow-hover);
+    }
+
+    wc-button[text-out][variant="outline-success"]:not([disabled]) .wcb-btn:not(:disabled):hover .wcb-icon-frame {
+        filter: none;
+        background: var(--wcb-color-success);
+        border-color: var(--wcb-color-success);
+        color: #fff;
+        box-shadow: var(--wcb-shadow-hover);
+    }
+
+    wc-button[text-out][variant="outline-danger"]:not([disabled]) .wcb-btn:not(:disabled):hover .wcb-icon-frame {
+        filter: none;
+        background: var(--wcb-color-danger);
+        border-color: var(--wcb-color-danger);
+        color: #fff;
+        box-shadow: var(--wcb-shadow-hover);
+    }
+
+    wc-button[text-out][variant="outline-warning"]:not([disabled]) .wcb-btn:not(:disabled):hover .wcb-icon-frame {
+        filter: none;
+        background: var(--wcb-color-warning);
+        border-color: var(--wcb-color-warning);
+        color: #fff;
+        box-shadow: var(--wcb-shadow-hover);
+    }
+
+    wc-button[text-out][variant="outline-info"]:not([disabled]) .wcb-btn:not(:disabled):hover .wcb-icon-frame {
+        filter: none;
+        background: var(--wcb-color-info);
+        border-color: var(--wcb-color-info);
+        color: #fff;
+        box-shadow: var(--wcb-shadow-hover);
+    }
+
+    wc-button[text-out][variant="outline-dark"]:not([disabled]) .wcb-btn:not(:disabled):hover .wcb-icon-frame {
+        filter: none;
+        background: var(--wcb-color-dark);
+        border-color: var(--wcb-color-dark);
+        color: #fff;
+        box-shadow: var(--wcb-shadow-hover);
+    }
+
+    wc-button[text-out][variant^="outline-"]:not([disabled]) .wcb-btn:not(:disabled):active .wcb-icon-frame {
+        transform: translateY(1px);
+        box-shadow: var(--wcb-shadow-none);
+    }
+
+    /* ── 14d. VARIANTES SOFT ─────────────────────────────────────────────────── */
+    /*
+   Fondo tenue + texto de color.
+   Hover: aumenta opacidad del fondo (idéntico a soft normal).
+*/
+
+    wc-button[text-out][variant="soft-primary"] .wcb-icon-frame {
+        background: color-mix(in srgb, var(--wcb-color-primary) 12%, transparent);
+        border-color: transparent;
+        color: var(--wcb-color-primary);
+    }
+
+    wc-button[text-out][variant="soft-secondary"] .wcb-icon-frame {
+        background: color-mix(in srgb, var(--wcb-color-secondary) 12%, transparent);
+        border-color: transparent;
+        color: var(--wcb-color-secondary);
+    }
+
+    wc-button[text-out][variant="soft-success"] .wcb-icon-frame {
+        background: color-mix(in srgb, var(--wcb-color-success) 12%, transparent);
+        border-color: transparent;
+        color: var(--wcb-color-success);
+    }
+
+    wc-button[text-out][variant="soft-danger"] .wcb-icon-frame {
+        background: color-mix(in srgb, var(--wcb-color-danger) 12%, transparent);
+        border-color: transparent;
+        color: var(--wcb-color-danger);
+    }
+
+    wc-button[text-out][variant="soft-warning"] .wcb-icon-frame {
+        background: color-mix(in srgb, var(--wcb-color-warning) 12%, transparent);
+        border-color: transparent;
+        color: var(--wcb-color-warning);
+    }
+
+    wc-button[text-out][variant="soft-info"] .wcb-icon-frame {
+        background: color-mix(in srgb, var(--wcb-color-info) 12%, transparent);
+        border-color: transparent;
+        color: var(--wcb-color-info);
+    }
+
+    wc-button[text-out][variant="soft-dark"] .wcb-icon-frame {
+        background: color-mix(in srgb, var(--wcb-color-dark) 12%, transparent);
+        border-color: transparent;
+        color: var(--wcb-color-dark);
+    }
+
+    wc-button[text-out][variant="soft-primary"]:not([disabled]) .wcb-btn:not(:disabled):hover .wcb-icon-frame {
+        filter: none;
+        background: color-mix(in srgb, var(--wcb-color-primary) 22%, transparent);
+        box-shadow: var(--wcb-shadow-hover);
+    }
+
+    wc-button[text-out][variant="soft-secondary"]:not([disabled]) .wcb-btn:not(:disabled):hover .wcb-icon-frame {
+        filter: none;
+        background: color-mix(in srgb, var(--wcb-color-secondary) 22%, transparent);
+        box-shadow: var(--wcb-shadow-hover);
+    }
+
+    wc-button[text-out][variant="soft-success"]:not([disabled]) .wcb-btn:not(:disabled):hover .wcb-icon-frame {
+        filter: none;
+        background: color-mix(in srgb, var(--wcb-color-success) 22%, transparent);
+        box-shadow: var(--wcb-shadow-hover);
+    }
+
+    wc-button[text-out][variant="soft-danger"]:not([disabled]) .wcb-btn:not(:disabled):hover .wcb-icon-frame {
+        filter: none;
+        background: color-mix(in srgb, var(--wcb-color-danger) 22%, transparent);
+        box-shadow: var(--wcb-shadow-hover);
+    }
+
+    wc-button[text-out][variant="soft-warning"]:not([disabled]) .wcb-btn:not(:disabled):hover .wcb-icon-frame {
+        filter: none;
+        background: color-mix(in srgb, var(--wcb-color-warning) 22%, transparent);
+        box-shadow: var(--wcb-shadow-hover);
+    }
+
+    wc-button[text-out][variant="soft-info"]:not([disabled]) .wcb-btn:not(:disabled):hover .wcb-icon-frame {
+        filter: none;
+        background: color-mix(in srgb, var(--wcb-color-info) 22%, transparent);
+        box-shadow: var(--wcb-shadow-hover);
+    }
+
+    wc-button[text-out][variant="soft-dark"]:not([disabled]) .wcb-btn:not(:disabled):hover .wcb-icon-frame {
+        filter: none;
+        background: color-mix(in srgb, var(--wcb-color-dark) 22%, transparent);
+        box-shadow: var(--wcb-shadow-hover);
+    }
+
+    wc-button[text-out][variant^="soft-"]:not([disabled]) .wcb-btn:not(:disabled):active .wcb-icon-frame {
+        transform: translateY(1px);
+        box-shadow: var(--wcb-shadow-none);
+    }
+
+    /* Soft White Text-Out */
+    wc-button[text-out][variant="soft-white"] .wcb-icon-frame {
+        background: color-mix(in srgb, var(--rf-bg-white, #ffffff) 15%, transparent);
+        border-color: transparent;
+        /* CAMBIO: Icono oscuro */
+        color: var(--rf-color-text, #1f2937);
+    }
+
+    wc-button[text-out][variant="soft-white"]:not([disabled]) .wcb-btn:not(:disabled):hover .wcb-icon-frame {
+        background: color-mix(in srgb, var(--rf-bg-white, #ffffff) 25%, transparent);
+        box-shadow: var(--wcb-shadow-hover);
+    }
+
+    wc-button[text-out][variant="soft-white"] .wcb-label {
+        /* CAMBIO: Label exterior oscuro */
+        color: var(--rf-color-text, #1f2937);
+    }
+
+    /* Soft Transparent Text-Out */
+    wc-button[text-out][variant="soft-transparent"] .wcb-icon-frame {
+        background: transparent;
+        border-color: transparent;
+        color: var(--rf-color-text, #1f2937);
+    }
+
+    wc-button[text-out][variant="soft-transparent"]:not([disabled]) .wcb-btn:not(:disabled):hover .wcb-icon-frame {
+        background: rgba(0, 0, 0, 0.05);
+        box-shadow: var(--wcb-shadow-hover);
+    }
+
+
+    /* ── 14e. VARIANTES GHOST ────────────────────────────────────────────────── */
+    /*
+   Fondo y borde transparentes.
+   Hover: fondo tenue (idéntico a ghost normal).
+*/
+
+    wc-button[text-out][variant="ghost"] .wcb-icon-frame {
+        background: transparent;
+        border-color: transparent;
+        color: var(--rf-color-text, #1f2937);
+    }
+
+    wc-button[text-out][variant="ghost-primary"] .wcb-icon-frame {
+        background: transparent;
+        border-color: transparent;
+        color: var(--wcb-color-primary);
+    }
+
+    wc-button[text-out][variant="ghost-secondary"] .wcb-icon-frame {
+        background: transparent;
+        border-color: transparent;
+        color: var(--wcb-color-secondary);
+    }
+
+    wc-button[text-out][variant="ghost-success"] .wcb-icon-frame {
+        background: transparent;
+        border-color: transparent;
+        color: var(--wcb-color-success);
+    }
+
+    wc-button[text-out][variant="ghost-danger"] .wcb-icon-frame {
+        background: transparent;
+        border-color: transparent;
+        color: var(--wcb-color-danger);
+    }
+
+    wc-button[text-out][variant="ghost-warning"] .wcb-icon-frame {
+        background: transparent;
+        border-color: transparent;
+        color: var(--wcb-color-warning);
+    }
+
+    wc-button[text-out][variant="ghost-info"] .wcb-icon-frame {
+        background: transparent;
+        border-color: transparent;
+        color: var(--wcb-color-info);
+    }
+
+    wc-button[text-out][variant="ghost-dark"] .wcb-icon-frame {
+        background: transparent;
+        border-color: transparent;
+        color: var(--wcb-color-dark);
+    }
+
+    wc-button[text-out][variant="ghost"]:not([disabled]) .wcb-btn:not(:disabled):hover .wcb-icon-frame {
+        filter: none;
+        background: var(--rf-bg-light, #f3f4f6);
+        box-shadow: var(--wcb-shadow-hover);
+    }
+
+    wc-button[text-out][variant="ghost-primary"]:not([disabled]) .wcb-btn:not(:disabled):hover .wcb-icon-frame {
+        filter: none;
+        background: color-mix(in srgb, var(--wcb-color-primary) 10%, transparent);
+        box-shadow: var(--wcb-shadow-hover);
+    }
+
+    wc-button[text-out][variant="ghost-secondary"]:not([disabled]) .wcb-btn:not(:disabled):hover .wcb-icon-frame {
+        filter: none;
+        background: color-mix(in srgb, var(--wcb-color-secondary) 10%, transparent);
+        box-shadow: var(--wcb-shadow-hover);
+    }
+
+    wc-button[text-out][variant="ghost-success"]:not([disabled]) .wcb-btn:not(:disabled):hover .wcb-icon-frame {
+        filter: none;
+        background: color-mix(in srgb, var(--wcb-color-success) 10%, transparent);
+        box-shadow: var(--wcb-shadow-hover);
+    }
+
+    wc-button[text-out][variant="ghost-danger"]:not([disabled]) .wcb-btn:not(:disabled):hover .wcb-icon-frame {
+        filter: none;
+        background: color-mix(in srgb, var(--wcb-color-danger) 10%, transparent);
+        box-shadow: var(--wcb-shadow-hover);
+    }
+
+    wc-button[text-out][variant="ghost-warning"]:not([disabled]) .wcb-btn:not(:disabled):hover .wcb-icon-frame {
+        filter: none;
+        background: color-mix(in srgb, var(--wcb-color-warning) 10%, transparent);
+        box-shadow: var(--wcb-shadow-hover);
+    }
+
+    wc-button[text-out][variant="ghost-info"]:not([disabled]) .wcb-btn:not(:disabled):hover .wcb-icon-frame {
+        filter: none;
+        background: color-mix(in srgb, var(--wcb-color-info) 10%, transparent);
+        box-shadow: var(--wcb-shadow-hover);
+    }
+
+    wc-button[text-out][variant="ghost-dark"]:not([disabled]) .wcb-btn:not(:disabled):hover .wcb-icon-frame {
+        filter: none;
+        background: color-mix(in srgb, var(--wcb-color-dark) 10%, transparent);
+        box-shadow: var(--wcb-shadow-hover);
+    }
+
+    wc-button[text-out][variant^="ghost"]:not([disabled]) .wcb-btn:not(:disabled):active .wcb-icon-frame {
+        transform: translateY(1px);
+        box-shadow: var(--wcb-shadow-none);
+    }
+
+
+    /* ── 14f. VARIANTES GRADIENT ─────────────────────────────────────────────── */
+    /*
+   Fondo degradado.
+   Hover: brightness (el gradiente lo soporta correctamente).
+*/
+
+    wc-button[text-out][variant="gradient-primary"] .wcb-icon-frame {
+        background: linear-gradient(135deg, var(--wcb-color-primary) 0%, color-mix(in srgb, var(--wcb-color-primary) 60%, #1e3a5f) 100%);
+        border-color: transparent;
+        color: #fff;
+    }
+
+    wc-button[text-out][variant="gradient-success"] .wcb-icon-frame {
+        background: linear-gradient(135deg, var(--wcb-color-success) 0%, color-mix(in srgb, var(--wcb-color-success) 60%, #065f46) 100%);
+        border-color: transparent;
+        color: #fff;
+    }
+
+    wc-button[text-out][variant="gradient-danger"] .wcb-icon-frame {
+        background: linear-gradient(135deg, var(--wcb-color-danger) 0%, color-mix(in srgb, var(--wcb-color-danger) 60%, #7f1d1d) 100%);
+        border-color: transparent;
+        color: #fff;
+    }
+
+    wc-button[text-out][variant="gradient-warning"] .wcb-icon-frame {
+        background: linear-gradient(135deg, var(--wcb-color-warning) 0%, color-mix(in srgb, var(--wcb-color-warning) 60%, #92400e) 100%);
+        border-color: transparent;
+        color: #fff;
+    }
+
+    wc-button[text-out][variant^="gradient-"]:not([disabled]) .wcb-btn:not(:disabled):hover .wcb-icon-frame {
+        filter: brightness(var(--wcb-hover-brightness));
+        box-shadow: var(--wcb-shadow-hover);
+    }
+
+    wc-button[text-out][variant^="gradient-"]:not([disabled]) .wcb-btn:not(:disabled):active .wcb-icon-frame {
+        filter: brightness(var(--wcb-active-brightness));
+        transform: translateY(1px);
+        box-shadow: var(--wcb-shadow-none);
+    }
+
+
+    /* ── 14g. TAMAÑOS ────────────────────────────────────────────────────────── */
+    /*
+   Host width escala con el tamaño del botón.
+   Las alturas del frame se alinean con --wcb-min-height-* de cada tamaño.
+*/
+
+    /* Host: xs */
+    wc-button[text-out][size="xs"] {
+        min-width: 54px;
+        max-width: 54px;
+    }
+
+    wc-button[text-out] .wcb-btn.wcb-size-xs .wcb-icon-frame {
+        width: var(--wcb-min-width-xs);
+        height: var(--wcb-min-width-xs); /* cuadrado real */
+    }
+
+    /* Host: sm */
+    wc-button[text-out][size="sm"] {
+        min-width: 62px;
+        max-width: 62px;
+    }
+
+    wc-button[text-out] .wcb-btn.wcb-size-sm .wcb-icon-frame {
+        width: var(--wcb-min-width-sm);
+        height: var(--wcb-min-width-sm); /* cuadrado real */
+    }
+
+    /* Host: md — es el valor base (74px), no necesita override */
+
+    /* Host: lg */
+    wc-button[text-out][size="lg"] {
+        min-width: 84px;
+        max-width: 84px;
+    }
+
+    wc-button[text-out] .wcb-btn.wcb-size-lg .wcb-icon-frame {
+        width: var(--wcb-min-width-lg);
+        height: var(--wcb-min-width-lg); /* cuadrado real */
+    }
+
+    /* Host: xl */
+    wc-button[text-out][size="xl"] {
+        min-width: 92px;
+        max-width: 92px;
+    }
+
+    wc-button[text-out] .wcb-btn.wcb-size-xl .wcb-icon-frame {
+        width: var(--wcb-min-width-xl);
+        height: var(--wcb-min-width-xl); /* cuadrado real */
+    }
+
+
+    /* ── 14h. PILL + TEXT-OUT = CÍRCULO ──────────────────────────────────────── */
+    /*
+   Con shape="pill" y text-out, el frame se convierte en un círculo perfecto.
+   Se fuerza width = height y border-radius: 50%.
+   Las dimensiones de cada tamaño usan la anchura habitual del frame como diámetro.
+*/
+
+    wc-button[text-out][shape="pill"] .wcb-icon-frame {
+        border-radius: var(--radius-circle);
+        width: var(--wcb-min-width-md);
+        height: var(--wcb-min-width-md); /* círculo: mismo valor en los dos ejes siempre, nunca sigue al cuadrado */
+        padding: 0;
+    }
+
+    wc-button[text-out][shape="pill"] .wcb-btn.wcb-size-xs .wcb-icon-frame {
+        width: var(--wcb-min-width-xs);
+        height: var(--wcb-min-width-xs);
+    }
+
+    wc-button[text-out][shape="pill"] .wcb-btn.wcb-size-sm .wcb-icon-frame {
+        width: var(--wcb-min-width-sm);
+        height: var(--wcb-min-width-sm);
+    }
+
+    wc-button[text-out][shape="pill"] .wcb-btn.wcb-size-lg .wcb-icon-frame {
+        width: var(--wcb-min-width-lg);
+        height: var(--wcb-min-width-lg);
+    }
+
+    wc-button[text-out][shape="pill"] .wcb-btn.wcb-size-xl .wcb-icon-frame {
+        width: var(--wcb-min-width-xl);
+        height: var(--wcb-min-width-xl);
+    }
+
+[text-out][shape="pill"] {
+    min-height: 1.9em;
+}
+
+wc-button[text-out][shape="pill"] .wcb-icon-frame svg {
+    width: 1.65em;
+    height: 1.65em;
+}
+
+wc-button[text-out][shape="pill"] .wcb-mask-icon::before {
+    min-height: 1.65em;
+}
+
+/* ── 14i. PILL + SOLO ICONO (sin label, sin text-out) = CÍRCULO ──────────── */
+/*
+   Mismo resultado que pill + text-out: ancho = alto = min-height del tamaño,
+   sin padding horizontal. Clase .wcb-icon-only puesta por WCButton._render().
+*/
+.wcb-btn.wcb-shape-pill.wcb-icon-only {
+    padding: 0;
+    width: var(--wcb-min-height-md);
+    flex-shrink: 0;
+}
+
+.wcb-btn.wcb-shape-pill.wcb-icon-only.wcb-size-xs { width: var(--wcb-min-height-xs); }
+.wcb-btn.wcb-shape-pill.wcb-icon-only.wcb-size-sm { width: var(--wcb-min-height-sm); }
+.wcb-btn.wcb-shape-pill.wcb-icon-only.wcb-size-lg { width: var(--wcb-min-height-lg); }
+.wcb-btn.wcb-shape-pill.wcb-icon-only.wcb-size-xl { width: var(--wcb-min-height-xl); }
+
+/* ── 15. MASK-ICON EN BOTÓN CON CLASE CSS ────────────────────────────────── */
+/*
+   Botones con icono definido por clase CSS (button-icons.css).
+*/
+
+.wcb-btn.wcb-has-mask {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    gap: 8px;
+}
+
+wc-button .wcb-mask-icon::before {
+    content: "";
+    width: 1.25em;
+    height: 1.25em;
+    background-color: currentColor;
+    -webkit-mask-image: var(--wci-icon-url, linear-gradient(transparent, transparent));
+    mask-image: var(--wci-icon-url, linear-gradient(transparent, transparent));
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    -webkit-mask-size: contain;
+    mask-repeat: no-repeat;
+    mask-position: center;
+    mask-size: contain;
+    transition: background-color 0.2s ease;
+    pointer-events: none;
+    flex-shrink: 0;
+}
+
+wc-button .wcb-variant-white .wcb-mask-icon::before,
+wc-button .wcb-variant-light .wcb-mask-icon::before,
+wc-button .wcb-variant-soft-white .wcb-mask-icon::before,
+wc-button .wcb-variant-soft-transparent .wcb-mask-icon::before {
+    background-color: var(--rf-color-primary, #285A92); /* icono = color de accion (blue-500); antes apuntaba a --ar-bg-color (superficie del panel) */
+}
+
+wc-button .wcb-variant-outline-primary .wcb-mask-icon::before,
+wc-button .wcb-variant-outline-secondary .wcb-mask-icon::before,
+wc-button .wcb-variant-outline-success .wcb-mask-icon::before,
+wc-button .wcb-variant-outline-danger .wcb-mask-icon::before,
+wc-button .wcb-variant-outline-warning .wcb-mask-icon::before,
+wc-button .wcb-variant-outline-info .wcb-mask-icon::before,
+wc-button .wcb-variant-outline-dark .wcb-mask-icon::before {
+    background-color: currentColor;
+}
+
+wc-button[text-out] .wcb-mask-icon::before {
+    min-width: 100%;
+    min-height: 1.5em;
+    mask-size: contain;
+    -webkit-mask-size: contain;
+}
+
+
+wc-button[text-out][variant="success"] .wcb-btn {
+    color: var(--wcb-color-success);
+}
+
+wc-button[text-out][variant="danger"] .wcb-btn {
+    color: var(--wcb-color-danger);
+}
+
+wc-button[text-out][variant="secondary"] .wcb-btn {
+    color: var(--wcb-color-secondary);
+}
+
+wc-button[text-out][variant="warning"] .wcb-btn {
+    color: var(--wcb-color-warning);
+}
+
+wc-button[text-out][variant="info"] .wcb-btn {
+    color: var(--wcb-color-info);
+}
+
+
+/* ── 15b. COLOR DE ICONO PERSONALIZADO [icon-color] ──────────────────────── */
+/*
+   Consume --wcb-custom-icon-color, inyectada por JS vía btn.style.setProperty.
+
+   Tres casos:
+   1. Icono por clase CSS (mask-icon): sobreescribe background-color del ::before.
+      !important necesario porque las reglas de variante tienen alta especificidad.
+   2. Icono SVG inline (modo normal): sobreescribe color en .wcb-icon, que hereda
+      a currentColor del SVG. Regla directa, sin necesidad de !important.
+   3. Icono SVG inline (text-out): el SVG va directo en .wcb-icon-frame; misma
+      especificidad que las reglas de variante text-out pero declarada después,
+      por lo que gana por orden de cascada.
+*/
+
+wc-button[icon-color] .wcb-mask-icon::before {
+    background-color: var(--wcb-custom-icon-color) !important;
+}
+
+wc-button[icon-color] .wcb-icon {
+    color: var(--wcb-custom-icon-color);
+}
+
+wc-button[icon-color][text-out] .wcb-icon-frame {
+    color: var(--wcb-custom-icon-color);
+}
+
+/*
+   color-bg / border-color en text-out: el background y el borde se inyectan
+   inline en .wcb-icon-frame. Los hover de variantes soft/ghost/outline usan
+   filter:none + background/border nuevo, lo que no funciona con inline style.
+   Forzar brightness para consistencia.
+*/
+wc-button[color-bg][text-out] .wcb-btn:not(:disabled):hover .wcb-icon-frame,
+wc-button[border-color][text-out] .wcb-btn:not(:disabled):hover .wcb-icon-frame {
+    filter: brightness(var(--wcb-hover-brightness)) !important;
+}
+
+wc-button[color-bg][text-out] .wcb-btn:not(:disabled):active .wcb-icon-frame,
+wc-button[border-color][text-out] .wcb-btn:not(:disabled):active .wcb-icon-frame {
+    filter: brightness(var(--wcb-active-brightness)) !important;
+    transform: translateY(1px);
+    box-shadow: var(--wcb-shadow-none);
+}
+
+/*
+   icon-original: desactiva la máscara y muestra el SVG con sus colores propios.
+   Usa background-image con el mismo --wcb-icon-url declarado en button-icons.css.
+   !important necesario para ganar a las reglas de variante y a icon-color.
+*/
+wc-button[icon-original] .wcb-mask-icon::before {
+    -webkit-mask-image: none !important;
+    mask-image: none !important;
+    background-image: var(--wci-icon-url) !important;
+    background-color: transparent !important;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+
+/* ── 15c. OVERRIDES DE TAMAÑO POR ICONO ─────────────────────────────────── */
+
+wc-button[text-out] .wcb-btn.ia_alexia_mujer .wcb-mask-icon::before {
+    min-height: 2.5em !important;
+}
+
+wc-button[text-out] .wcb-btn.justificar .wcb-mask-icon::before,
+wc-button[text-out] .wcb-btn.excel_exportar .wcb-mask-icon::before,
+wc-button[text-out] .wcb-btn.excel_importar .wcb-mask-icon::before,
+wc-button[text-out] .wcb-btn.codeBlock .wcb-mask-icon::before,
+wc-button[text-out] .wcb-btn.link .wcb-mask-icon::before {
+    min-height: 2.1em !important;
+}
+
+wc-button:not([label]) .wcb-btn.justificar .wcb-mask-icon::before,
+wc-button:not([label]) .wcb-btn.excel_exportar .wcb-mask-icon::before,
+wc-button:not([label]) .wcb-btn.excel_importar .wcb-mask-icon::before,
+wc-button:not([label]) .wcb-btn.codeBlock .wcb-mask-icon::before,
+wc-button:not([label]) .wcb-btn.link .wcb-mask-icon::before {
+    height: 1.75em !important;
+    width: 1.75em !important;
+}
+
+/* ── 16. LOADING ─────────────────────────────────────────────────────────── */
+
+@keyframes wcb-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.wcb-spinner {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+    .wcb-spinner svg {
+        width: 1em;
+        height: 1em;
+        display: block;
+        animation: wcb-spin 0.75s linear infinite;
+        color: currentColor;
+    }
+
+/* Spinner: opacidad reducida en el botón completo */
+.wcb-loading-spinner {
+    opacity: 0.75;
+}
+
+/* Pulse: oscila la opacidad del botón completo */
+@keyframes wcb-pulse-loading {
+    0%, 100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.45;
+    }
+}
+
+.wcb-loading-pulse {
+    animation: wcb-pulse-loading 1.2s ease-in-out infinite;
+    pointer-events: none;
+}
+
+
+/* ── 17. BADGE ───────────────────────────────────────────────────────────── */
+
+/* Overflow visible para que el badge sobresalga del botón estándar */
+wc-button:not([text-out])[badge] .wcb-btn {
+    overflow: visible;
+}
+
+/* Modo text-out: el frame del icono es el contexto de posicionamiento del badge */
+wc-button[text-out][badge] .wcb-icon-frame {
+    position: relative;
+    overflow: visible;
+}
+
+.wcb-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    z-index: 1;
+    background: var(--wcb-badge-color, var(--wcb-color-danger));
+    border: 2px solid var(--rf-bg-white, #fff);
+    pointer-events: none;
+}
+
+/* badge-position="bottom": esquina inferior derecha en vez de la superior */
+wc-button[badge-position="bottom"] .wcb-badge {
+    top: auto;
+    bottom: -5px;
+}
+
+.wcb-badge-dot,
+.wcb-badge-pulse {
+    width: 10px;
+    height: 10px;
+    border-radius: var(--radius-circle);
+    display: block;
+}
+
+@keyframes wcb-badge-ripple {
+    0% {
+        box-shadow: 0 0 0 0 color-mix(in srgb, var(--wcb-badge-color, var(--wcb-color-danger)) 50%, transparent);
+    }
+
+    70% {
+        box-shadow: 0 0 0 7px transparent;
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 transparent;
+    }
+}
+
+.wcb-badge-pulse {
+    animation: wcb-badge-ripple 1.5s ease-out infinite;
+}
+
+/* Badge con icono (atributo badge-icon): circulo de 24px con el wc-icon de 15px, el mismo tamaño que en
+   wc-image (mas pequeño el icono no se identifica). Blanco salvo sobre warning (--wcb-badge-fg, lo pone el
+   JS: el amarillo pide texto oscuro). */
+.wcb-badge-icon {
+    --wcb-badge-icon-box: 24px;
+    --wcb-badge-icon-glyph: 15px;
+    width: var(--wcb-badge-icon-box);
+    height: var(--wcb-badge-icon-box);
+    border-radius: var(--radius-circle);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+}
+
+    .wcb-badge.wcb-badge-icon wc-icon .wci-box {
+        width: 100%;
+        height: 100%;
+    }
+
+    .wcb-badge.wcb-badge-icon wc-icon .wci-glyph::before {
+        width: var(--wcb-badge-icon-glyph);
+        height: var(--wcb-badge-icon-glyph);
+        background-color: var(--wcb-badge-fg, var(--rf-bg-white, #fff));
+    }
+
+.wcb-badge-num {
+    min-width: 18px;
+    height: 18px;
+    border-radius: var(--radius-full);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 600;
+    font-family: var(--wcb-font-family);
+    color: var(--wcb-badge-fg, #fff);
+    padding: 0 4px;
+}

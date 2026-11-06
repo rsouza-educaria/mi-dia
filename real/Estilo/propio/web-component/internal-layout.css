@@ -1,0 +1,1539 @@
+/* =========================================
+   INTERNAL LAYOUT - NÚCLEO COMPARTIDO
+   ========================================= */
+
+@import url("colors.css");
+@import url("fonts.css");
+@import url("button.css");
+@import url("range.css");
+@import url("banner.css");
+@import url("rich-text.css");
+@import url("icon.css");
+@import url("datepicker.css");
+
+:root, :host {
+    /* --- PALETA DE COLORES: ahora centralizada en colors.css (importado arriba) --- */
+
+    /* --- UI METRICS --- */
+
+    /* Escala de border-radius (normalizada 4/8/12). Vocabulario unico del sistema. */
+    --radius-none:   0;
+    --radius-sm:     4px;    /* badges, chips */
+    --radius-md:     8px;    /* inputs, tarjetas */
+    --radius-lg:     12px;   /* botones, modales, contenedores */
+    --radius-full:   9999px; /* pildoras, range */
+    --radius-circle: 50%;    /* avatares, thumb, radio */
+
+    /* Alias de compatibilidad: los componentes que ya consumen estos nombres siguen
+       funcionando; solo cambia el valor al normalizar (6->8, 10->12). */
+    --rf-radius:    var(--radius-sm);   /* antes 6px, luego 8px (radius-md) */
+    --rf-radius-lg: var(--radius-lg);   /* antes 10px */
+    --rf-font-size: 0.95rem;
+    --rf-gap: 1.2rem;
+    --input-height: 37px;
+}
+
+:host {
+    /* --- TYPOGRAPHY BASE: ahora centralizada en fonts.css (importado arriba) --- */
+    /* La pila vive en --font-family-base. Esta linea debe apuntar al token y no
+       repetir la pila: los @import se tratan como insertados al inicio, asi que
+       una pila literal aqui ganaria a lo que declare fonts.css. */
+    font-family: var(--font-family-base);
+    color: var(--rf-color-text);
+}
+
+/* --- RESET DE CAJA --- */
+:host,
+:host *,
+:host *::before,
+:host *::after,
+[wc-educaria],
+[wc-educaria] *,
+[wc-educaria] *::before,
+[wc-educaria] *::after {
+    box-sizing: border-box;
+}
+
+/* --- UTILIDADES --- */
+:host .hidden {
+    display: none !important;
+}
+
+/* --- Inputs Base --- */
+:where([wc-educaria]) input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"]),
+:where([wc-educaria]) textarea {
+    padding: 0.6rem 0.8rem;
+    font-size: var(--rf-font-size);
+    color: var(--rf-color-text);
+    border: 1px solid var(--rf-color-border);
+    border-radius: var(--rf-radius);
+    transition: border-color 0.2s;
+    font-family: inherit;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+}
+
+    /* La cadena de :not() se repite aqui a proposito: la regla base de arriba
+       (misma cadena) tiene mas especificidad que un simple ":focus", asi que
+       sin repetirla el border-color de foco nunca gana. Defecto preexistente,
+       detectado al tocar esta regla; no cambiaba nada en ningun input del
+       sistema, antes ni despues del cambio de hoy. */
+    :where([wc-educaria]) input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"]):focus,
+    :where([wc-educaria]) textarea:focus {
+        outline: none;
+        border-color: var(--rf-color-border-focus);
+        box-shadow: 0 0 0 1px rgba(var(--rf-color-primary-rgb), 0.15);
+    }
+
+:where([wc-educaria]) textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+    /* --- ReadOnly & Disabled --- */
+    :where([wc-educaria]) input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"]):read-only,
+    :where([wc-educaria]) textarea:read-only,
+    :where([wc-educaria]) input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"]):disabled,
+    :where([wc-educaria]) textarea:disabled,
+    wc-select[readonly] .wcs-wrapper,
+    wc-select[disabled] .wcs-wrapper {
+        background-color: var(--rf-bg-readonly) !important;
+        color: var(--rf-text-readonly) !important;
+        border-color: var(--rf-color-border) !important;
+        box-shadow: none;
+        background-image: none;
+    }
+
+wc-image[readonly] .image-preview-area {
+    cursor: default;
+    color: var(--rf-text-readonly);
+}
+
+/* --- Checkbox & Radio --- */
+:host .checkbox-wrapper,
+:where(wc-radio-group) .radio-option {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-size: var(--rf-font-size);
+    color: var(--rf-color-text);
+    min-height: 1.5rem;
+}
+
+    :where(wc-radio-group) .radio-option input {
+        cursor: pointer;
+        margin-right: 0.5rem;
+        width: 1em;
+        height: 1em;
+        accent-color: var(--rf-color-primary);
+    }
+
+:where(wc-radio-group) .radio-group {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+wc-radio-group[orientation="vertical"] .radio-group {
+    flex-direction: column;
+    flex-wrap: nowrap;
+    gap: 0.5rem;
+}
+
+/* ========================================= */
+/* --- WC-PILL-GROUP (Pildoras seleccionables) --- */
+/* ========================================= */
+/* Cada pildora es <label.wcpg-option> con un checkbox nativo oculto y su texto
+   (.wcpg-label), que es la pildora visible. El estado se pinta con el selector
+   hermano (input:checked + .wcpg-label), sin clases por JS. Un solo color base,
+   el del checkbox: marcada = primary con texto blanco; desmarcada = la inversa. */
+:where(wc-pill-group) .wcpg-group {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+wc-pill-group[orientation="vertical"] .wcpg-group {
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: flex-start;
+}
+
+:where(wc-pill-group) .wcpg-option {
+    display: inline-flex;
+    position: relative;
+    max-width: 100%;
+}
+
+    /* Oculto pero focusable: el teclado (Tab + Espacio) va al input nativo */
+    :where(wc-pill-group) .wcpg-input {
+        position: absolute;
+        opacity: 0;
+        width: 0;
+        height: 0;
+        margin: 0;
+        pointer-events: none;
+    }
+
+:where(wc-pill-group) .wcpg-label {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.35rem 0.85rem;
+    border: 1px solid var(--rf-color-primary);
+    border-radius: var(--radius-full);
+    background-color: var(--rf-bg-white);
+    color: var(--rf-color-primary);
+    font-size: var(--font-size-200);
+    font-weight: 600;
+    line-height: 1.2;
+    min-width: 0;
+    /* Un texto mas largo que el contenedor se parte en varias lineas en vez de desbordar */
+    white-space: normal;
+    overflow-wrap: anywhere;
+    cursor: pointer;
+    user-select: none;
+    transition: var(--wcb-transition);
+}
+
+    :where(wc-pill-group) .wcpg-input:not(:disabled) + .wcpg-label:hover {
+        filter: brightness(var(--wcb-hover-brightness));
+    }
+
+    :where(wc-pill-group) .wcpg-input:checked + .wcpg-label {
+        background-color: var(--rf-color-primary);
+        color: var(--rf-bg-white);
+    }
+
+    :where(wc-pill-group) .wcpg-input:focus-visible + .wcpg-label {
+        outline: var(--wcb-focus-ring-width) solid var(--rf-color-primary);
+        outline-offset: 2px;
+    }
+
+    /* Disabled / readonly: mismo criterio que wc-checkbox */
+    :where(wc-pill-group) .wcpg-input:disabled + .wcpg-label {
+        background-color: var(--rf-bg-readonly);
+        border-color: var(--rf-color-border);
+        color: var(--rf-text-readonly);
+        opacity: 0.7;
+        cursor: not-allowed;
+    }
+
+    :where(wc-pill-group) .wcpg-input:disabled:checked + .wcpg-label {
+        background-color: var(--rf-color-border);
+        color: var(--rf-bg-white);
+    }
+
+/* ========================================= */
+/* --- WC-COLOR-GROUP (Swatches de color) --- */
+/* ========================================= */
+/* Cada color es <label.wccg-option> con un checkbox nativo oculto y un cuadro
+   (.wccg-swatch) cuyo color llega en la custom property --wccg-color (la pone el JS
+   por opcion). El estado se pinta con el selector hermano (input:checked + .wccg-swatch),
+   sin clases por JS. Desmarcado = borde gris fijo (el de los inputs), para que un color
+   blanco o muy claro no se pierda contra el fondo. Marcado = borde del color de texto +
+   anillo exterior. */
+:where(wc-color-group) .wccg-group {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 6px;
+    /* Holgura para el anillo del color marcado, que sale 3px de la caja del swatch
+       (mismo valor que el padding que llevaba la antigua botonera del cuaderno) */
+    padding: 6px;
+}
+
+:where(wc-color-group) .wccg-option {
+    display: inline-flex;
+    position: relative;
+}
+
+    /* Oculto pero focusable: el teclado (Tab + Espacio) va al input nativo */
+    :where(wc-color-group) .wccg-input {
+        position: absolute;
+        opacity: 0;
+        width: 0;
+        height: 0;
+        margin: 0;
+        pointer-events: none;
+    }
+
+:where(wc-color-group) .wccg-swatch {
+    display: block;
+    box-sizing: border-box;
+    width: var(--wcb-min-height-md);
+    height: var(--wcb-min-height-md);
+    border: 1px solid var(--rf-color-border);
+    border-radius: var(--radius-sm);
+    background-color: var(--wccg-color);
+    cursor: pointer;
+    user-select: none;
+    transition: var(--wcb-transition);
+}
+
+    /* "Sin color" (option.color = 'transparent'): cuadro blanco con una raya diagonal roja,
+       de esquina a esquina (inferior izquierda -> superior derecha) */
+    :where(wc-color-group) .wccg-swatch.is-transparent {
+        background-color: var(--rf-bg-white);
+        background-image: linear-gradient(to top left,
+            transparent calc(50% - 1px),
+            var(--rf-color-error) calc(50% - 1px),
+            var(--rf-color-error) calc(50% + 1px),
+            transparent calc(50% + 1px));
+    }
+
+    :where(wc-color-group) .wccg-input:not(:disabled) + .wccg-swatch:hover {
+        filter: brightness(var(--wcb-hover-brightness));
+    }
+
+    :where(wc-color-group) .wccg-input:checked + .wccg-swatch {
+        border-color: var(--rf-color-text);
+        box-shadow: 0 0 0 2px var(--rf-bg-white), 0 0 0 3px var(--rf-color-text);
+    }
+
+    :where(wc-color-group) .wccg-input:focus-visible + .wccg-swatch {
+        outline: var(--wcb-focus-ring-width) solid var(--rf-color-primary);
+        outline-offset: 4px;
+    }
+
+    /* Disabled / readonly: mismo criterio que wc-checkbox y wc-pill-group */
+    :where(wc-color-group) .wccg-input:disabled + .wccg-swatch {
+        opacity: 0.7;
+        cursor: not-allowed;
+    }
+
+/* ============================================== */
+/* --- WC-ICON-GROUP (Iconos seleccionables) --- */
+/* ============================================== */
+/* Cada opcion es <label.wcig-option> con un checkbox nativo oculto y un <wc-icon> del
+   que la opcion solo aporta el icono, el tamano y la forma. Los colores NO los decide
+   la opcion: los pone este bloque sobre la caja (.wci-box) y el glifo del wc-icon con el
+   selector hermano (input:checked + wc-icon), sin clases por JS. El glifo toma su color
+   de --wci-color, que se redefine aqui por estado. Mismo criterio que wc-pill-group:
+   desmarcado = fondo blanco, borde claro e icono primary; marcado = fondo primary e
+   icono blanco. */
+:where(wc-icon-group) .wcig-group {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+:where(wc-icon-group) .wcig-option {
+    display: inline-flex;
+    position: relative;
+    cursor: pointer;
+    user-select: none;
+}
+
+    /* Oculto pero focusable: el teclado (Tab + Espacio) va al input nativo */
+    :where(wc-icon-group) .wcig-input {
+        position: absolute;
+        opacity: 0;
+        width: 0;
+        height: 0;
+        margin: 0;
+        pointer-events: none;
+    }
+
+    :where(wc-icon-group) .wcig-input + wc-icon .wci-box {
+        --wci-color: var(--rf-color-primary);
+        border-color: var(--rf-color-border-light);
+        background-color: var(--rf-bg-white);
+        transition: var(--wcb-transition);
+    }
+
+    :where(wc-icon-group) .wcig-input:checked + wc-icon .wci-box {
+        --wci-color: var(--rf-bg-white);
+        border-color: var(--rf-color-primary);
+        background-color: var(--rf-color-primary);
+    }
+
+    :where(wc-icon-group) .wcig-input:focus-visible + wc-icon .wci-box {
+        outline: var(--wcb-focus-ring-width) solid var(--rf-color-primary);
+        outline-offset: 2px;
+    }
+
+    /* Disabled / readonly: mismo criterio que wc-color-group. Conservan sus colores
+       (el marcado sigue en azul), solo atenuados y sin poder cambiarse */
+    :where(wc-icon-group) .wcig-input:disabled + wc-icon {
+        cursor: not-allowed;
+    }
+
+    :where(wc-icon-group) .wcig-input:disabled + wc-icon .wci-box {
+        opacity: 0.7;
+    }
+
+/* ========================================= */
+/* ESTILOS DEL COMPONENTE WC-SELECT        */
+/* ========================================= */
+/* Host del componente. Un elemento personalizado sin regla propia computa
+   `display:inline`, y en contenedores cuyo ancho depende del contenido (inline-flex,
+   celda de tabla o item flex con `flex:1`) la etiqueta seleccionada acabaría
+   ensanchando el control. Con `display:block` y `min-width:0` se comporta como
+   cualquier otro input: ocupa el ancho disponible y nunca lo desborda.
+   `--wcs-min-width` establece un ancho mínimo para los contenedores que no aportan
+   ancho, como las barras de herramientas ajustadas al contenido. */
+wc-select {
+    display: block;
+    box-sizing: border-box;
+    min-width: var(--wcs-min-width, 0);
+    max-width: 100%;
+}
+
+.wcs-wrapper {
+    position: relative;
+    width: 100%;
+    box-sizing: border-box; /* el reset de caja solo alcanza a :host y [wc-educaria] */
+    min-height: var(--input-height);
+    background-color: var(--rf-bg-white);
+    border: 1px solid var(--rf-color-border);
+    border-radius: var(--rf-radius);
+    padding: 4px 30px 4px 0.8rem; /* Izquierda igualada a input/textarea; derecha con espacio para flecha/clear */
+    cursor: pointer;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+/* Foco visual */
+.wcs-wrapper:focus-within {
+    outline: none;
+    border-color: var(--rf-color-border-focus);
+    box-shadow: 0 0 0 1px rgba(var(--rf-color-primary-rgb), 0.15);
+}
+
+/* --- 3. FLECHA Y BOTÓN LIMPIAR --- */
+.wcs-arrow {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--rf-text-readonly); /* Gris suave */
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+}
+
+    .wcs-arrow svg {
+        width: 16px;
+        height: 16px;
+    }
+
+.wcs-clear {
+    position: absolute;
+    right: 32px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 18px;
+    height: 18px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-circle);
+    color: var(--rf-text-readonly);
+    font-size: 12px;
+    cursor: pointer;
+    z-index: 2;
+    transition: all 0.2s;
+}
+
+    .wcs-clear:hover {
+        background-color: #fee2e2;
+        color: var(--rf-color-error);
+    }
+
+/* Mostrar botón limpiar al hacer hover si tiene clase .is-visible (gestionado por JS) */
+.wcs-wrapper .wcs-clear.is-visible {
+    display: flex !important;
+}
+
+/* Cuando la X es visible, ampliar el padding para que el texto no se pise */
+.wcs-wrapper:has(.wcs-clear.is-visible) {
+    padding-right: 54px;
+}
+
+/* --- 4. CONTENIDO (Tags y Texto) --- */
+
+/* Contenedor del valor/tags dentro del wrapper */
+.wcs-display {
+    flex: 1 1 auto;
+    /* `width:0` evita que la etiqueta seleccionada aporte ancho al control. Sin ello,
+       en un contenedor dimensionado por su contenido, el texto ensancha el select en
+       lugar de recortarse. */
+    width: 0;
+    min-width: 0;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px;
+    line-height: var(--line-height-300);
+}
+
+/* Texto simple (Single Select) */
+.wcs-text {
+    /* `flex:0 0 auto`: al desplazar el texto se le retira el `max-width` y debe
+       conservar su ancho natural; con el `flex-shrink` por defecto volvería a
+       comprimirse. */
+    flex: 0 0 auto;
+    font-size: var(--rf-font-size);
+    line-height: var(--line-height-300);
+    color: var(--rf-color-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+    max-width: 100%;
+    padding-right: 4px;
+}
+
+/* Modo simple: una sola línea. La etiqueta se recorta con puntos suspensivos y solo
+   se vuelve desplazable (rueda horizontal, shift + rueda o arrastre con el ratón)
+   mientras WCSelect.js aplica .is-scrolling. Un contenedor desplazable deja de
+   mostrar los puntos suspensivos, por lo que ambos estados son excluyentes. */
+wc-select:not([multiple]) .wcs-display {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none; /* Firefox */
+    user-select: none;
+}
+
+    wc-select:not([multiple]) .wcs-display::-webkit-scrollbar {
+        height: 0;
+        display: none;
+    }
+
+    wc-select:not([multiple]) .wcs-display.is-scrolling .wcs-text {
+        max-width: none;
+        text-overflow: clip;
+    }
+
+    wc-select:not([multiple]) .wcs-display.is-dragging {
+        cursor: grabbing;
+    }
+
+/* Placeholder */
+.wcs-placeholder {
+    color: var(--rf-text-readonly);
+    font-size: var(--rf-font-size);
+    line-height: var(--line-height-300);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Etiquetas (Multi Select) */
+.wcs-tag {
+    background-color: var(--rf-bg-readonly); /* Usamos el gris de readonly como fondo de tag */
+    border-radius: var(--radius-sm);
+    padding: 2px 8px;
+    font-size: 0.85rem;
+    display: inline-flex;
+    align-items: center;
+    color: var(--rf-color-text);
+    user-select: none;
+    max-width: 100%;
+    border: 1px solid var(--rf-color-border-light);
+    margin-left: 3px;
+    margin-bottom: 3px;
+}
+
+.wcs-tag-text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.wcs-tag-remove {
+    margin-left: 6px;
+    cursor: pointer;
+    color: var(--rf-text-readonly);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 14px;
+    height: 14px;
+    border-radius: var(--radius-circle);
+    transition: background 0.2s;
+}
+
+    .wcs-tag-remove:hover {
+        background-color: var(--rf-color-border);
+        color: var(--rf-color-error);
+    }
+
+:host([readonly]) .wcs-tag-remove,
+:host([disabled]) .wcs-tag-remove {
+    display: none;
+}
+
+/* Contador de etiquetas colapsadas (atributo `collapse-tags`): resume las que no caben en
+   el ancho del control. No es una etiqueta seleccionable, por eso no lleva "x"; el clic lo
+   recoge el .wcs-wrapper y abre el desplegable, donde se ve la seleccion completa.
+   `flex: 0 0 auto` es necesario: `.wcs-tag` no fija flex-shrink y el contador no debe
+   comprimirse, porque su ancho es parte de la medida del colapso (WCSelect.js,
+   _colapsarTagsSobrantes). */
+.wcs-tag--more {
+    flex: 0 0 auto;
+    font-weight: 600;
+    color: var(--rf-text-readonly);
+    cursor: pointer;
+}
+
+/* --- 5. DROPDOWN (DESPLEGABLE) --- */
+.wcs-dropdown {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    background: var(--rf-bg-white);
+    border: 1px solid var(--rf-color-border);
+    border-radius: var(--rf-radius);
+    max-height: 220px;
+    overflow-y: auto;
+    z-index: 100;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    display: none;
+    opacity: 0;
+    transform: translateY(-5px);
+    transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+    .wcs-dropdown.open {
+        display: block;
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    /* Volteo hacia arriba cuando no hay hueco debajo del control; la decisión la toma
+       WCSelect._posicionarDropdown. En modo position:fixed las coordenadas se escriben
+       inline y estas reglas solo aportan la dirección de la animación. */
+    .wcs-dropdown.flip-up {
+        top: auto;
+        bottom: calc(100% + 4px);
+        transform: translateY(5px);
+    }
+
+    .wcs-dropdown.flip-up.open {
+        transform: translateY(0);
+    }
+
+/* Buscador Sticky */
+.wcs-search-box {
+    padding: 8px;
+    position: sticky;
+    top: 0;
+    background: var(--rf-bg-white);
+    z-index: 10;
+    border-bottom: 1px solid var(--rf-color-border-light);
+}
+
+.wcs-search-input {
+    width: 100%;
+    padding: 6px 10px;
+    border: 1px solid var(--rf-color-border);
+    border-radius: var(--radius-sm);
+    outline: none;
+    font-size: 0.9rem;
+    color: var(--rf-color-text);
+    transition: border-color 0.2s;
+}
+
+/* El foco de .wcs-search-input lo cubre la regla generica de input:focus:
+   misma borda y glow que cualquier campo del sistema, sin duplicar el valor
+   aqui (ese duplicado, con el azul solido antiguo, fue el origen de que este
+   campo quedara distinto del resto). */
+
+/* Lista de opciones */
+.wcs-list {
+    padding: 4px 0;
+}
+
+/* Un valor largo sin espacios (p. ej. una categoria nueva de 100 caracteres) tiene un
+   min-content igual a la palabra entera. La etiqueta de la fila es un nodo de texto pelado
+   dentro de un flex, o sea un item anonimo: no se puede topar por clase, y su minimo
+   automatico es ese min-content, con lo que la linea desborda el dropdown y este saca barra
+   horizontal (overflow-y:auto computa overflow-x a auto). Se hereda 'anywhere' desde la fila
+   para que la palabra pueda partirse y el dropdown conserve su ancho.
+   'anywhere' y no 'break-word': solo 'anywhere' cuenta para el calculo de min-content, que es
+   justo lo que usa el minimo automatico del flex item. */
+.wcs-option,
+.wcs-add-option {
+    overflow-wrap: anywhere;
+}
+
+.wcs-option {
+    padding: 8px 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    font-size: var(--rf-font-size);
+    color: var(--rf-color-text);
+    transition: background-color 0.1s;
+}
+
+    .wcs-option:hover {
+        background-color: var(--rf-bg-light);
+    }
+
+    /* Resaltado de navegacion por teclado (aria-activedescendant) */
+    .wcs-option--active {
+        background-color: var(--rf-bg-light);
+        outline: 2px solid var(--rf-color-primary);
+        outline-offset: -2px;
+    }
+
+    .wcs-option.selected {
+        background-color: rgba(var(--rf-color-primary-rgb), 0.1); /* 10% de opacidad del primario */
+        color: var(--rf-color-primary);
+        font-weight: 500;
+    }
+
+    .wcs-option.hidden {
+        display: none;
+    }
+
+.wcs-no-results {
+    padding: 12px;
+    text-align: center;
+    color: var(--rf-text-readonly);
+    font-style: italic;
+    font-size: 0.9rem;
+}
+
+/* Opción para agregar valor nuevo (wc-select[autoalimentable]) */
+.wcs-add-option {
+    padding: 8px 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: var(--rf-font-size);
+    color: var(--rf-color-text);
+    border-top: 1px solid var(--rf-border-color);
+    transition: background-color 0.1s;
+    user-select: none;
+}
+
+.wcs-add-option:hover {
+    background-color: var(--rf-bg-light);
+}
+
+.wcs-add-icon {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-circle);
+    background: var(--wcb-color-primary);
+    color: #fff;
+    transition: all 0.2s;
+}
+
+.wcs-add-icon svg {
+    width: 12px;
+    height: 12px;
+    stroke: currentColor;
+}
+
+/* Checkbox simulado para multiselect */
+.wcs-checkbox {
+    margin-right: 10px;
+    pointer-events: none;
+    width: 16px;
+    height: 16px;
+    accent-color: var(--rf-color-primary);
+}
+
+/* ========================================= */
+/* --- WC-SELECT: GRUPOS COLAPSABLES ---     */
+/* ========================================= */
+
+/* Cabecera de grupo */
+.wcs-group-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px 6px 8px;
+    cursor: pointer;
+    user-select: none;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+    color: var(--rf-color-text-sec);
+    background-color: var(--rf-bg-light);
+    border-bottom: 1px solid var(--rf-color-border-light);
+    transition: background-color 0.1s;
+}
+
+.wcs-group:not(:first-child) .wcs-group-header {
+    border-top: 1px solid var(--rf-color-border-light);
+}
+
+.wcs-group-header:hover {
+    background-color: #ececec;
+}
+
+/* Multiselect: todos los hijos seleccionados */
+.wcs-group-header.is-all-selected {
+    background-color: rgba(var(--rf-color-primary-rgb), 0.08);
+    color: var(--rf-color-primary);
+}
+
+/* Multiselect: algunos hijos seleccionados */
+.wcs-group-header.is-partial {
+    background-color: rgba(var(--rf-color-primary-rgb), 0.04);
+}
+
+/* Etiqueta del grupo */
+.wcs-group-label {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Flecha de colapso/expansión */
+.wcs-group-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--rf-color-text-sec);
+    transition: transform 0.2s ease;
+}
+
+    .wcs-group-toggle svg {
+        width: 14px;
+        height: 14px;
+    }
+
+    /* Colapsado → apunta a la derecha */
+    .wcs-group-toggle.is-collapsed {
+        transform: rotate(-90deg);
+    }
+
+/* Cuerpo del grupo */
+.wcs-group-body.is-collapsed {
+    display: none;
+}
+
+/* Hijos (nivel 1): sangría para indicar jerarquía */
+.wcs-option--child {
+    padding-left: 26px;
+}
+
+/* Subgrupo (nivel 2): cabecera más indentada y tono más suave */
+.wcs-subgroup-header {
+    padding-left: 22px;
+    font-size: 0.72rem;
+    background-color: var(--rf-bg-white);
+    color: var(--rf-color-text-sec);
+    border-top: none;
+    border-bottom: 1px solid var(--rf-color-border-light);
+}
+
+.wcs-subgroup-header:hover {
+    background-color: #f5f5f5;
+}
+
+/* Nietos (nivel 2): mayor sangría */
+.wcs-option--grandchild {
+    padding-left: 42px;
+}
+
+/* ========================================= */
+/* --- CAMPO TIPO IMAGEN --- */
+/* ========================================= */
+:where(wc-image) .image-upload-wrapper {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+:where(wc-image) .image-preview-area {
+    flex-grow: 1;
+    border: 2px dashed var(--rf-color-border);
+    border-radius: var(--rf-radius);
+    background-color: var(--rf-bg-readonly);
+    position: relative;
+    cursor: pointer;
+    overflow: hidden;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 120px;
+    /* Contenedor del container query del placeholder/overlay (ver «solo el icono» más abajo). Su ancho siempre
+       lo da el padre (wrapper al 100%), nunca el contenido, así que la contención no lo encoge. */
+    container: wc-image-preview / inline-size;
+}
+
+    :where(wc-image) .image-preview-area:hover:not(.disabled) {
+        border-color: var(--rf-color-primary);
+        background-color: #eff6ff;
+    }
+
+    :where(wc-image) .image-preview-area.has-image {
+        border-style: solid;
+        padding: 0;
+        background-color: var(--rf-bg-white);
+        border: 1px solid var(--rf-color-border);
+    }
+
+    :where(wc-image) .image-preview-area img {
+        /* --- Posicionamiento absoluto para no romper el grid --- */
+        position: absolute;
+        /* TEST: 2px de respiro para que se vea el fondo blanco del circulo entre el
+           borde gris (de .image-preview-area) y la foto, en vez de la foto pegada al borde. */
+        top: 2px;
+        left: 2px;
+        width: calc(100% - 4px);
+        height: calc(100% - 4px);
+        display: block;
+        border-radius: inherit; /* Opcional: para que no se salga de los bordes redondeados si los hubiera */
+    }
+
+wc-image[shape="circle"] .image-preview-area {
+    border-radius: var(--radius-circle);
+    min-height: unset; /* Quitamos el min-height rectangular */
+    aspect-ratio: 1 / 1; /* Forzamos que sea cuadrado perfecto para el círculo */
+}
+
+/* Punto de aviso (atributo badge). Va en el wrapper porque el preview recorta (overflow:hidden).
+   En la esquina de la caja; con shape="circle" se lleva al borde del círculo (ver más abajo). */
+wc-image[badge] .image-upload-wrapper {
+    position: relative;
+}
+
+:where(wc-image) .image-badge {
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 1;
+    width: 10px;
+    height: 10px;
+    border-radius: var(--radius-circle);
+    background: var(--image-badge-color, var(--rf-color-error));
+    border: 2px solid var(--rf-bg-white);
+    pointer-events: none;
+}
+
+/* Badge con icono (atributo badge-icon): circulo de 24px a la derecha. Sobresale solo por la derecha: por
+   arriba o por abajo lo recortaria un contenedor con overflow:hidden del alto de la foto (p. ej.
+   .wctl-zone-center del tree-list). Icono de 15px, blanco salvo sobre warning (--image-badge-icon-color,
+   lo pone el JS: el amarillo pide texto oscuro). */
+:where(wc-image) .image-badge.has-icon {
+    --image-badge-icon-box: 24px;
+    --image-badge-icon-glyph: 15px;
+    right: -6px;
+    width: var(--image-badge-icon-box);
+    height: var(--image-badge-icon-box);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+}
+
+/* badge-position="bottom": esquina inferior derecha en vez de la superior (punto o icono) */
+wc-image[badge-position="bottom"] .image-badge {
+    top: auto;
+    bottom: 0;
+}
+
+/* shape="circle": la esquina de la caja queda fuera del círculo, así que el badge se centra en el punto del
+   borde a 45 grados, a 14.645% del lado desde cada borde de la caja ((1 - 1/raíz de 2) / 2). */
+wc-image[shape="circle"] .image-badge {
+    top: 14.645%;
+    right: 14.645%;
+    transform: translate(50%, -50%);
+}
+
+wc-image[shape="circle"][badge-position="bottom"] .image-badge {
+    top: auto;
+    bottom: 14.645%;
+    transform: translate(50%, 50%);
+}
+
+/* Con icono, igual pero sin pasar del alto de la foto (arriba o abajo lo recortaría un contenedor con
+   overflow:hidden, p. ej. el tree-list): en fotos pequeñas queda al ras y sobresale solo por la derecha. */
+wc-image[shape="circle"] .image-badge.has-icon {
+    top: max(0px, calc(14.645% - var(--image-badge-icon-box) / 2));
+    right: calc(14.645% - var(--image-badge-icon-box) / 2);
+    transform: none;
+}
+
+wc-image[shape="circle"][badge-position="bottom"] .image-badge.has-icon {
+    top: auto;
+    bottom: max(0px, calc(14.645% - var(--image-badge-icon-box) / 2));
+}
+
+    :where(wc-image) .image-badge.has-icon wc-icon .wci-box {
+        width: 100%;
+        height: 100%;
+    }
+
+    :where(wc-image) .image-badge.has-icon wc-icon .wci-glyph::before {
+        width: var(--image-badge-icon-glyph);
+        height: var(--image-badge-icon-glyph);
+        background-color: var(--image-badge-icon-color, var(--rf-bg-white));
+    }
+
+/* Ajustes cuando es circular y readonly (como en la lista) */
+wc-image[shape="circle"] .upload-placeholder svg {
+    width: 50%; /* Reducimos el icono por defecto para que quepa en el círculo */
+    height: auto;
+}
+
+/* Placeholder */
+:where(wc-image) .upload-placeholder {
+    text-align: center;
+    color: var(--rf-text-readonly);
+    pointer-events: none;
+    padding: 1rem;
+}
+
+    :where(wc-image) .upload-placeholder svg {
+        width: 48px;
+        height: 48px;
+        margin-bottom: 0.5rem;
+        stroke: currentColor;
+        opacity: 0.5;
+    }
+
+    :where(wc-image) .upload-placeholder span {
+        display: block;
+        font-size: 0.85rem;
+    }
+
+/* Botón de eliminar imagen */
+wc-image[shape="circle"] .remove-image-btn {
+    left: 42%;
+}
+
+:where(wc-image) .remove-image-btn {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid var(--rf-color-border);
+    color: var(--rf-color-error);
+    border-radius: var(--radius-circle);
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-weight: bold;
+    z-index: 10;
+    font-size: 14px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+    :where(wc-image) .remove-image-btn:hover {
+        background: var(--rf-color-error);
+        color: white;
+        border-color: var(--rf-color-error);
+    }
+
+/* --- OVERLAY DE EDICIÓN --- */
+:where(wc-image) .image-edit-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+    pointer-events: none;
+    color: white;
+    z-index: 5;
+    text-align: center;
+}
+
+    :where(wc-image) .image-edit-overlay svg {
+        width: 32px;
+        height: 32px;
+        margin-bottom: 4px;
+        filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+    }
+
+    :where(wc-image) .image-edit-overlay span {
+        font-size: 0.8rem;
+        font-weight: 500;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+    }
+
+:where(wc-image) .image-preview-area:hover .image-edit-overlay {
+    opacity: 1;
+}
+
+wc-image[readonly] .image-edit-overlay {
+    display: none !important;
+}
+
+/* Solo el icono: con menos de 120px de ancho el texto del placeholder y del overlay («Modificar foto») no cabe
+   (se partía en varias líneas y se salía del círculo). Se oculta y el icono se centra a escala de la caja. */
+@container wc-image-preview (max-width: 119px) {
+    :where(wc-image) .upload-placeholder {
+        width: 100%;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+        :where(wc-image) .upload-placeholder svg {
+            width: 50%;
+            max-width: 48px;
+            height: auto;
+            margin-bottom: 0;
+        }
+
+        :where(wc-image) .upload-placeholder span,
+        :where(wc-image) .image-edit-overlay span {
+            display: none;
+        }
+
+        :where(wc-image) .image-edit-overlay svg {
+            width: 40%;
+            max-width: 32px;
+            height: auto;
+            margin-bottom: 0;
+        }
+}
+
+/* --- INDICADOR DE CARGA (spinner propio, ver show-loading) --- */
+:where(wc-image) .image-loading-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(255, 255, 255, 0.6);
+    border-radius: inherit;
+    z-index: 10;
+}
+
+:where(wc-image) .image-spinner {
+    width: 26px;
+    height: 26px;
+    border: 3px solid rgba(0, 0, 0, 0.1);
+    border-top-color: var(--rf-color-primary);
+    border-radius: 50%;
+    animation: wc-image-spin 0.75s linear infinite;
+    opacity: 0.35;
+}
+
+@keyframes wc-image-spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ========================================= */
+/* --- WC-STATUS (Píldoras de Estado) ---    */
+/* ========================================= */
+
+wc-status {
+    display: flex;
+    align-items: center;
+    /* Misma altura mínima que los inputs para alinear perfecto en el grid */
+    min-height: 38px;
+    height: 100%;
+}
+
+:where(wc-status) .status-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.35rem 0.85rem;
+    border-radius: var(--radius-full);
+    height: 100%;
+    width: 100%;
+    font-size: var(--font-size-200);
+    font-weight: 600;
+    line-height: 1;
+    white-space: nowrap;
+    box-sizing: border-box;
+}
+
+:where(wc-status) .status-badge.status-align-left  { justify-content: flex-start; }
+:where(wc-status) .status-badge.status-align-right { justify-content: flex-end; }
+
+/* Modificador: texto largo que wrappea en varias lineas */
+wc-status[multiline] {
+    height: auto;
+    align-items: center;
+}
+
+    wc-status[multiline] .status-badge {
+        height: auto;
+        white-space: normal;
+        line-height: 14px;
+        min-height: 38px;
+    }
+
+/* Modificador: varias etiquetas en un mismo wc-status (propiedad items). Van una al lado
+   de otra, con el ancho de su texto, y bajan de linea cuando no caben (como .wcpg-group). */
+:where(wc-status) .status-group {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+}
+
+    :where(wc-status) .status-group > .status-badge {
+        width: auto;
+        height: auto;
+    }
+
+/* Etiqueta con onClick (items): se puede pulsar. */
+:where(wc-status) .status-badge.clickable {
+    cursor: pointer;
+}
+
+/* Modificador: badge con "x" de cierre (atributo closable). La x es un
+   <wc-button class="status-close cerrar" variant="ghost" size="xs" shape="pill">
+   y toma el color del texto del estado via currentColor. */
+:where(wc-status) .status-badge.status-closable {
+    gap: 0.4rem;
+    /* La cruz queda a la misma distancia del borde derecho que el texto del izquierdo
+       (0.85rem): el host de la x (24px, margin-right -4px) la deja 4px mas adentro
+       que el padding, menos el 1px de diferencia con la mitad del circulo. */
+    padding-right: calc(0.85rem - 3px);
+}
+
+/* Host = area de clic (24px, WCAG 2.5.8); los margenes negativos evitan que
+   el badge crezca en alto respecto a uno sin "x". */
+:where(wc-status) wc-button.status-close {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    margin: -6px -4px -6px 0;
+    cursor: pointer;
+}
+
+    /* Boton visible: circulo de 20px, tintado con el color del estado en hover. */
+    :where(wc-status) wc-button.status-close > .wcb-btn {
+        width: 20px;
+        height: 20px;
+        padding: 0;
+        color: inherit;
+    }
+
+        :where(wc-status) wc-button.status-close > .wcb-btn .wcb-mask-icon::before {
+            width: 10px;
+            height: 10px;
+        }
+
+        :where(wc-status) wc-button.status-close > .wcb-btn:hover:not(:disabled) {
+            filter: none;
+            background: rgba(0, 0, 0, 0.08);
+            background: color-mix(in srgb, currentColor 15%, transparent);
+        }
+
+        :where(wc-status) wc-button.status-close > .wcb-btn:active:not(:disabled) {
+            filter: none;
+            transform: none;
+            background: rgba(0, 0, 0, 0.14);
+            background: color-mix(in srgb, currentColor 25%, transparent);
+        }
+
+        :where(wc-status) wc-button.status-close > .wcb-btn:focus-visible {
+            outline-offset: 0;
+            opacity: 1;
+        }
+
+/* --- Paleta de colores: hereda de los tokens semanticos --alert-* de
+   colors.css (misma fuente que ya usan wc-banner y dynamic-form). La
+   variante outline (mas abajo) solo cambia el fondo, reutilizando el mismo
+   texto/borde de estas reglas. */
+:host .status-success,
+:where(wc-status) .status-success {
+    background-color: var(--alert-bg-success, #d1fae5);
+    color: var(--alert-text-success, #065f46);
+    border: 1px solid var(--alert-border-success, #a7f3d0);
+}
+
+:host .status-error,
+:where(wc-status) .status-error {
+    background-color: var(--alert-bg-error, #fee2e2);
+    color: var(--alert-text-error, #991b1b);
+    border: 1px solid var(--alert-border-error, #fecaca);
+}
+
+:host .status-warning,
+:where(wc-status) .status-warning {
+    background-color: var(--alert-bg-warning, #fef3c7);
+    color: var(--alert-text-warning, #92400e);
+    border: 1px solid var(--alert-border-warning, #fde68a);
+}
+
+:host .status-info,
+:where(wc-status) .status-info {
+    background-color: var(--alert-bg-info, #eaf6fa);
+    color: var(--alert-text-info, #235363);
+    border: 1px solid var(--alert-border-info, #d3edf5);
+}
+
+:host .status-default,
+:where(wc-status) .status-default {
+    background-color: var(--alert-bg-default, #f4f5f7);
+    color: var(--alert-text-default, #5c5c5c);
+    border: 1px solid var(--alert-border-default, #e8e9eb);
+}
+
+/* Primary: color de marca lleno (como wc-button variant primary), sin token --alert-* propio. */
+:host .status-primary,
+:where(wc-status) .status-primary {
+    background-color: var(--rf-color-primary, #5298D1);
+    color: var(--rf-bg-white, #ffffff);
+    border: 1px solid var(--rf-color-primary, #5298D1);
+}
+
+/* --- Variante Outline: mismo texto/borde, fondo blanco en vez del pastel --- */
+:host .status-outline.status-success,
+:where(wc-status) .status-outline.status-success {
+    background-color: var(--rf-bg-white);
+}
+
+:host .status-outline.status-error,
+:where(wc-status) .status-outline.status-error {
+    background-color: var(--rf-bg-white);
+}
+
+:host .status-outline.status-warning,
+:where(wc-status) .status-outline.status-warning {
+    background-color: var(--rf-bg-white);
+}
+
+:host .status-outline.status-info,
+:where(wc-status) .status-outline.status-info {
+    background-color: var(--rf-bg-white);
+}
+
+:host .status-outline.status-default,
+:where(wc-status) .status-outline.status-default {
+    background-color: var(--rf-bg-white);
+}
+
+:host .status-outline.status-primary,
+:where(wc-status) .status-outline.status-primary {
+    background-color: var(--rf-bg-white);
+    color: var(--rf-color-primary, #5298D1);
+}
+
+/* Primary clicable: mismo hover que las pildoras de wc-pill-group (.wcpg-label). */
+:host .status-primary.clickable,
+:where(wc-status) .status-primary.clickable {
+    transition: var(--wcb-transition);
+}
+
+    :host .status-primary.clickable:hover,
+    :where(wc-status) .status-primary.clickable:hover {
+        filter: brightness(var(--wcb-hover-brightness));
+    }
+
+/* ========================================= */
+/* --- WC-CHECKBOX ---                       */
+/* ========================================= */
+wc-checkbox {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.wcc-wrapper {
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+    font-size: var(--rf-font-size);
+    color: var(--rf-color-text);
+    user-select: none;
+    position: relative;
+    vertical-align: middle;
+}
+
+    /* Ocultar input nativo pero mantenerlo en el DOM por accesibilidad semántica */
+    .wcc-wrapper input.wcc-hidden-input {
+        position: absolute !important;
+        opacity: 0 !important;
+        width: 0 !important;
+        height: 0 !important;
+        margin: 0 !important;
+        pointer-events: none !important; /* CRUCIAL: El ratón lo ignorará por completo */
+    }
+
+/* La caja visual del checkbox */
+.wcc-box {
+    width: 20px;
+    height: 20px;
+    border: 1.5px solid var(--rf-color-border);
+    border-radius: var(--radius-sm);
+    background-color: var(--rf-bg-white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease-in-out;
+    margin-right: 0.5rem;
+    flex-shrink: 0;
+}
+
+    /* Foco de accesibilidad */
+    .wcc-box:focus-visible {
+        outline: none;
+        border-color: var(--rf-color-border-focus);
+        box-shadow: 0 0 0 1px rgba(var(--rf-color-primary-rgb), 0.15);
+    }
+
+/* Iconos ocultos por defecto */
+.wcc-icon {
+    display: none;
+    width: 90%;
+    height: 90%;
+    color: white;
+}
+
+/* --- ESTADOS ACTIVOS (Checked e Indeterminate) --- */
+.wcc-wrapper.is-checked .wcc-box,
+.wcc-wrapper.is-indeterminate .wcc-box {
+    background-color: var(--rf-color-primary);
+    border-color: var(--rf-color-primary);
+}
+
+.wcc-wrapper.is-checked .wcc-icon-check {
+    display: block;
+}
+
+.wcc-wrapper.is-indeterminate .wcc-icon-dash {
+    display: block;
+}
+
+/* --- ESTADOS INACTIVOS (Disabled y Readonly) --- */
+.wcc-wrapper.is-disabled,
+.wcc-wrapper.is-readonly {
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+    .wcc-wrapper.is-disabled .wcc-box,
+    .wcc-wrapper.is-readonly .wcc-box {
+        background-color: var(--rf-bg-readonly);
+        border-color: var(--rf-color-border);
+    }
+
+    /* Si está disabled/readonly PERO estaba marcado, pintamos el icono de gris */
+    .wcc-wrapper.is-disabled.is-checked .wcc-box,
+    .wcc-wrapper.is-readonly.is-checked .wcc-box,
+    .wcc-wrapper.is-disabled.is-indeterminate .wcc-box,
+    .wcc-wrapper.is-readonly.is-indeterminate .wcc-box {
+        background-color: var(--rf-color-border);
+    }
+
+
+/* --- MODO SWITCH --- */
+.wcc-wrapper.is-switch .wcc-box {
+    width: 43px; /* Más ancho para que parezca un switch */
+    height: 24px;
+    border-radius: var(--radius-full); /* Bordes totalmente redondeados */
+    background-color: var(--rf-color-border); /* Gris apagado por defecto */
+    border-color: transparent;
+    position: relative;
+    transition: background-color 0.2s ease-in-out;
+}
+
+/* Ocultamos los iconos nativos (check/dash) en modo switch */
+.wcc-wrapper.is-switch .wcc-icon {
+    display: none !important;
+}
+
+/* Dibujamos el "botón" (círculo) del switch usando ::after */
+.wcc-wrapper.is-switch .wcc-box::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 2px; /* Posición inicial (Apagado) */
+    transform: translateY(-50%);
+    width: 18px;
+    height: 18px;
+    background-color: var(--rf-bg-white);
+    border-radius: var(--radius-circle);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    transition: left 0.2s ease-in-out;
+}
+
+/* --- ESTADO ACTIVO DEL SWITCH --- */
+.wcc-wrapper.is-switch.is-checked .wcc-box {
+    background-color: var(--rf-color-primary);
+}
+
+    .wcc-wrapper.is-switch.is-checked .wcc-box::after {
+        left: calc(100% - 20px); /* Desplaza el círculo a la derecha */
+    }
+
+/* --- ESTADOS INACTIVOS (Disabled / Readonly) EN SWITCH --- */
+.wcc-wrapper.is-switch.is-disabled .wcc-box,
+.wcc-wrapper.is-switch.is-readonly .wcc-box {
+    opacity: 0.6;
+}
+
+.wcc-wrapper.is-switch.is-disabled.is-checked .wcc-box,
+.wcc-wrapper.is-switch.is-readonly.is-checked .wcc-box {
+    /* Mantenemos un gris para switch activos pero bloqueados */
+    background-color: var(--rf-color-text-sec);
+}
+
+/* --- CONTROL A LA DERECHA DEL TEXTO (checkPosition: 'right') --- */
+.wcc-wrapper.check-end {
+    width: 100%;
+    flex-direction: row-reverse;
+    justify-content: space-between;
+}
+
+.wcc-wrapper.check-end .wcc-box {
+    margin-right: 0;
+    margin-left: 0.5rem;
+}
+
+wc-input[clearable] input {
+    padding-right: 25px !important;
+}
+
+wc-input[toggle-password] input {
+    padding-right: 29px !important;
+}
+
+wc-input[toggle-password][clearable] input {
+    padding-right: 50px !important;
+}
+
+/* --- wc-range: Asegurar que ocupe todo el ancho --- */
+wc-range {
+    display: block;
+    width: 100%;
+}
+
+wc-input input {
+    height: var(--input-height);
+}

@@ -1,0 +1,756 @@
+/* ===========================================================================
+   WC-RICH-TEXT - Sistema de estilos
+   ===========================================================================
+   Índice:
+     01. Variables CSS
+     02. Contenedor principal
+     03. Toolbar
+     04. Área de edición
+     05. Contenido del editor (tipografía)
+     06. Placeholder
+     07. Estados (focus, disabled, readonly, error)
+     08. Fallback
+     09. Responsive
+   =========================================================================== */
+
+
+/* 01. VARIABLES CSS ======================================================== */
+
+wc-rich-text {
+    /* Colores base - referenciando variables del sistema */
+    --wcrt-bg: var(--rf-bg-white, #ffffff);
+    --wcrt-border-color: var(--rf-color-border, #d1d5db);
+    --wcrt-border-color-focus: var(--rf-color-border-focus, #D3E3F2);
+    --wcrt-text-color: var(--rf-color-text, #1f2937);
+    --wcrt-text-muted: var(--rf-color-text-sec, #6b7280);
+    /* Toolbar */
+    --wcrt-toolbar-bg: var(--rf-bg-light, #f9fafb);
+    --wcrt-toolbar-border: var(--rf-color-border, #d1d5db);
+    --wcrt-btn-hover-bg: #e5e7eb;
+    --wcrt-btn-active-bg: var(--wcrt-btn-hover-bg);
+    --wcrt-btn-active-color: var(--color-grey-700);
+    /* Tamaños */
+    --wcrt-radius: var(--rf-radius);
+    --wcrt-padding: 0.75rem 1rem;
+    --wcrt-toolbar-padding: 0.5rem;
+    --wcrt-btn-size: 2rem;
+    --wcrt-icon-size: 1rem;
+    /* Transiciones */
+    --wcrt-transition: all 0.18s ease-in-out;
+    /* Estados */
+    --wcrt-opacity-disabled: var(--wcb-opacity-disabled, 0.45);
+    display: block;
+    width: 100%;
+}
+
+
+/* 02. CONTENEDOR PRINCIPAL ================================================= */
+
+.wcrt-wrapper {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--wcrt-border-color);
+    border-radius: var(--wcrt-radius);
+    background: var(--wcrt-bg);
+    overflow: hidden;
+    transition: var(--wcrt-transition);
+}
+
+/* Toolbar en la parte inferior */
+.wcrt-wrapper.toolbar-bottom {
+    flex-direction: column-reverse;
+}
+
+.wcrt-wrapper.toolbar-bottom .wcrt-toolbar {
+    border-bottom: none;
+    border-top: 1px solid var(--wcrt-toolbar-border);
+}
+
+
+/* 03. TOOLBAR ============================================================== */
+
+.wcrt-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.12rem;
+    padding: var(--wcrt-toolbar-padding);
+    background: var(--wcrt-toolbar-bg);
+    border-bottom: 1px solid var(--wcrt-toolbar-border);
+    align-items: center;
+}
+
+.wcrt-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--wcrt-btn-size);
+    height: var(--wcrt-btn-size);
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: calc(var(--wcrt-radius) - 2px);
+    background: transparent;
+    color: var(--color-grey-700);
+    cursor: pointer;
+    transition: var(--wcrt-transition);
+}
+
+/* El icono de mascara de wc-button (variant soft-transparent) se fuerza a
+   --rf-color-primary (azul) en button.css para el resto del sistema. Aqui se
+   sobreescribe solo para los botones de esta toolbar, siguiendo el mismo
+   patron que ya usan las variantes outline-* en button.css: el icono toma el
+   color de texto del boton (currentColor) en vez del azul de accion, y por
+   eso tambien se ve blanco sobre el fondo activo sin declararlo aparte. */
+wc-button.wcrt-btn .wcb-mask-icon::before {
+    background-color: currentColor;
+}
+
+.wcrt-btn svg {
+    width: var(--wcrt-icon-size);
+    height: var(--wcrt-icon-size);
+    pointer-events: none;
+}
+
+/* Iconos cargados desde archivos SVG externos via mask-image */
+.wcrt-btn:active:not(:disabled) {
+    transform: translateY(1px);
+}
+
+.wcrt-btn.is-active {
+    background: var(--wcrt-btn-active-bg);
+    color: var(--wcrt-btn-active-color);
+}
+
+.wcrt-btn:disabled {
+    opacity: var(--wcrt-opacity-disabled);
+    cursor: not-allowed;
+}
+
+/* Separador */
+.wcrt-separator {
+    display: inline-block;
+    width: 1px;
+    height: calc(var(--wcrt-btn-size) - 8px);
+    margin: 0 0.375rem;
+    background: var(--wcrt-toolbar-border);
+}
+
+/* Selectores de fuente y tamaño (wc-select) dentro de la toolbar */
+.wcrt-font-select {
+    width: 145px;
+}
+
+.wcrt-fontsize-select {
+    width: 64px;
+}
+
+.wcrt-headingstyle-select {
+    width: 135px;
+}
+
+wc-rich-text .wcs-placeholder,
+wc-rich-text .wcs-text,
+wc-rich-text .wcs-search-input,
+wc-rich-text .wcs-option {
+    font-size: var(--font-size-help);
+}
+
+/* Color Pickers */
+.wcrt-color-picker {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+
+.wcrt-color-btn {
+    position: relative;
+}
+
+.wcrt-color-bar {
+    position: absolute;
+    bottom: 3px;
+    left: 5px;
+    right: 5px;
+    height: 3px;
+    border-radius: var(--radius-sm);
+    pointer-events: none;
+}
+
+.wcrt-color-input {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+    border: none;
+    padding: 0;
+}
+
+.wcrt-color-input:disabled {
+    cursor: not-allowed;
+}
+
+/* Modal de enlaces */
+.wcrt-link-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+}
+
+.wcrt-link-modal-content {
+    background: var(--wcrt-bg, #fff);
+    border-radius: var(--radius-md);
+    padding: 0;
+    min-width: 320px;
+    max-width: 400px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.wcrt-link-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--wcrt-toolbar-border, #e5e7eb);
+}
+
+.wcrt-link-modal-title {
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--wcrt-text-color, #1f2937);
+}
+
+.wcrt-link-modal-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: var(--wcrt-text-muted, #6b7280);
+    padding: 0;
+    line-height: 1;
+}
+
+.wcrt-link-modal-close:hover {
+    color: var(--wcrt-text-color, #1f2937);
+}
+
+.wcrt-link-modal-body {
+    padding: 16px;
+}
+
+.wcrt-link-field {
+    margin-bottom: 12px;
+}
+
+.wcrt-link-field:last-child {
+    margin-bottom: 0;
+}
+
+.wcrt-link-field label {
+    display: block;
+    margin-bottom: 4px;
+    font-weight: 500;
+    font-size: 14px;
+    color: var(--wcrt-text-color, #1f2937);
+}
+
+.wcrt-link-field input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--wcrt-border-color, #d1d5db);
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    box-sizing: border-box;
+    color: var(--wcrt-text-color, #1f2937);
+    background: var(--wcrt-bg, #fff);
+}
+
+.wcrt-link-field input:focus {
+    outline: none;
+    border-color: var(--wcrt-border-color-focus, #5298D1);
+    box-shadow: 0 0 0 2px rgba(var(--rf-color-primary-rgb), 0.15);
+}
+
+.wcrt-link-field input.is-error {
+    border-color: #ef4444;
+}
+
+.wcrt-link-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 12px 16px;
+    border-top: 1px solid var(--wcrt-toolbar-border, #e5e7eb);
+}
+
+.wcrt-link-btn {
+    padding: 8px 16px;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    cursor: pointer;
+    border: 1px solid var(--wcrt-border-color, #d1d5db);
+    background: var(--wcrt-bg, #fff);
+    color: var(--wcrt-text-color, #1f2937);
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.wcrt-link-btn:hover {
+    background: var(--wcrt-btn-hover-bg, #e5e7eb);
+}
+
+.wcrt-link-btn-ok {
+    background: var(--wcrt-btn-active-bg, #5298D1);
+    color: #fff;
+    border-color: var(--wcrt-btn-active-bg, #5298D1);
+}
+
+.wcrt-link-btn-ok:hover {
+    background: #4080b8;
+    border-color: #4080b8;
+}
+
+.wcrt-link-btn-remove {
+    background: #ef4444;
+    color: #fff;
+    border-color: #ef4444;
+    margin-right: auto;
+}
+
+.wcrt-link-btn-remove:hover {
+    background: #dc2626;
+    border-color: #dc2626;
+}
+
+
+/* 04. ÁREA DE EDICIÓN ====================================================== */
+
+.wcrt-editor-container {
+    position: relative;
+    min-height: 150px;
+}
+
+/* ⚠️ EL AREA EDITABLE (.wcrt-editor) YA NO SE ESTILA DESDE AQUI.
+   Vive dentro de un shadow root propio (ver _render() en WCRichText.js), asi
+   que NINGUNA regla `.wcrt-editor ...` de este fichero le llega: el CSS de esa
+   zona esta en `WCRichText.EDITOR_SURFACE_CSS` (inline en el shadow).
+   Se hizo asi a proposito: el usuario sube plantillas HTML maquetadas fuera,
+   con su propio <style>, y las reglas de contenido de este fichero les ganaban
+   por especificidad (`.wcrt-editor p` (0,1,1) vence a `p` (0,0,1)) y les
+   desmontaban el diseño — bordes en todas las celdas, anchos forzados,
+   margenes de parrafo, etc.
+   Las secciones 05, 06, 11, 12 y 13 de abajo quedan INERTES por ese motivo. Se
+   conservan como referencia de lo que habia; si hiciera falta reinstaurar algo,
+   el sitio correcto es EDITOR_SURFACE_CSS, no aqui. */
+
+
+/* 05. CONTENIDO DEL EDITOR (Tipografía) — INERTE, ver nota de la seccion 04 == */
+
+.wcrt-editor p {
+    margin: 0.5em 0;
+}
+
+.wcrt-editor h1,
+.wcrt-editor h2,
+.wcrt-editor h3,
+.wcrt-editor h4,
+.wcrt-editor h5,
+.wcrt-editor h6 {
+    margin: 1em 0 0.5em;
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+.wcrt-editor h1 { font-size: 2em; }
+.wcrt-editor h2 { font-size: 1.5em; }
+.wcrt-editor h3 { font-size: 1.25em; }
+.wcrt-editor h4 { font-size: 1.1em; }
+.wcrt-editor h5 { font-size: 1em; }
+.wcrt-editor h6 { font-size: 0.9em; color: var(--wcrt-text-muted); }
+
+.wcrt-editor ul,
+.wcrt-editor ol {
+    padding-left: 1.5em;
+    margin: 0.5em 0;
+}
+
+.wcrt-editor li {
+    margin: 0.25em 0;
+}
+
+.wcrt-editor blockquote {
+    margin: 1em 0;
+    padding: 0.5em 1em;
+    border-left: 3px solid var(--wcrt-border-color-focus);
+    background: var(--wcrt-toolbar-bg);
+    color: var(--wcrt-text-muted);
+    font-style: italic;
+}
+
+.wcrt-editor code {
+    background: #f3f4f6;
+    padding: 0.125em 0.375em;
+    border-radius: var(--radius-sm);
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 0.9em;
+    color: #e11d48;
+}
+
+.wcrt-editor pre {
+    background: #1f2937;
+    color: #f3f4f6;
+    padding: 0.75em 1em;
+    border-radius: var(--wcrt-radius);
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 0.875em;
+    overflow-x: auto;
+    margin: 1em 0;
+}
+
+.wcrt-editor pre code {
+    background: transparent;
+    padding: 0;
+    color: inherit;
+}
+
+.wcrt-editor hr {
+    border: none;
+    border-top: 2px solid var(--wcrt-toolbar-border);
+    margin: 1.5em 0;
+}
+
+.wcrt-editor strong {
+    font-weight: 700;
+}
+
+.wcrt-editor em {
+    font-style: italic;
+}
+
+.wcrt-editor s {
+    text-decoration: line-through;
+}
+
+.wcrt-editor u {
+    text-decoration: underline;
+}
+
+/* Primer y último elemento sin margen extra */
+.wcrt-editor > *:first-child {
+    margin-top: 0;
+}
+
+.wcrt-editor > *:last-child {
+    margin-bottom: 0;
+}
+
+
+/* 06. PLACEHOLDER ========================================================== */
+
+.wcrt-editor[data-placeholder]:empty::before,
+.wcrt-editor .tiptap.is-empty::before {
+    content: attr(data-placeholder);
+    color: var(--wcrt-text-muted);
+    pointer-events: none;
+    position: absolute;
+    opacity: 0.6;
+}
+
+/* TipTap usa su propio sistema de placeholder */
+.wcrt-editor .tiptap p.is-editor-empty:first-child::before {
+    content: attr(data-placeholder);
+    color: var(--wcrt-text-muted);
+    float: left;
+    height: 0;
+    pointer-events: none;
+    opacity: 0.6;
+}
+
+
+/* 07. ESTADOS ============================================================== */
+
+/* Focus */
+.wcrt-wrapper.is-focused {
+    border-color: var(--wcrt-border-color-focus);
+    box-shadow: 0 0 0 1px rgba(var(--rf-color-primary-rgb), 0.15);
+}
+
+/* Disabled */
+.wcrt-wrapper.is-disabled {
+    opacity: var(--wcrt-opacity-disabled);
+    pointer-events: none;
+    cursor: not-allowed;
+}
+
+/* El fondo de is-disabled/is-readonly sobre el area editable se aplica ahora
+   desde EDITOR_SURFACE_CSS (dentro del shadow root del editor), no desde aqui:
+   este fichero ya no se carga ahi dentro. Ver nota de la seccion 04. */
+
+/* Readonly: ocultar toolbar por defecto */
+.wcrt-wrapper.is-readonly .wcrt-toolbar {
+    display: none;
+}
+
+/* Mostrar toolbar si contiene print o preview */
+.wcrt-wrapper.is-readonly .wcrt-toolbar:has([data-command="print"]),
+.wcrt-wrapper.is-readonly .wcrt-toolbar:has([data-command="preview"]) {
+    display: flex;
+}
+
+/* Ocultar todo excepto print y preview */
+.wcrt-wrapper.is-readonly .wcrt-toolbar > *:not([data-command="print"]):not([data-command="preview"]) {
+    display: none;
+}
+
+
+/* 08. FALLBACK ============================================================= */
+
+.wcrt-fallback {
+    padding: 0;
+}
+
+.wcrt-fallback-textarea {
+    width: 100%;
+    min-height: 150px;
+    padding: var(--wcrt-padding);
+    border: none;
+    resize: vertical;
+    font-family: inherit;
+    font-size: inherit;
+    line-height: 1.6;
+}
+
+.wcrt-error {
+    display: block;
+    padding: 0.5em 1em;
+    background: #fef2f2;
+    color: #991b1b;
+    font-size: 0.875em;
+}
+
+
+/* 09. RESPONSIVE =========================================================== */
+
+@media (max-width: 640px) {
+    .wcrt-toolbar {
+        gap: 0.125rem;
+    }
+    
+    .wcrt-btn {
+        width: calc(var(--wcrt-btn-size) - 4px);
+        height: calc(var(--wcrt-btn-size) - 4px);
+    }
+    
+    .wcrt-separator {
+        margin: 0 0.25rem;
+    }
+}
+
+
+/* 10. MODO CÓDIGO FUENTE =================================================== */
+
+.wcrt-source-container {
+    position: relative;
+}
+
+.wcrt-source-textarea {
+    width: 100%;
+    min-height: 150px;
+    padding: var(--wcrt-padding);
+    border: none;
+    resize: vertical;
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 0.875em;
+    line-height: 1.5;
+    background: #1f2937;
+    color: #f3f4f6;
+    box-sizing: border-box;
+}
+
+.wcrt-source-textarea:focus {
+    outline: none;
+}
+
+/* Barra de contador de caracteres/palabras */
+.wcrt-count-bar {
+    display: flex;
+    gap: 1rem;
+    padding: 0.25rem 0.75rem;
+    background: var(--wcrt-toolbar-bg);
+    border-top: 1px solid var(--wcrt-toolbar-border);
+    font-size: 0.75rem;
+    color: var(--wcrt-text-muted);
+    user-select: none;
+}
+
+/* Botón sourceCode activo */
+.wcrt-btn[data-command="sourceCode"].active {
+    background: var(--wcrt-btn-active-bg);
+    color: var(--wcrt-btn-active-color);
+}
+
+
+/* 11. IMÁGENES ============================================================= */
+
+.wcrt-editor img {
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--wcrt-radius);
+    margin: 0.5em 0;
+}
+
+/* La imagen se pinta en el editor a traves de un nodeView propio (ver
+   ResizableImage.addNodeView en WCRichText.js) — el nodo seleccionado
+   (.ProseMirror-selectednode) lo marca ProseMirror en el elemento raiz de ESE
+   nodeView, que es .wcrt-img-node (el <span> envoltorio), no el <img> directo. */
+.wcrt-editor .wcrt-img-node.ProseMirror-selectednode {
+    outline: 2px solid var(--wcrt-border-color-focus);
+    outline-offset: 2px;
+}
+
+
+/* 12. TABLAS =============================================================== */
+
+.wcrt-editor table {
+    border-collapse: collapse;
+    margin: 0.75em 0;
+    overflow: hidden;
+    table-layout: auto;
+    max-width: 100%;
+}
+
+/* Tablas insertadas desde el toolbar (sin width inline): ocupan el ancho disponible */
+.wcrt-editor table:not([style*="width"]) {
+    width: 100%;
+}
+
+.wcrt-editor table td,
+.wcrt-editor table th {
+    padding: 0.4em 0.6em;
+    vertical-align: top;
+    min-width: 60px;
+    position: relative;
+    box-sizing: border-box;
+}
+
+.wcrt-editor table th {
+    background: var(--wcrt-toolbar-bg, #f9fafb);
+    font-weight: 600;
+    text-align: left;
+}
+
+/* Celda seleccionada por TipTap */
+.wcrt-editor table .selectedCell::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(var(--rf-color-primary-rgb), 0.15);
+    pointer-events: none;
+}
+
+/* Resize handle de TipTap */
+.wcrt-editor .column-resize-handle {
+    position: absolute;
+    right: -2px;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: var(--wcrt-border-color-focus, #5298D1);
+    cursor: col-resize;
+    pointer-events: all;
+}
+
+.wcrt-editor .tableWrapper {
+    overflow-x: auto;
+    margin: 0.75em 0;
+}
+
+/* Toggle de bordes de tabla: por defecto CON borde, clase para quitarlos */
+.wcrt-editor table td,
+.wcrt-editor table th {
+    border: 1px solid var(--wcrt-border-color, #d1d5db); /* Por defecto CON borde */
+}
+
+.wcrt-editor table.wcrt-table-no-border td,
+.wcrt-editor table.wcrt-table-no-border th {
+    border-color: transparent; /* Sin borde cuando tiene la clase */
+}
+
+/* Celdas con style inline (de pegado) respetan su borde original */
+.wcrt-editor table td[style*="border"],
+.wcrt-editor table th[style*="border"] {
+    /* El inline style tiene prioridad, no sobreescribimos */
+}
+
+/* 13. IMÁGENES REDIMENSIONABLES ============================================ */
+
+.wcrt-editor img {
+    max-width: 100%;
+    height: auto;
+    cursor: pointer;
+}
+
+.wcrt-editor img:hover {
+    outline: 2px solid var(--wcrt-border-color-focus, #5298D1);
+    outline-offset: 2px;
+}
+
+/* Handle de resize (posicionado dinámicamente via JS) */
+.wcrt-editor .wcrt-resize-handle {
+    position: absolute;
+    background: var(--wcrt-border-color-focus, #5298D1);
+    z-index: 10;
+    pointer-events: all;
+    border-radius: var(--radius-sm);
+}
+
+/* Handle derecho (solo ancho) */
+.wcrt-editor .wcrt-resize-right {
+    width: 8px;
+    height: 16px;
+    cursor: ew-resize;
+}
+
+/* Handle inferior (solo alto) */
+.wcrt-editor .wcrt-resize-bottom {
+    width: 16px;
+    height: 8px;
+    cursor: ns-resize;
+}
+
+/* Handle esquina (proporcional) */
+.wcrt-editor .wcrt-resize-corner {
+    width: 12px;
+    height: 12px;
+    cursor: nwse-resize;
+    border-radius: var(--radius-sm) 0 0 0;
+}
+
+.wcrt-editor .wcrt-resize-corner::before {
+    content: '';
+    position: absolute;
+    right: 2px;
+    bottom: 2px;
+    width: 6px;
+    height: 6px;
+    border-right: 2px solid white;
+    border-bottom: 2px solid white;
+}
+
+/* Iconos de tabla: definidos en button-icons.css */
+
+
+wc-input.has-error input {
+    border-color: var(--rf-color-error) !important;
+    background-color: #fff5f5 !important;
+}
+wc-rich-text .wcb-size-sm {
+    padding: 4px 7px !important;
+}

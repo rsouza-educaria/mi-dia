@@ -1,0 +1,311 @@
+/* ????????????????????????????????????????????????????????????????????????????
+   WC-RANGE � Sistema de estilos
+   ?????????????????????????????????????????????????????????????????????????
+   �ndice:
+     01. Variables CSS
+     02. Host (wc-range)
+     03. Wrapper (.wcr-wrapper)
+     04. Input nativo (.wcr-native-input)
+     05. Track (pista del slider)
+     06. Thumb (el c�rculo/control deslizante)
+     07. Marcador de valor (.wcr-marker)
+     08. Posiciones del marcador (top, bottom, left, right)
+     09. Marcador visible solo en hover
+     10. Estados (disabled, dragging)
+   ???????????????????????????????????????????????????????????????????????????? */
+
+/* ?? 01. VARIABLES CSS ????????????????????????????????????????????????????? */
+
+:root, :host {
+    /* Colores del slider */
+    --wcr-track-bg: var(--color-grey-300, #e5e5e5);
+    --wcr-track-fill: var(--rf-color-primary, #5298D1);
+    --wcr-thumb-bg: var(--color-grey-50, #ffffff);
+    --wcr-thumb-border: var(--rf-color-primary, #5298D1);
+    --wcr-thumb-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    
+    /* Dimensiones */
+    --wcr-track-height: 6px;
+    --wcr-thumb-size: 18px;
+    --wcr-track-radius: var(--radius-full);
+    
+    /* Marcador */
+    --wcr-marker-bg: var(--rf-color-primary, #5298D1);
+    --wcr-marker-color: var(--color-grey-50, #ffffff);
+    --wcr-marker-padding: 4px 8px;
+    --wcr-marker-radius: var(--radius-sm);
+    --wcr-marker-font-size: 0.75rem;
+    --wcr-marker-offset: 8px;
+    --wcr-marker-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    
+    /* Estados */
+    --wcr-opacity-disabled: 0.5;
+}
+
+/* ?? 02. HOST (wc-range) ??????????????????????????????????????????????????? */
+
+wc-range {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* ?? 03. WRAPPER (.wcr-wrapper) ???????????????????????????????????????????? */
+
+.wcr-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 8px 0;
+}
+
+/* Ajustes seg�n posici�n del marcador */
+.wcr-wrapper.wcr-marker-top {
+    padding-top: 32px;
+}
+
+.wcr-wrapper.wcr-marker-bottom {
+    padding-bottom: 32px;
+}
+
+.wcr-wrapper.wcr-marker-left {
+    padding-left: 60px;
+}
+
+.wcr-wrapper.wcr-marker-right {
+    padding-right: 60px;
+}
+
+/* ?? 04. INPUT NATIVO (.wcr-native-input) ?????????????????????????????????? */
+
+.wcr-native-input {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: var(--wcr-track-height);
+    background: transparent;
+    outline: none;
+    cursor: pointer;
+}
+
+.wcr-native-input:focus {
+    outline: none;
+}
+
+/* ?? 05. TRACK (pista del slider) ?????????????????????????????????????????? */
+
+/* Webkit (Chrome, Safari, Edge) */
+.wcr-native-input::-webkit-slider-runnable-track {
+    width: 100%;
+    height: var(--wcr-track-height);
+    background: var(--wcr-track-bg);
+    border-radius: var(--wcr-track-radius);
+    transition: background 0.2s ease;
+}
+
+.wcr-native-input:hover::-webkit-slider-runnable-track {
+    background: var(--color-grey-400, #d1d5db);
+}
+
+/* Firefox */
+.wcr-native-input::-moz-range-track {
+    width: 100%;
+    height: var(--wcr-track-height);
+    background: var(--wcr-track-bg);
+    border-radius: var(--wcr-track-radius);
+    transition: background 0.2s ease;
+}
+
+.wcr-native-input:hover::-moz-range-track {
+    background: var(--color-grey-400, #d1d5db);
+}
+
+/* Firefox - progreso lleno */
+.wcr-native-input::-moz-range-progress {
+    height: var(--wcr-track-height);
+    background: var(--wcr-track-fill);
+    border-radius: var(--wcr-track-radius);
+}
+
+/* ?? 06. THUMB (el c�rculo/control deslizante) ????????????????????????????? */
+
+/* Webkit (Chrome, Safari, Edge) */
+.wcr-native-input::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: var(--wcr-thumb-size);
+    height: var(--wcr-thumb-size);
+    background: var(--wcr-thumb-bg);
+    border: 2px solid var(--wcr-thumb-border);
+    border-radius: var(--radius-circle);
+    cursor: pointer;
+    box-shadow: var(--wcr-thumb-shadow);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    margin-top: calc((var(--wcr-track-height) - var(--wcr-thumb-size)) / 2);
+}
+
+.wcr-native-input::-webkit-slider-thumb:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.wcr-native-input:active::-webkit-slider-thumb {
+    transform: scale(1.15);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+/* Firefox */
+.wcr-native-input::-moz-range-thumb {
+    width: var(--wcr-thumb-size);
+    height: var(--wcr-thumb-size);
+    background: var(--wcr-thumb-bg);
+    border: 2px solid var(--wcr-thumb-border);
+    border-radius: var(--radius-circle);
+    cursor: pointer;
+    box-shadow: var(--wcr-thumb-shadow);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.wcr-native-input::-moz-range-thumb:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.wcr-native-input:active::-moz-range-thumb {
+    transform: scale(1.15);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+/* ?? 07. MARCADOR DE VALOR (.wcr-marker) ??????????????????????????????????? */
+
+.wcr-marker {
+    position: absolute;
+    display: none;
+    background: var(--wcr-marker-bg);
+    color: var(--wcr-marker-color);
+    padding: var(--wcr-marker-padding);
+    border-radius: var(--wcr-marker-radius);
+    font-size: var(--wcr-marker-font-size);
+    font-weight: 500;
+    white-space: nowrap;
+    box-shadow: var(--wcr-marker-shadow);
+    transition: left 0.1s ease, opacity 0.2s ease;
+    pointer-events: none;
+    z-index: 10;
+}
+
+/* ?? 08. POSICIONES DEL MARCADOR (top, bottom, left, right) ???????????????? */
+
+/* TOP - Encima del slider */
+.wcr-wrapper.wcr-marker-top .wcr-marker {
+    top: 0;
+    transform: translateX(-50%);
+}
+
+.wcr-wrapper.wcr-marker-top .wcr-marker::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 5px solid var(--wcr-marker-bg);
+}
+
+/* BOTTOM - Debajo del slider */
+.wcr-wrapper.wcr-marker-bottom .wcr-marker {
+    bottom: 0;
+    transform: translateX(-50%);
+}
+
+.wcr-wrapper.wcr-marker-bottom .wcr-marker::after {
+    content: '';
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-bottom: 5px solid var(--wcr-marker-bg);
+}
+
+/* LEFT - A la izquierda del slider */
+.wcr-wrapper.wcr-marker-left .wcr-marker {
+    left: 0;
+    transform: translateY(-50%);
+}
+
+.wcr-wrapper.wcr-marker-left .wcr-marker::after {
+    content: '';
+    position: absolute;
+    left: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0;
+    height: 0;
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+    border-left: 5px solid var(--wcr-marker-bg);
+}
+
+/* RIGHT - A la derecha del slider */
+.wcr-wrapper.wcr-marker-right .wcr-marker {
+    right: 0;
+    transform: translateY(-50%);
+}
+
+.wcr-wrapper.wcr-marker-right .wcr-marker::after {
+    content: '';
+    position: absolute;
+    right: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0;
+    height: 0;
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+    border-right: 5px solid var(--wcr-marker-bg);
+}
+
+/* ?? 09. MARCADOR VISIBLE SOLO EN HOVER ???????????????????????????????????? */
+
+.wcr-wrapper.wcr-marker-hover .wcr-marker {
+    opacity: 0;
+}
+
+.wcr-wrapper.wcr-marker-hover:hover .wcr-marker,
+.wcr-wrapper.wcr-marker-hover.wcr-dragging .wcr-marker {
+    opacity: 1;
+}
+
+/* ?? 10. ESTADOS (disabled, dragging) ?????????????????????????????????????? */
+
+/* Deshabilitado */
+.wcr-native-input:disabled {
+    opacity: var(--wcr-opacity-disabled);
+    cursor: not-allowed;
+}
+
+.wcr-native-input:disabled::-webkit-slider-thumb {
+    cursor: not-allowed;
+}
+
+.wcr-native-input:disabled::-moz-range-thumb {
+    cursor: not-allowed;
+}
+
+wc-range[disabled] {
+    opacity: var(--wcr-opacity-disabled);
+    pointer-events: none;
+}
+
+/* Arrastrando */
+.wcr-wrapper.wcr-dragging .wcr-marker {
+    transition: left 0s, opacity 0.2s ease;
+}

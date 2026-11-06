@@ -1,0 +1,319 @@
+/* ===========================================================================
+   ACTION-RESULT - Sistema de estilos para resultados de operaciones
+   ===========================================================================
+   Basado en impresionPanel.css para consistencia visual
+   =========================================================================== */
+
+@import url("internal-layout.css");
+
+/* 01. VARIABLES CSS ======================================================== */
+
+:host {
+    /* Colores de Texto (de impresionPanel) */
+    --ar-text-main: #1d1d1f;
+    --ar-text-secondary: #86868b;
+    /* Colores de Estado */
+    --ar-color-empty: #9ca3af;
+    --ar-color-error: var(--alexia-color-danger, #B6153A);
+    --ar-color-success: var(--alexia-color-success, #10855B);
+    --ar-color-warning: var(--alexia-color-warning, #f59e0b);
+    --ar-color-info: var(--alexia-color-info, #0A529F);
+    /* Fondos */
+    --ar-bg-stack: #f5f5f7;
+    --ar-divider: rgba(0, 0, 0, 0.05);
+    /* Tamaños de icono */
+    --ar-icon-size-sm: 40px;
+    --ar-icon-size-md: 52px;
+    --ar-icon-size-lg: 72px;
+    /* Tipografía (de impresionPanel) */
+    --ar-font-family: Nunito, "Segoe UI", Roboto, sans-serif;
+    /* Espaciado (de impresionPanel) */
+    --ar-padding-stack: 24px;
+    --ar-gap-stack: 12px;
+    --ar-gap-header: 12px;
+    --ar-radius-stack: var(--rf-radius);
+}
+
+
+/* 02. HOST ================================================================= */
+
+:host {
+    display: block;
+    width: 100%;
+    grid-column: 1 / -1; /* Span completo si el padre es un CSS grid (ej: section-grid de content-section) */
+}
+
+:host([hidden]) {
+    display: none;
+}
+
+/* Centrado vertical cuando es el único hijo del contenedor */
+:host(:only-child) {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    flex: 1;
+}
+
+
+/* 03. CONTENEDOR PRINCIPAL ================================================= */
+
+.ar-container {
+    display: flex;
+    flex-direction: column;
+    font-family: var(--ar-font-family);
+    color: var(--ar-text-main);
+    box-sizing: border-box;
+}
+
+/* Nota: El centrado se aplica solo al header, no al detail-stack */
+
+
+/* 04. HEADER (icono + título + subtítulo) ================================== */
+
+.ar-header {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ar-gap-header);
+    margin-bottom: 32px;
+}
+
+/* Centrado solo para el header (como en impresionPanel) */
+.ar-centered .ar-header {
+    align-items: center;
+    text-align: center;
+}
+
+.ar-centered .ar-actions {
+    justify-content: center;
+}
+
+
+/* 05. ICONO ================================================================ */
+
+.ar-icon {
+    width: var(--ar-icon-size-md);
+    height: var(--ar-icon-size-md);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 24px;
+    flex-shrink: 0;
+}
+
+.ar-icon svg {
+    width: 50%;
+    height: 50%;
+}
+
+/* wc-icon dentro del contenedor de icono */
+.ar-icon wc-icon {
+    --wci-color: currentColor;
+}
+
+.ar-icon wc-icon .wci-box {
+    background: transparent !important;
+    border: none !important;
+}
+
+
+/* 06. TEXTOS =============================================================== */
+
+.ar-heading {
+    font-family: var(--font-family-display);
+    font-size: var(--font-size-display);
+    font-weight: var(--font-weight-display);
+    line-height: var(--line-height-display);
+    letter-spacing: var(--letter-spacing-display);
+    margin: 0;
+    color: var(--ar-text-main);
+}
+
+.ar-subtitle {
+    font-family: var(--font-family-subtitle);
+    font-size: var(--font-size-subtitle);
+    font-weight: var(--font-weight-subtitle);
+    line-height: var(--line-height-subtitle);
+    letter-spacing: var(--letter-spacing-subtitle);
+    color: var(--ar-text-secondary);
+    margin: 0;
+    white-space: pre-line;
+}
+
+.ar-details {
+    font-size: 13px;
+    color: var(--ar-text-secondary);
+    margin: 0;
+    padding: 8px 16px;
+    line-height: 1.4;
+    background: rgba(0, 0, 0, 0.03);
+    border-radius: var(--ar-radius-stack);
+    font-family: 'Consolas', 'Monaco', monospace;
+    max-width: fit-content;
+}
+
+.ar-centered .ar-details {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+
+/* 06b. NOTICE (elemento libre, ej. wc-banner) =============================== */
+
+.ar-notice {
+    width: 100%;
+    margin-top: 1rem;
+}
+
+
+/* 07. DETAIL STACK (items estructurados - EXACTO de impresionPanel) ======== */
+
+.ar-detail-stack {
+    background: var(--ar-bg-stack);
+    border-radius: var(--ar-radius-stack);
+    padding: var(--ar-padding-stack);
+    display: flex;
+    flex-direction: column;
+    gap: var(--ar-gap-stack);    
+    flex-shrink: 0;
+    width: 100%;
+    box-sizing: border-box;
+    text-align: left;  /* Los items siempre alineados a la izquierda */
+    align-self: stretch; /* Ocupa todo el ancho disponible en flex */
+    margin-bottom: 5px;
+}
+
+.ar-detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.ar-detail-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--ar-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.01em;
+}
+
+.ar-detail-value {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ar-text-main);
+    line-height: 1.4;
+    word-break: break-word;
+}
+
+.ar-detail-divider {
+    height: 1px;
+    background: var(--ar-divider);
+}
+
+
+/* 08. ACCIONES ============================================================= */
+
+.ar-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+
+/* 09. VARIANTES ============================================================ */
+
+/* Empty */
+.ar-variant-empty .ar-icon {
+    background: var(--ar-color-empty);
+}
+
+/* Error */
+.ar-variant-error .ar-icon {
+    background: var(--ar-color-error);
+}
+
+/* Success */
+.ar-variant-success .ar-icon {
+    background: var(--ar-color-success);
+}
+
+/* Warning */
+.ar-variant-warning .ar-icon {
+    background: var(--ar-color-warning);
+}
+
+/* Info */
+.ar-variant-info .ar-icon {
+    background: var(--ar-color-info);
+}
+
+
+/* 10. TAMAÑOS ============================================================== */
+
+/* Small */
+.ar-size-sm .ar-icon {
+    width: var(--ar-icon-size-sm);
+    height: var(--ar-icon-size-sm);
+    font-size: 18px;
+}
+
+.ar-size-sm .ar-heading {
+    font-family: var(--font-family-title);
+    font-size: var(--font-size-title);
+    font-weight: var(--font-weight-title);
+    line-height: var(--line-height-title);
+    letter-spacing: var(--letter-spacing-title);
+}
+
+.ar-size-sm .ar-subtitle {
+    font-size: var(--font-size-subtitle);
+}
+
+.ar-size-sm .ar-header {
+    margin-bottom: 20px;
+}
+
+/* Large */
+.ar-size-lg .ar-icon {
+    width: var(--ar-icon-size-lg);
+    height: var(--ar-icon-size-lg);
+    font-size: 32px;
+}
+
+.ar-size-lg .ar-heading {
+    font-size: var(--font-size-600); /* 28px, paso de escala: display no tiene variantes de tamaño */
+}
+
+.ar-size-lg .ar-subtitle {
+    font-size: var(--font-size-subtitle); /* 14px, colapsa al valor único del rol */
+}
+
+.ar-size-lg .ar-header {
+    margin-bottom: 40px;
+}
+
+
+/* 11. ANIMACIONES ========================================================== */
+
+@keyframes ar-float {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-8px);
+    }
+}
+
+.ar-icon-animated .ar-icon {
+    animation: ar-float 2.5s ease-in-out infinite;
+}
+
+/* Reducir movimiento si el usuario lo prefiere */
+@media (prefers-reduced-motion: reduce) {
+    .ar-icon-animated .ar-icon {
+        animation: none;
+    }
+}

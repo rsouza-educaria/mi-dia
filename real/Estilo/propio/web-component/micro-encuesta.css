@@ -1,0 +1,440 @@
+/* ===========================================================================
+   MICRO-ENCUESTA — la pregunta corta que aparece despues de hacer algo
+   ---------------------------------------------------------------------------
+   El componente se pinta dentro del elemento que le digan: el cuerpo de un
+   panel, una ventana, un hueco de una pagina, o flotando sobre todo. Por eso
+   aqui no se decide el sitio: solo se decide como se ve una vez esta puesto.
+   El atributo [flotante] es lo unico que lo despega del flujo.
+   =========================================================================== */
+
+@import url("internal-layout.css");
+
+:host {
+    /* Superficie */
+    --me-fondo: #ffffff;
+    --me-borde: var(--rf-color-border-light, #e5e7eb);
+    --me-sombra: 0 4px 16px rgba(0, 0, 0, .10);
+    --me-radio: var(--radius-lg, 12px);
+
+    /* Texto */
+    --me-texto: var(--rf-color-text, #1d1d1f);
+    --me-texto-suave: var(--rf-color-text-sec, #6b7280);
+
+    /* Acento: lo elegido y el boton principal */
+    --me-acento: var(--rf-color-primary, #285A92);
+
+    /* Lo elegido, con los mismos valores que el prototipo de la pantalla:
+       un fondo casi blanco y un borde a un tercio del acento */
+    --me-elegido-fondo: color-mix(in srgb, var(--me-acento) 8%, #ffffff);
+    --me-elegido-borde: color-mix(in srgb, var(--me-acento) 35%, transparent);
+
+    /* Lado del cuadrado de voto. Es una medida pedida, no una consecuencia del
+       contenido: por eso esta aqui arriba y no enterrada en su regla */
+    --me-voto-lado: 128px;
+
+    /* Aviso de obligatoria sin contestar */
+    --me-falta: var(--rf-color-error, #B6153A);
+
+    /* Estrellas */
+    --me-estrella-apagada: var(--rf-color-border, #cbd5e1);
+    --me-estrella-encendida: var(--color-yellow-600, #d97706);
+
+    /* Medidas */
+    --me-espacio: 16px;
+    --me-hueco: 12px;
+    /* Lo que ocupa el aspa, que es lo que mide su linea: de ahi sale la banda que se le reserva
+       arriba. Cambiarle el cuerpo obliga a cambiar esto. */
+    --me-aspa: 24px;
+
+    /* Caja flexible en columna, no bloque: por dentro se comporta igual -- la tarjeta es hija
+       unica y ocupa el ancho y el alto de su contenido -- pero asi puede repartir el alto
+       cuando sobra, que es lo que necesita el agradecimiento para quedar centrado */
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    box-sizing: border-box;
+    /* Span completo si el contenedor es un grid, igual que action-result */
+    grid-column: 1 / -1;
+}
+
+/* El alto que sobre, pero SOLO cuando la encuesta esta sola donde la han puesto: entonces la
+   vista es suya y el agradecimiento se centra en ella. Si comparte sitio con algo mas -- el
+   remate de la accion que acaba de terminar, por ejemplo -- no se estira: quedaria un hueco
+   enorme entre lo que ya habia y ella. Es el mismo :only-child con el que action-result decide
+   lo mismo. */
+:host(:only-child) {
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+/* Lo mismo, para cuando quien la acompanaba se ha quitado de en medio mientras ella da las
+   gracias: sigue habiendo dos hijos, pero a la vista solo esta ella. */
+:host([sola]) {
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+:host([hidden]) {
+    display: none;
+}
+
+/* Flotante: encima de todo, en la esquina. Por debajo del panel lateral y de las ventanas
+   (que usan 10501) a proposito — una encuesta nunca debe tapar algo con lo que se esta
+   trabajando. */
+:host([flotante]) {
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+    z-index: 10400;
+    width: 380px;
+    max-width: calc(100vw - 48px);
+}
+
+
+/* --- CONTENEDOR ---------------------------------------------------------- */
+
+.me-contenedor {
+    display: flex;
+    flex-direction: column;
+    gap: var(--me-hueco);
+    box-sizing: border-box;
+    padding: var(--me-espacio);
+    background: var(--me-fondo);
+    border: 1px solid var(--me-borde);
+    border-radius: var(--me-radio);
+    color: var(--me-texto);
+}
+
+/* La sombra es lo que despega la encuesta del fondo, y solo tiene sentido flotando: incrustada
+   se apoya en el fondo del anfitrion, que es lo que hace que parezca parte de la pantalla y no
+   un anuncio pegado encima. */
+:host([flotante]) .me-contenedor {
+    box-shadow: var(--me-sombra);
+}
+
+/* Dentro del marco de un panel o de una ventana la encuesta no dibuja el suyo: una caja dentro
+   de otra caja se lee como algo pegado encima, no como parte de la pantalla. El anfitrion ya
+   pone el fondo, el borde y el espacio alrededor. */
+:host([adoptada]) .me-contenedor {
+    padding: 0;
+    background: none;
+    border: 0;
+    border-radius: 0;
+}
+
+
+/* --- CABECERA ------------------------------------------------------------ */
+
+/* El aspa se apoya en la esquina y no cuenta en la caja, como en wc-banner: asi los textos se
+   centran en el ancho de la encuesta y no en lo que sobra al lado del aspa. */
+.me-cabecera {
+    position: relative;
+}
+
+/* Donde hay aspa, los textos empiezan por debajo de ella: la cabecera reserva su alto justo, sin
+   hueco de mas, y el titulo se centra en todo el ancho sin tropezarsela por largo que sea. El
+   titulo entra pegado a esa banda porque su respiro ya lo da ella. */
+:host(:not([adoptada])) .me-cabecera {
+    padding-top: var(--me-aspa);
+}
+
+:host(:not([adoptada])) .me-titulo {
+    padding-top: 0;
+}
+
+.me-textos {
+    min-width: 0;
+}
+
+/* Titulo y enunciado de una pregunta se pintan IGUAL, con una sola regla: son la voz con la que
+   la encuesta pregunta, y no hay motivo para que cambie de una linea a la siguiente. Los valores
+   son los de la pantalla de diseno. */
+.me-titulo,
+.me-enunciado {
+    margin: 0;
+    padding: 8px 0;
+    text-align: center;
+    font-family: var(--font-family-title);
+    font-size: var(--font-size-title);
+    font-weight: var(--font-weight-bold);
+}
+
+/* El subtitulo no pregunta, acompana: los tokens de subtitulo del kit -- los mismos que usan
+   action-result y la cabecera del panel lateral -- y el gris de apoyo. Con el cuerpo y la
+   negrita del titulo compite con el, y la cabecera se lee como dos titulares seguidos. */
+.me-subtitulo {
+    margin: 0;
+    padding: 0 0 8px;
+    text-align: center;
+    font-family: var(--font-family-subtitle);
+    font-size: var(--font-size-subtitle);
+    font-weight: var(--font-weight-subtitle);
+    line-height: var(--line-height-subtitle);
+    letter-spacing: var(--letter-spacing-subtitle);
+    color: var(--me-texto-suave);
+}
+
+/* En la esquina de la banda que le reserva la cabecera, sin salirse de ella: el aire que la
+   separa del borde de la tarjeta es el que la tarjeta ya deja alrededor de todo.
+
+   El aspecto es el de .modal-close, el aspa de la ventana: sin fondo ni borde, el aspa a 24 y
+   un gris que se oscurece al pasar por encima. Los grises son los de la propia encuesta, que
+   son los mismos de los que tira la ventana. */
+.me-cerrar {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: 24px;
+    line-height: 1;
+    cursor: pointer;
+    color: var(--me-texto-suave);
+    transition: color 0.15s ease;
+}
+
+.me-cerrar:hover {
+    color: var(--me-texto);
+}
+
+
+/* --- CUERPO Y PREGUNTAS -------------------------------------------------- */
+
+.me-cuerpo {
+    display: flex;
+    flex-direction: column;
+    gap: var(--me-espacio);
+}
+
+/* La unica excepcion: en una pregunta de texto libre el enunciado no pregunta nada, es la
+   etiqueta del campo que hay debajo. Se pinta como label.field-label de dynamic-form, para que
+   se lea igual que cualquier otro formulario de Alexia. */
+.me-pregunta[data-tipo="TEXTO"] .me-enunciado {
+    padding: 0 0 .4rem;
+    text-align: left;
+    font-family: var(--font-family-label);
+    font-size: var(--font-size-label);
+    font-weight: var(--font-weight-label);
+    color: var(--rf-color-label);
+}
+
+/* Separador de puntos entre preguntas, el mismo que usa dynamic-form */
+.me-pregunta + .me-pregunta {
+    border-top: 1px dashed var(--rf-color-border, #e5e7eb);
+    padding-top: var(--me-espacio);
+}
+
+/* Una obligatoria sin contestar. No sale ningun aviso encima: se marca donde falta */
+.me-pregunta.me-falta .me-enunciado {
+    color: var(--me-falta);
+}
+
+.me-pregunta.me-falta wc-button .wcb-btn {
+    border-color: var(--me-falta);
+}
+
+
+/* --- VOTO ---------------------------------------------------------------- */
+
+.me-voto {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+}
+
+/* El cuadrado se pide sobreescribiendo la altura minima del propio wc-button en su tamano
+   grande: la escala estandar llega a 52px y aqui hacen falta 128.
+
+   El relleno lateral del tamano grande (24px por lado) deja 78px de texto dentro del cuadrado, y
+   "No me gusta" no cabe. Con 8px quedan 110, que alcanzan tambien para "I don't like it". */
+.me-voto-opcion {
+    width: var(--me-voto-lado);
+    --wcb-min-height-lg: var(--me-voto-lado);
+    --wcb-padding-lg: 0 8px;
+}
+
+.me-voto-opcion .wcb-label {
+    white-space: nowrap;
+    line-height: 1.2;
+}
+
+/* Entre el enunciado y los botones del voto, el mismo aire que separa las preguntas */
+.me-pregunta[data-tipo="VOTO"] .me-enunciado {
+    padding-bottom: var(--me-espacio);
+}
+
+/* El pulgar, mas grande que el texto del boton. wc-button pinta el icono dentro de un <span>
+   cuando no es una clase del catalogo, y ese span hereda el tamano de letra del boton */
+.me-voto-opcion .wcb-icon span {
+    font-size: 32px;
+    line-height: 1;
+}
+
+/* La misma medida cuando el icono viene del catalogo por su clase, que ahi es una mascara con
+   el tamano del boton y no una letra */
+.me-voto-opcion .wcb-mask-icon::before {
+    width: 32px;
+    height: 32px;
+}
+
+/* --- ESTRELLAS ----------------------------------------------------------- */
+
+/* Centradas, igual que el voto: la fila de estrellas no ocupa el ancho del contenedor, y pegada
+   a la izquierda queda descolgada del titulo y del pie. Con el salto de linea de una escala larga,
+   centrar reparte tambien la ultima fila */
+.me-estrellas {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 4px;
+}
+
+/* La estrella es un boton transparente cuyo dibujo sale del catalogo de iconos, por la clase
+   'estrella' y sin atributo icon: wc-button lo pinta entonces como una mascara. Aqui se decide
+   su tamano y su color, que es lo unico que distingue una llena de una vacia.
+
+   Se apunta con wc-button delante porque button.css tine la mascara de la variante
+   soft-transparent con un selector de la misma forma: con la clase a secas no se le gana. */
+wc-button.me-estrella .wcb-mask-icon::before {
+    width: 1.7rem;
+    height: 1.7rem;
+    background-color: var(--me-estrella-apagada);
+}
+
+wc-button.me-estrella[data-llena] .wcb-mask-icon::before {
+    background-color: var(--me-estrella-encendida);
+}
+
+/* La estrella es solo el dibujo, sin texto al lado: con el relleno lateral que trae el boton del
+   kit, cinco estrellas no caben en un panel estrecho. El salto de linea de arriba es la red por
+   si la escala configurada es mas larga. */
+wc-button.me-estrella .wcb-btn {
+    padding-left: 4px;
+    padding-right: 4px;
+}
+
+/* Al pasar por encima, la variante pone un fondo gris pensado para botones con caja. Aqui el
+   boton ES la estrella, asi que el fondo sobra. */
+wc-button.me-estrella .wcb-btn:hover:not(:disabled) {
+    background: transparent;
+    box-shadow: none;
+}
+
+/* Y en hover se ve lo que se va a elegir, encendido igual que si ya estuviera elegido: la que
+   se senala y todas las anteriores. La segunda regla es la que enciende las anteriores; donde
+   :has() no llegue, se encendera solo la senalada, que sigue siendo util. */
+wc-button.me-estrella .wcb-btn:hover .wcb-mask-icon::before,
+wc-button.me-estrella:has(~ wc-button.me-estrella:hover) .wcb-mask-icon::before {
+    background-color: var(--me-estrella-encendida);
+}
+
+
+/* --- ESCALA -------------------------------------------------------------- */
+
+/* Los valores se reparten el ancho, y si la escala es larga saltan de linea en vez de salirse
+   del panel: repartidos en dos filas se siguen leyendo, cortados no. */
+.me-escala-valores {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+/* Se apunta a los botones por su sitio y no por una clase propia: poner clase sin icono hace
+   que wc-button reserve un hueco de icono vacio al lado del numero */
+.me-escala-valores wc-button {
+    flex: 1;
+    min-width: 36px;
+}
+
+.me-escala-extremos {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 6px;
+    font-size: .78rem;
+    color: var(--me-texto-suave);
+}
+
+
+/* --- OPCIONES Y TEXTO LIBRE ---------------------------------------------- */
+/* wc-radio-group y wc-textarea traen su propio aspecto de internal-layout.css:
+   aqui solo se les dice que ocupen el ancho */
+
+.me-opciones,
+.me-texto {
+    display: block;
+    width: 100%;
+}
+
+
+/* --- FOOTER -------------------------------------------------------------- */
+
+.me-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--me-hueco);
+    flex-wrap: wrap;
+    padding-top: 4px;
+}
+
+.me-botones {
+    display: flex;
+    gap: 8px;
+    margin-left: auto;
+}
+
+/* Los botones son wc-button: el aspecto, el estado apagado y el foco los trae button.css */
+
+
+/* --- AGRADECIMIENTO ------------------------------------------------------ */
+
+/* Lo pinta un action-result, que trae su icono de exito, su tipografia y su propio CSS. Lo
+   unico que se decide aqui es donde cae: repartiendo el alto que haya, para que el remate
+   quede en medio y no arriba con todo el blanco debajo. Cuando no sobra alto -- la encuesta
+   iba incrustada en una pantalla, o flotando -- no hay nada que repartir y se queda donde
+   estaba la pregunta, que es lo que corresponde.
+
+   El contenedor es una columna, asi que el alto lo reparte justify-content y lo que centra a
+   lo ancho es align-items: sin el, el remate se estira de lado a lado y el texto se lee donde
+   lo deje el ancho que le toque.
+
+   Y es ademas donde se apoya el aspa, que aqui no tiene cabecera en la que posarse. */
+.me-gracias {
+    flex: 1;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    position: relative;
+}
+
+/* El aspa del agradecimiento va suelta en la esquina de la tarjeta y no en el flujo: el
+   contenedor centra lo que lleva dentro, y puesta en el se iria al medio con el remate. El aire
+   que la separa del borde lo pone ella, porque se cuelga de la tarjeta y no de su contenido. */
+.me-gracias .me-cerrar {
+    top: var(--me-espacio);
+    right: var(--me-espacio);
+}
+
+
+/* --- ESTRECHO ------------------------------------------------------------ */
+
+@media (max-width: 480px) {
+    :host([flotante]) {
+        right: 12px;
+        left: 12px;
+        bottom: 12px;
+        width: auto;
+    }
+
+    .me-voto {
+        gap: 12px;
+    }
+
+    .me-voto-opcion {
+        width: auto;
+        flex: 1;
+        min-width: 0;
+    }
+}
+

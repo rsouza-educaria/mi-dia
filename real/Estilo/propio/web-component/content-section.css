@@ -1,0 +1,126 @@
+@import url("internal-layout.css");
+
+/* wc-section.css */
+
+:host {
+    display: block;
+    width: 100%;
+}
+
+.form-section {
+    background: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: var(--radius-md);
+    overflow: visible;
+    transition: all 0.3s ease;
+}
+
+.section-borderless {
+    border: none;
+    background: transparent;
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    font-family: var(--font-family-section);
+    font-size: var(--font-size-section);
+    font-weight: var(--font-weight-section);
+    line-height: var(--line-height-section);
+    letter-spacing: var(--letter-spacing-section);
+    color: #333;
+    border-top-left-radius: var(--radius-md);
+    border-top-right-radius: var(--radius-md);
+}
+
+.section-borderless .section-header {
+    background-color: transparent;
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.has-divider:not(.is-collapsed) .section-header {
+    border-bottom: 1px solid var(--rf-color-border-light, #e5e7eb);
+}
+
+.has-divider.divider-dot:not(.is-collapsed) .section-header {
+    border-bottom: 1px dotted var(--rf-color-border-light, #e5e7eb);
+}
+
+.is-collapsable .section-header {
+    cursor: pointer;
+    user-select: none;
+}
+
+.collapse-icon {
+    margin-right: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s ease;
+    width: 16px;
+    height: 16px;
+}
+
+.is-collapsed .collapse-icon {
+    transform: rotate(-90deg);
+}
+
+.header-icon {
+    flex-shrink: 0;
+    margin-right: 8px;
+}
+
+.header-icon.hidden {
+    display: none;
+}
+
+.header-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 8px;
+    padding: 1px 8px;
+    border-radius: var(--radius-full);
+    font-size: var(--font-size-100);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--line-height-400);
+}
+
+/* [hidden] del UA no gana la cascada frente a esta regla de autor con display explícito;
+   sin esto, el badge vacío queda visible (píldora gris) en cuanto el header se muestra. */
+.header-badge[hidden] {
+    display: none;
+}
+
+/* Gris neutro sólo cuando no hay un color semántico (.status-*) aplicado — evita que esta regla
+   compita en especificidad con .status-success/.status-error/etc. de internal-layout.css, que
+   content-section.css ya importa (no se redefinen esos colores acá). */
+    .header-badge:not([class*="status-"]) {
+        background: var(--color-grey-500);        
+    }
+
+.section-grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 16px;
+    padding: 10px 16px;
+    transition: max-height 0.3s ease, padding 0.3s ease, opacity 0.3s ease;
+}
+
+.section-borderless .section-grid {
+    padding-left: 0;
+    padding-right: 0;
+}
+
+/* Animación de colapsado */
+.is-collapsed .section-grid {
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    opacity: 0;
+    overflow: hidden;
+    /* Evita que los inputs sean focuseables cuando está cerrado */
+    pointer-events: none;
+}

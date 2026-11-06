@@ -1,0 +1,495 @@
+/* ===========================================================================
+   WC-FILE-UPLOAD - Sistema de estilos
+   ===========================================================================
+   Índice:
+     01. Variables CSS
+     02. Host
+     03. Estructura base (card)
+     04. Dropzone
+     05. Dropzone compacto
+     06. Sección de archivos
+     07. Lista de archivos
+     08. Item de archivo
+     09. Badge de extensión
+     10. Estados (hover, disabled, drag-over)
+   =========================================================================== */
+
+@import url("internal-layout.css");
+
+/* 01. VARIABLES CSS ======================================================== */
+
+:host {
+    /* Colores base */
+    --fu-bg-primary: var(--rf-bg-white, #ffffff);
+    --fu-bg-surface: var(--color-grey-100);
+    --fu-bg-input: var(--color-grey-300);
+    --fu-text-primary: var(--rf-color-label);
+    --fu-text-muted: #adb4be;
+
+    /* Espaciado */
+    --fu-padding: 24px;
+    --fu-padding-compact: 10px 24px;
+    --fu-gap: 16px;
+    --fu-radius: var(--rf-radius);
+    --fu-radius-sm: var(--radius-sm);
+
+    /* Tamaños */
+    --fu-dropzone-min-height: 100px;
+    --fu-file-item-height: 36px;
+    --fu-badge-width: 28px;
+    --fu-badge-height: 22px;
+
+    /* Colores de extensiones */
+    --fu-ext-pdf-bg: var(--color-red-100);
+    --fu-ext-pdf-color: var(--color-red-500);
+    --fu-ext-doc-bg: var(--color-blue-200);
+    --fu-ext-doc-color: var(--rf-color-primary);
+    --fu-ext-xls-bg: var(--color-green-50);
+    --fu-ext-xls-color: var(--color-green-600);
+    --fu-ext-img-bg: var(--color-purple-50);
+    --fu-ext-img-color: var(--color-purple-500);
+    --fu-ext-generic-bg: var(--color-grey-400);
+    --fu-ext-generic-color: var(--fu-text-muted);
+
+    /* Transiciones */
+    --fu-transition: var(--wcb-transition, all 0.15s ease);
+}
+
+
+/* 02. HOST ================================================================= */
+
+:host {
+    display: block;
+    width: 100%;
+}
+
+
+/* 03. ESTRUCTURA BASE (CARD) =============================================== */
+
+.fu-card {
+    background: var(--fu-bg-primary);
+    border: 1px solid var(--rf-color-border);
+    border-radius: var(--fu-radius);
+    overflow: visible;
+    transition: border-color 0.15s ease;
+}
+
+.fu-card:hover {
+    border-color: var(--rf-color-primary);
+}
+
+.fu-card.drag-over {
+    border-color: var(--rf-color-primary);
+    outline: 2px solid var(--rf-color-primary);
+    outline-offset: -2px;
+}
+
+
+/* 04. DROPZONE ============================================================= */
+
+.fu-dropzone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 20px var(--fu-padding);
+    min-height: var(--fu-dropzone-min-height);
+    cursor: pointer;
+    text-align: center;
+    transition: background 0.15s ease;
+    border-radius: calc(var(--fu-radius) - 1px);
+}
+
+.fu-dropzone:not(.compact):hover,
+.fu-dropzone:not(.compact).drag-over {
+    background: var(--fu-bg-surface);
+}
+
+.fu-dropzone.compact:hover {
+    background: var(--fu-bg-surface);
+}
+
+
+.fu-cloud-icon {
+    color: var(--rf-color-primary);
+    width: 28px;
+    height: 22px;
+}
+
+.fu-add-icon {
+    display: none;
+    color: var(--rf-color-primary);
+    width: 16px;
+    height: 16px;
+}
+
+.fu-title {
+    font-family: var(--font-family-title);
+    font-size: var(--font-size-title);
+    font-weight: var(--font-weight-title);
+    line-height: var(--line-height-title);
+    letter-spacing: var(--letter-spacing-title);
+    color: var(--rf-color-primary);
+}
+
+.fu-subtitle {
+    font-family: var(--font-family-subtitle);
+    font-size: var(--font-size-subtitle);
+    font-weight: var(--font-weight-subtitle);
+    letter-spacing: var(--letter-spacing-subtitle);
+    color: var(--rf-color-text);
+    line-height: var(--line-height-subtitle);
+}
+
+
+/* 05. DROPZONE COMPACTO ==================================================== */
+
+.fu-dropzone.compact {
+    flex-direction: row;
+    min-height: auto;
+    padding: var(--fu-padding-compact);
+    gap: 8px;
+    justify-content: center;    
+}
+
+.fu-dropzone.compact .fu-cloud-icon {
+    display: none;
+}
+
+.fu-dropzone.compact .fu-add-icon {
+    display: flex;
+    align-items: center;
+}
+
+.fu-dropzone.compact .fu-title {
+    font-size: 13px;
+}
+
+.fu-dropzone.compact .fu-subtitle {
+    display: none;
+}
+
+
+/* 06. SECCIÓN DE ARCHIVOS ================================================== */
+
+.fu-files-section {
+    display: none;
+    overflow: visible;
+}
+
+.fu-files-section.visible {
+    display: block;
+}
+
+.fu-files-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px var(--fu-padding) 8px;
+    border-top: 1px solid var(--rf-color-border);
+}
+
+.fu-files-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--fu-text-primary);
+    flex: 1;
+    line-height: 1.4;
+}
+
+.fu-files-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 18px;
+    padding: 0 6px;
+    border-radius: var(--radius-full);
+    background: var(--color-blue-50);
+    border: 1px solid var(--color-blue-200);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--rf-color-primary);
+}
+
+
+/* 07. LISTA DE ARCHIVOS ==================================================== */
+
+.fu-file-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 0 var(--fu-padding) 14px;
+    overflow: visible;
+}
+
+
+/* 08. ITEM DE ARCHIVO ====================================================== */
+
+.fu-file-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: var(--fu-file-item-height);
+    padding: 0 12px;
+    background: var(--fu-bg-input);
+    border-radius: var(--fu-radius-sm);
+    border: 1px solid transparent;
+    transition: var(--fu-transition);
+}
+
+.fu-file-item:hover {
+    border-color: var(--color-blue-200);
+}
+
+.fu-file-name {
+    flex: 1;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--fu-text-primary);
+    line-height: 1.4;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.fu-file-size {
+    font-size: 11px;
+    color: var(--fu-text-muted);
+    flex-shrink: 0;
+}
+
+.fu-file-actions {
+    display: flex;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.fu-file-delete {
+    flex-shrink: 0;
+}
+
+/* Estilos para wc-button dentro del file item */
+.fu-file-item wc-button {
+    --wcb-color-ghost: var(--fu-text-muted);
+    position: relative;
+}
+
+.fu-file-item wc-button .wcb-btn {
+    width: 22px;
+    height: 22px;
+    min-height: 22px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-sm);
+    transition: all 0.1s ease;
+}
+
+/* Botón eliminar - hover rojo */
+.fu-file-item wc-button.fu-file-delete .wcb-btn:hover {
+    color: var(--color-red-500);
+    background: var(--color-red-100);
+}
+
+/* Botones preview/download - hover azul */
+.fu-file-item wc-button.fu-file-preview .wcb-btn:hover,
+.fu-file-item wc-button.fu-file-download .wcb-btn:hover {
+    color: var(--rf-color-primary);
+    background: var(--fu-ext-doc-bg);
+}
+
+
+/* 09. BADGE DE EXTENSIÓN =================================================== */
+
+.fu-file-ext {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--fu-badge-width);
+    height: var(--fu-badge-height);
+    border-radius: var(--radius-sm);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    flex-shrink: 0;
+    text-transform: uppercase;
+}
+
+/* Colores por tipo de archivo */
+.fu-file-ext.pdf {
+    background: var(--fu-ext-pdf-bg);
+    color: var(--fu-ext-pdf-color);
+}
+
+.fu-file-ext.doc,
+.fu-file-ext.docx {
+    background: var(--fu-ext-doc-bg);
+    color: var(--fu-ext-doc-color);
+}
+
+.fu-file-ext.xls,
+.fu-file-ext.xlsx {
+    background: var(--fu-ext-xls-bg);
+    color: var(--fu-ext-xls-color);
+}
+
+.fu-file-ext.img,
+.fu-file-ext.jpg,
+.fu-file-ext.jpeg,
+.fu-file-ext.png,
+.fu-file-ext.gif,
+.fu-file-ext.webp,
+.fu-file-ext.svg {
+    background: var(--fu-ext-img-bg);
+    color: var(--fu-ext-img-color);
+}
+
+.fu-file-ext.generic {
+    background: var(--fu-ext-generic-bg);
+    color: var(--fu-ext-generic-color);
+}
+
+
+/* 10. ESTADOS ============================================================== */
+
+/* Hidden input */
+.fu-input-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Error state */
+.fu-card.has-error {
+    border-color: var(--rf-color-error);
+    overflow: hidden;
+}
+
+.fu-error-message {
+    display: none;
+    padding: 8px var(--fu-padding);
+    font-size: 12px;
+    color: var(--rf-color-error);
+    background: var(--color-red-100);
+}
+
+.fu-card.has-error .fu-error-message {
+    display: block;
+}
+
+/* Disabled state - siguiendo patrón de la guía */
+:host([disabled]) {
+    cursor: not-allowed;
+}
+
+.fu-card.is-disabled {
+    opacity: var(--wcb-opacity-disabled, 0.45);
+    pointer-events: none;
+}
+
+/* Readonly state - solo visualización de archivos */
+:host([readonly]) .fu-files-section {
+    /* Siempre visible en readonly (se activa con clase visible desde JS) */
+    border-top: none;
+    padding-top: 0;
+}
+
+.fu-card.is-readonly {
+    /* Sin borde exterior ya que no hay dropzone */
+    border: none;
+    background: transparent;
+    padding: 0;
+}
+
+
+/* 11. VARIANTE BUTTON ====================================================== */
+
+.fu-card.fu-button-variant {
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-none);
+    overflow: visible;
+}
+
+.fu-card.fu-button-variant:hover,
+.fu-card.fu-button-variant.drag-over {
+    border: none;
+    border-color: transparent;
+    outline: none;
+}
+
+/* Fila con el botón */
+.fu-button-row {
+    display: flex;
+    align-items: center;
+    padding: 0;
+}
+
+/* Estilo del ícono de upload en el botón */
+.fu-upload-icon {
+    width: 14px;
+    height: 14px;
+}
+
+/* En modo button, la sección de archivos tiene su propio contenedor */
+.fu-card.fu-button-variant .fu-files-section {
+    margin-top: 12px;
+    background: var(--fu-bg-primary);
+    border: 1px solid var(--rf-color-border);
+    border-radius: var(--fu-radius);
+}
+
+.fu-card.fu-button-variant .fu-files-section:hover {
+    border-color: var(--rf-color-primary);
+}
+
+/* Sin header: solo la lista de archivos */
+.fu-card.fu-button-variant .fu-files-section.fu-no-header .fu-file-list {
+    padding: 12px var(--fu-padding);
+}
+
+
+/* 12. ESTADO SUBIENDO (CHUNKED UPLOAD) ===================================== */
+
+/* El item en subida crece para alojar la barra de progreso en una segunda fila */
+.fu-file-item.is-uploading {
+    flex-wrap: wrap;
+    height: auto;
+    padding-top: 6px;
+    padding-bottom: 6px;
+}
+
+/* Porcentaje de subida en lugar del tamanio */
+.fu-uploading-pct {
+    font-variant-numeric: tabular-nums;
+    color: var(--rf-color-primary);
+    font-weight: 600;
+}
+
+/* Pista de la barra de progreso (ocupa toda la fila inferior) */
+.fu-upload-progress {
+    flex-basis: 100%;
+    width: 100%;
+    height: 3px;
+    margin-top: 4px;
+    background: var(--rf-color-border);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+/* Relleno de la barra (el ancho se fija inline desde el JS) */
+.fu-upload-progress-bar {
+    height: 100%;
+    background: var(--rf-color-primary);
+    border-radius: 2px;
+    transition: width 0.3s ease;
+}

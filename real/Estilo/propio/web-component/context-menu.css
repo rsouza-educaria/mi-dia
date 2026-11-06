@@ -1,0 +1,59 @@
+/* ===========================================================================
+   CONTEXT-MENU - Menu contextual (boton derecho)
+   ===========================================================================
+   Comparte el look/UX del popover de <button-bar> para que un ContextMenu pueda
+   integrarse en el futuro como uno de los menus de un ButtonBar. Por eso
+   heredamos button-bar.css (que a su vez importa internal-layout.css -> button.css)
+   y solo sobreescribimos lo propio del menu contextual.
+
+   Indice:
+     01. Variables CSS
+     02. Host
+     03. Panel (hereda .wcbb-popover de button-bar.css)
+     04. Iconos heredados (sprites antiguos)
+   =========================================================================== */
+
+@import url("button-bar.css");
+
+
+/* 01. VARIABLES CSS ======================================================== */
+
+:host {
+    --wccm-z:            var(--wcbb-z-popover, 10600);
+    --wccm-max-height:   360px;
+    --wccm-min-width:    180px;
+    --wccm-max-width:    320px;
+}
+
+
+/* 02. HOST ================================================================= */
+
+/* El host no ocupa espacio: el panel es position:fixed y vive en el top layer */
+:host {
+    display:  block;
+    position: fixed;
+    left:     0;
+    top:      0;
+    width:    0;
+    height:   0;
+    z-index:  var(--wccm-z);
+}
+
+
+/* 03. PANEL (clase .wcbb-popover heredada de button-bar.css) =============== */
+
+.wcbb-popover {
+    z-index:    var(--wccm-z);
+    max-height: var(--wccm-max-height);
+}
+
+
+/* 04. ICONOS HEREDADOS (sprites antiguos del ERP) ========================== */
+
+/* item.iconBackground: se usa la imagen como mascara via --wci-icon-url
+   (ver button.css). Este selector fuerza el pintado con el color del item. */
+.wcbb-popover-row .wcb-btn.cm-ibg .wcb-mask-icon::before {
+    -webkit-mask-image: var(--wci-icon-url);
+    mask-image:         var(--wci-icon-url);
+    background-color:   currentColor;
+}

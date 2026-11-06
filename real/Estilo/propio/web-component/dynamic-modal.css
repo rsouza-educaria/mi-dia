@@ -1,0 +1,286 @@
+/* ===========================================================================
+   DYNAMIC-MODAL - Sistema de estilos
+   ===========================================================================
+   Indice:
+     01. Variables CSS
+     02. Host
+     03. Backdrop y contenido
+     04. Header
+     05. Body
+     06. Footer
+     07. Tamanos
+     08. Animaciones
+   =========================================================================== */
+
+@import url("internal-layout.css");
+
+
+/* 01. VARIABLES CSS ======================================================== */
+
+:host {
+    --dm-bg: var(--rf-bg-white, #fff);
+    --dm-radius: var(--radius-lg);
+    --dm-border: var(--color-grey-300, #e5e5e5);
+    --dm-title-color: var(--color-grey-800, #1f2937);
+    --dm-close-color: var(--color-grey-500, #6b7280);
+    --dm-close-hover: var(--color-grey-800, #1f2937);
+    --dm-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    --dm-backdrop-bg: rgba(0, 0, 0, 0.5);
+    --dm-transition: all 0.15s ease-out;
+}
+
+
+/* 02. HOST ================================================================= */
+
+:host {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 10501;
+}
+
+:host([open]) {
+    display: flex;
+}
+
+
+/* 03. BACKDROP Y CONTENIDO ================================================= */
+
+.modal-backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--dm-backdrop-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: dmFadeIn 0.15s ease-out;
+}
+
+.modal-content {
+    background: var(--dm-bg);
+    border-radius: var(--dm-radius);
+    box-shadow: var(--dm-shadow);
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh;
+    animation: dmSlideIn 0.15s ease-out;
+}
+
+
+/* 04. HEADER =============================================================== */
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--dm-border);
+    flex-shrink: 0;
+}
+
+.modal-header.hidden {
+    display: none;
+}
+
+.modal-header-icon {
+    flex-shrink: 0;
+    margin-right: 10px;
+}
+
+.modal-header-icon.hidden {
+    display: none;
+}
+
+.modal-title {
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--dm-title-color);
+    margin: 0;
+    flex: 1;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: var(--dm-close-color);
+    padding: 0;
+    line-height: 1;
+    margin-left: 12px;
+    transition: color 0.15s ease;
+}
+
+.modal-close:hover {
+    color: var(--dm-close-hover);
+}
+
+.modal-close.hidden {
+    display: none;
+}
+
+
+/* 05. BODY ================================================================= */
+
+.modal-body {
+    padding: 16px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.modal-generated-content:empty {
+    display: none;
+}
+
+.modal-message {
+    margin: 0;
+    white-space: pre-line;
+}
+
+.modal-prompt-wrapper {
+    margin-bottom: 8px;
+}
+
+.modal-prompt-label {
+    display: block;
+    margin-bottom: 4px;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+
+/* 06. FOOTER =============================================================== */
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 12px 16px;
+    border-top: 1px solid var(--dm-border);
+    flex-shrink: 0;
+}
+
+.modal-footer.hidden {
+    display: none;
+}
+
+.modal-footer.has-left-btn {
+    justify-content: space-between;
+}
+
+.footer-left,
+.footer-right {
+    display: flex;
+    gap: 8px;
+}
+
+
+/* 07. TAMANOS ============================================================== */
+
+:host([size="sm"]) .modal-content { 
+    width: 320px; 
+    min-width: 280px; 
+}
+
+:host([size="md"]) .modal-content { 
+    width: 480px; 
+    min-width: 320px; 
+}
+
+:host([size="lg"]) .modal-content { 
+    width: 640px; 
+    min-width: 480px; 
+}
+
+:host([size="xl"]) .modal-content { 
+    width: 800px; 
+    min-width: 640px; 
+}
+
+:host([size="full"]) .modal-content { 
+    width: 90vw; 
+    height: 90vh; 
+}
+
+:host([size="auto"]) .modal-content { 
+    width: auto; 
+    max-width: 95vw; 
+    min-width: 320px; 
+}
+
+
+/* 08. ANIMACIONES ========================================================== */
+
+@keyframes dmFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes dmSlideIn {
+    from { 
+        opacity: 0;
+        transform: scale(0.95) translateY(-10px);
+    }
+    to { 
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+
+/* 07b. PANEL ANCLADO (opcional) ============================================
+   Nada de esto se aplica si no se piden los atributos nuevos, que hoy no pone
+   ninguna llamada: una modal sin backdrop="false" ni placement="anchor" se ve
+   exactamente igual que antes.
+   -------------------------------------------------------------------------- */
+
+/* Sin fondo: se ve la pagina de detras y se puede seguir usando.
+
+   El que tapa no es el fondo, es el :host: position:fixed con los cuatro
+   lados a 0. Aunque sea transparente sigue recibiendo el raton, y la pagina
+   se queda inerte. Se le quitan los clics a todo y se le devuelven solo a la
+   caja, que es lo unico que de verdad esta ahi. */
+:host([backdrop="false"]) {
+    pointer-events: none;
+}
+
+:host([backdrop="false"]) .modal-backdrop {
+    background: transparent;
+    animation: none;
+    pointer-events: none;
+}
+
+:host([backdrop="false"]) .modal-content {
+    pointer-events: auto;
+}
+
+/* Anclado: manda el left/top que calcula el componente, no el centrado. Fixed,
+   porque las coordenadas ya vienen en las de la ventana donde esta la modal. */
+:host([placement="anchor"]) .modal-backdrop {
+    display: block;
+}
+
+:host([placement="anchor"]) .modal-content {
+    position: fixed;
+    top: 0;
+    left: 0;
+}
+
+/* A medida: mismo mecanismo que el anclado, pero el left/top los calcula _aplicarCaja a partir
+   de pos-x / pos-y. Solo se activa si llega una POSICION: pedir unicamente size-x o size-y no
+   cambia el centrado, porque un ancho y un alto en linea conviven con el flex del backdrop. */
+:host([placement="manual"]) .modal-backdrop {
+    display: block;
+}
+
+:host([placement="manual"]) .modal-content {
+    position: fixed;
+    top: 0;
+    left: 0;
+}

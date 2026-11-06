@@ -1,0 +1,801 @@
+@import url("internal-layout.css");
+
+:host {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    flex: 1;
+    min-height: 0; /* Vital para que el flex no colapse */
+    width: 100%;
+}
+
+/* Si el host esta dentro de un contenedor flex-column (p.ej. .form-group del DynamicForm),
+   flex-basis:0% (implicito en flex:1) gana sobre height y lo ignora. Con height explicito
+   forzamos flex-basis:auto para que la altura mande y el scroll interno funcione. */
+:host([height]) {
+    flex: 0 0 auto;
+}
+
+:host([borderless]) .wctl-wrapper {
+    border: none;
+    border-radius: var(--radius-none); /* Opcional: suele quedar mejor sin curvas si va a ras de un contenedor */
+    background: transparent; /* Opcional: por si el padre tiene un color de fondo específico */
+}
+
+/* Si también quieres quitar la línea de la última fila para que quede totalmente limpio: */
+:host([borderless]) .wctl-row,
+:host([borderless]) .wctl-header {
+    border-bottom: none;
+}
+
+.wctl-wrapper {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    border: 1px solid var(--rf-color-border-light);
+    border-radius: var(--rf-radius);
+    background: var(--rf-bg-white);
+    overflow: hidden;
+}
+
+/* --- CABECERA --- */
+.wctl-header {
+    display: flex;
+    align-items: center;
+    padding: 0.8rem 1rem;
+    border-bottom: 1px solid var(--rf-color-border-light);
+    background-color: var(--rf-bg-light);
+    gap: 1rem;
+}
+
+:host([borderless]) .wctl-header {
+    background-color: transparent;
+}
+
+.wctl-search-box {
+    flex-grow: 1;
+}
+
+.wctl-search-input {
+    display: block; /* Vital para que el Web Component ocupe el espacio correcto */
+    width: 100%;
+}
+
+/* --- FILAS DEL ÁRBOL --- */
+.wctl-tree-root {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    flex-grow: 1;
+    overflow-y: auto;
+}
+
+.wctl-node {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.wctl-row {
+    display: flex;
+    align-items: center;
+    padding: 0.6rem 0.1rem;
+    border-bottom: 1px solid var(--rf-color-border-light);
+    border-left: 4px solid var(--wctl-row-border-rest, transparent);
+    transition: background-color 0.2s, border-left-color 0.2s;
+    position: relative;
+}
+
+/* node.borderColor: en reposo el borde sale con opacidad; en hover / seleccionada / desplegada
+   con contenido toma el color pleno (esas reglas usan --wctl-row-border-color en vez del azul de foco). */
+.wctl-row.has-border-color {
+    --wctl-row-border-rest: color-mix(in srgb, var(--wctl-row-border-color) 80%, transparent);
+}
+
+    .wctl-row:hover {
+        background-color: var(--rf-bg-normal);
+        border-left-color: var(--wctl-row-border-color, var(--rf-color-border-focus));
+    }
+
+.wctl-indent {
+    flex-shrink: 0;
+}
+/* --- ZONAS DE LA FILA --- */
+.wctl-zone-left {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    margin-right: 0.2rem;
+    min-width: 10px;
+}
+
+.wctl-expander {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--rf-color-text-sec);
+    border-radius: var(--radius-sm);
+    margin-right: 4px;
+    transition: background 0.2s, color 0.2s;
+}
+
+    .wctl-expander:hover {
+        background-color: var(--rf-color-border);
+        color: var(--rf-color-text);
+    }
+
+    .wctl-expander.is-hidden {
+        display: none;
+    }
+
+    /* Placeholder de alineacion: nodo sin children/content en un GRUPO DE HERMANOS (mismo padre,
+       o nivel raiz) donde algun hermano si es expandible. Ocupa el mismo hueco que un expander
+       real (mismo ancho/alto/margen) pero vacio y sin interaccion, para que el titulo/icono de
+       todas las filas hermanas arranque a la misma altura.
+       Oculto por defecto (display:none, sin reservar hueco). El contenedor de ESE grupo concreto
+       (.wctl-tree-root para la raiz, o el .wctl-children-container de un padre) lleva la clase
+       has-expandable cuando alguno de sus hijos directos es expandible; el combinador ">" limita
+       el efecto a esos hermanos directos, sin colar a niveles mas profundos (que tienen su propio
+       contenedor y su propia clase independiente). Asi, los nietos pueden ser todos hoja y no
+       reservar hueco, aunque el nivel raiz si lo haga, y viceversa. */
+    .wctl-expander.is-placeholder {
+        display: none;
+        cursor: default;
+        pointer-events: none;
+    }
+
+.wctl-tree-root.has-expandable > .wctl-node > .wctl-row .wctl-expander.is-placeholder,
+.wctl-children-container.has-expandable > .wctl-node > .wctl-row .wctl-expander.is-placeholder {
+    display: flex;
+}
+
+    .wctl-expander svg {
+        width: 16px;
+        height: 16px;
+    }
+
+.wctl-zone-center {
+    display: flex;
+    align-items: center;
+    flex: 1 1 0;
+    min-width: 0; /* permite que el contenido encoja y aplique ellipsis */
+    gap: 0.75rem;
+    overflow: hidden;
+}
+
+    /* Filas sin textos a la derecha: hasta 240px para foto + nombre antes de que lo recorten los
+       botones, dejando siempre 175px a la zona derecha (un botón text-out de 74px + el «…» +
+       separaciones). Lo que no cabe pasa al «…». Con rightTitle/rightSubtitle no se aplica: el
+       texto se come esos 175px y la botonera se quedaría solo con el «…». */
+    .wctl-row:not(:has(.wctl-right-info)) > .wctl-zone-center {
+        min-width: min(240px, calc(100% - 175px));
+    }
+
+    .wctl-zone-center.is-clickable,
+    .wctl-zone-center.is-clickable .image-preview-area {
+        cursor: pointer !important;
+    }
+
+    /* La foto del nodo no encoge. Sin esto, con poco ancho (panel colapsado) comparte el
+       encogimiento con el nombre y su tamaño depende de lo largo que sea: las fotos de una
+       misma lista salen desiguales (medido 26 a 42 px frente a los 52 px de width). */
+    .wctl-zone-center > wc-image {
+        flex-shrink: 0;
+    }
+
+/* Bloque (no flex): si es flex-item, la caja de linea del span se ajusta
+   demasiado y overflow:hidden recorta la tilde de las mayusculas (Á/É/Ó).
+   Con layout de bloque la altura la marca el line-height y la tilde cabe. */
+.wctl-info {
+    display: block;
+    min-width: 0; /* clave para que title/subtitle se trunquen con ellipsis */
+}
+
+.wctl-title {
+    display: block;
+    font-family: var(--font-family-title);
+    font-size: var(--font-size-title);
+    font-weight: var(--font-weight-title);
+    line-height: var(--line-height-title);
+    letter-spacing: var(--letter-spacing-title);
+    color: var(--rf-color-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    /* padding vertical: overflow:hidden recorta en el borde de padding, no en
+       el de contenido. Esta holgura evita que la tilde de las mayusculas
+       (Á/É/Ó) se corte, sin afectar al ellipsis horizontal. */
+    padding-block: 3px;
+}
+
+.wctl-subtitle {
+    display: block;
+    font-family: var(--font-family-help);
+    font-size: var(--font-size-help);
+    font-weight: var(--font-weight-help);
+    line-height: var(--line-height-help);
+    letter-spacing: var(--letter-spacing-help);
+    color: var(--rf-color-text-sec);
+    margin-top: -3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-block: 3px;
+}
+
+.wctl-zone-right {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex: 0 1 auto;       /* se dimensiona al contenido pero puede encoger */
+    min-width: 0;         /* permite que el texto interior se trunque */
+    max-width: 60%;       /* tope para no fagocitar la zona central */
+    margin-left: auto;
+    padding-left: 1rem;
+    padding-right: 0.2rem;
+    /* Holgura vertical para que el badge de un boton (posicionado en top:-5px,
+       sobresale por encima del boton) no lo recorte el overflow:hidden de abajo.
+       El overflow recorta en el borde del padding-box, asi que este padding
+       amplia la caja de recorte hacia el padding vertical de la propia fila
+       (0.6rem), sin desbordarla. No se toca overflow (button-bar mide/colapsa
+       sus botones y podria verse afectado) ni el centrado (padding simetrico). */
+    padding-block: 5px;
+    white-space: nowrap;
+    flex-wrap: nowrap;
+    overflow: hidden;
+}
+
+    /* button-bar de nodo: ancho natural, pero puede encoger para que su
+       ResizeObserver colapse botones al "..." cuando falta espacio. */
+    .wctl-zone-right .wctl-btn-bar {
+        flex: 0 1 auto;
+        min-width: 0;
+        padding-right: 0.5rem;
+    }
+
+    /* Ese ancho natural es el de TODOS sus botones (--wcbb-full-width, lo publica el propio button-bar), no
+       el de los que caben ahora: si no, al pasar botones al "..." la zona encoge con ellos y ya no vuelve a
+       crecer cuando la fila se ensancha (p.ej. al ampliar el panel). Sin la variable, ancho de su contenido. */
+    .wctl-btn-bar > button-bar {
+        width: var(--wcbb-full-width, auto);
+        max-width: 100%;
+    }
+
+/* Textos info en la zona derecha (node.rightTitle / node.rightSubtitle).
+   Bloque (no flex) por el mismo motivo que .wctl-info: evitar que
+   overflow:hidden recorte la tilde de las mayusculas. */
+.wctl-right-info {
+    display: block;
+    text-align: right;
+    overflow: hidden;
+    flex: 1 1 auto; /* ocupa el hueco disponible y encoge con ellipsis */
+    min-width: 0;
+    padding-right: 0.5rem;
+}
+
+.wctl-right-title {
+    display: block;
+    font-family: var(--font-family-title);
+    font-size: var(--font-size-title);
+    font-weight: var(--font-weight-title);
+    line-height: var(--line-height-title);
+    letter-spacing: var(--letter-spacing-title);
+    color: var(--rf-color-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-block: 3px;
+}
+
+.wctl-right-subtitle {
+    display: block;
+    font-family: var(--font-family-help);
+    font-size: var(--font-size-help);
+    font-weight: var(--font-weight-help);
+    line-height: var(--line-height-help);
+    letter-spacing: var(--letter-spacing-help);
+    color: var(--rf-color-text-sec);
+    margin-top: -3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-block: 3px;
+}
+
+/* rightTitle/rightSubtitle como objeto: badge <wc-status> en vez de texto. No se reutilizan
+   .wctl-right-title/.wctl-right-subtitle (asumen texto plano y pisarian el display:flex propio
+   de wc-status). Solo margen para separar dos badges apilados (rightTitle + rightSubtitle). */
+.wctl-right-status {
+    max-width: 100%;
+    margin-block: 2px;
+}
+
+/* buttons-on-focus: botones flotando sobre la fila, sin reservar espacio.
+   La barra solo es tan ancha como los botones (width:auto), no toda la fila,
+   y el contenedor nunca captura clics: solo los botones reales lo hacen, asi
+   el onClick de la fila sigue funcionando bajo la barra. */
+:host([buttons-on-focus]) .wctl-zone-right .wctl-btn-bar {
+    position: absolute;
+    right: 0.2rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: auto;
+    min-width: 0;
+    max-width: calc(100% - 1rem);
+    opacity: 0;
+    pointer-events: none;       /* el contenedor deja pasar el clic a la fila */
+    transition: opacity 0.15s;
+}
+
+    /* Los botones reales solo son clicables cuando la barra esta visible */
+    :host([buttons-on-focus]) .wctl-row:hover .wctl-btn-bar > button-bar,
+    :host([buttons-on-focus]) .wctl-row:focus-within .wctl-btn-bar > button-bar {
+        pointer-events: auto;
+    }
+
+:host([buttons-on-focus]) .wctl-row:hover .wctl-btn-bar,
+:host([buttons-on-focus]) .wctl-row:focus-within .wctl-btn-bar {
+    opacity: 1;
+    background: color-mix(in srgb, var(--rf-bg-light) 30%, transparent);
+}
+
+:host([buttons-on-focus]) .wctl-row.is-selected:hover .wctl-btn-bar,
+:host([buttons-on-focus]) .wctl-row.is-selected:focus-within .wctl-btn-bar {
+    background: color-mix(in srgb, var(--rf-bg-selected-hover) 30%, transparent);
+}
+
+.wctl-children-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+/* Panel de contenido personalizado (node.content): dynamic-form u otro
+   componente que se pinta al desplegar el nodo, en vez de sus children. */
+.wctl-content-panel {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.75rem 1rem;
+}
+
+/* Apertura y cierre suaves del panel de contenido. _toggleExpand solo alterna
+   style.display (none/block), asi que el panel saltaba de 0 a su altura en un fotograma.
+   - height:auto + interpolate-size permite animar hacia/desde la altura natural.
+   - @starting-style anima la entrada (display pasa de none a block).
+   - display con allow-discrete mantiene el panel visible mientras dura la salida.
+   - El estado cerrado se detecta por el style inline que escribe _toggleExpand.
+   Sin soporte de interpolate-size el panel se comporta como antes (sin animar la altura). */
+.wctl-content-panel {
+    overflow: hidden;
+    interpolate-size: allow-keywords;
+    height: auto;
+    opacity: 1;
+    transition: height 0.25s ease, opacity 0.2s ease, padding-block 0.25s ease,
+                display 0.25s allow-discrete;
+}
+
+    .wctl-content-panel[style*="display: none"] {
+        height: 0;
+        opacity: 0;
+        padding-block: 0;
+    }
+
+@starting-style {
+    .wctl-content-panel {
+        height: 0;
+        opacity: 0;
+        padding-block: 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .wctl-content-panel {
+        transition: none;
+    }
+}
+
+/* Fila desplegada con detalle (node.content): se ve como seleccionada (.wctl-row.is-selected) y su
+   detalle lleva fondo y borde inferior, para que quede claro a que fila pertenece. Todas las filas
+   tienen .wctl-content-panel, pero solo se muestra (sin el display:none en linea que escribe el JS)
+   en un nodo con content desplegado. Las filas que despliegan hijos no se resaltan: se
+   confundirian con la seleccion. */
+.wctl-node:has(> .wctl-content-panel:not([style*="display: none"])) > .wctl-row[aria-expanded="true"] {
+    background-color: var(--rf-bg-dark);
+    border-left-color: var(--wctl-row-border-color, var(--rf-color-border-focus));
+}
+
+    .wctl-node:has(> .wctl-content-panel:not([style*="display: none"])) > .wctl-row[aria-expanded="true"]:hover {
+        background-color: var(--color-grey-200);
+    }
+
+.wctl-content-panel {
+    background-color: var(--rf-bg-normal);
+    border-bottom: 1px solid var(--rf-color-border-light);
+}
+/* --- ZONA ACCIONES Y MENÚ --- */
+.wctl-actions-wrapper {
+    position: relative;
+    margin-left: 4px;
+}
+
+.wctl-btn-more {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: var(--radius-sm);
+    color: var(--rf-color-text-sec);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, color 0.2s;
+}
+
+    .wctl-btn-more:hover {
+        background-color: var(--rf-color-border);
+        color: var(--rf-color-text);
+    }
+
+    .wctl-btn-more svg {
+        width: 20px;
+        height: 20px;
+    }
+/* El menú desplegable */
+.wctl-actions-menu {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 100%;
+    background: var(--rf-bg-white);
+    border: 1px solid var(--rf-color-border-light);
+    border-radius: var(--rf-radius);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    z-index: 100;
+    min-width: 150px;
+    padding: 0.5rem 0;
+    flex-direction: column;
+}
+
+    .wctl-actions-menu.is-open {
+        display: flex;
+    }
+
+.wctl-action-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: none;
+    border: none;
+    width: 100%;
+    text-align: left;
+    padding: 0.6rem 1rem;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: var(--rf-color-text);
+    transition: background 0.2s;
+}
+
+    .wctl-action-item:hover {
+        background-color: var(--rf-bg-light);
+    }
+
+.wctl-action-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+    .wctl-action-icon svg {
+        width: 18px;
+        height: 18px;
+    }
+/* Icono de nodo (wc-icon) */
+.wctl-custom-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+/* Ejemplo de cómo usar la clase personalizada que añadimos a la fila */
+.wctl-row.row-highlight {
+    background-color: #fff9e6; /* Un amarillo suave */
+}
+
+.wctl-row.row-error {
+    border-left: 4px solid #dc3545;
+}
+
+/* --- ESTADO VACÍO (EMPTY STATE) --- */
+.wctl-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 1rem;
+    color: var(--rf-color-text-sec, #6c757d);
+    text-align: center;
+    flex-grow: 1; /* Si el componente tiene height, esto lo centra verticalmente */
+}
+
+.wctl-empty-icon {
+    margin-bottom: 0.8rem;
+}
+
+    .wctl-empty-icon svg {
+        width: 42px;
+        height: 42px;
+    }
+
+.wctl-empty-text {
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+.wctl-actions-inline {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+}
+
+.wctl-actions-wrapper.is-hidden {
+    display: none;
+}
+
+.wctl-action-btn {
+    /* Estilos de botón real (con bordes y padding adaptable) */
+    background: var(--rf-bg-white, #ffffff);
+    border: 1px solid var(--rf-color-border-light);
+    cursor: pointer;
+    min-width: 32px; /* Mínimo para que si es solo icono quede cuadrado */
+    height: 32px; /* Alto fijo para alinear perfecto con el resto */
+    padding: 0 0.6rem; /* Padding lateral para que el texto respire */
+    border-radius: var(--rf-radius);
+    color: var(--rf-color-text-sec);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    font-size: 0.85rem;
+    font-family: inherit;
+    white-space: nowrap; /* Evita que el texto salte a dos líneas */
+    transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+
+    .wctl-action-btn:hover {
+        background-color: var(--rf-bg-light);
+        color: var(--rf-color-text);
+        border-color: var(--rf-color-border, #ccc);
+    }
+
+/* Le damos el mismo estilo base al botón de "Más" (los 3 puntitos) */
+.wctl-btn-more {
+    background: var(--rf-bg-white, #ffffff);
+    border: 1px solid var(--rf-color-border-light);
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    padding: 0; /* Este sí es siempre cuadrado */
+    border-radius: var(--rf-radius);
+    color: var(--rf-color-text-sec);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+
+    .wctl-btn-more:hover {
+        background-color: var(--rf-bg-light);
+        color: var(--rf-color-text);
+        border-color: var(--rf-color-border, #ccc);
+    }
+
+    /* --- ACCESIBILIDAD Y FOCO --- */
+    .wctl-btn-more:focus-visible,
+    .wctl-expander:focus-visible,
+    .wctl-action-item:focus-visible,
+    .wctl-search-input:focus-visible,
+    .wctl-action-btn:focus-visible {
+        outline: 2px solid var(--rf-color-primary, #007bff);
+        outline-offset: -2px;
+    }
+
+/* --- ESTILOS PARA SELECCIÓN ÚNICA (SINGLE SELECT) --- */
+.wctl-row.is-single-selectable {
+    cursor: pointer;
+    transition: background-color 0.2s, border-left-color 0.2s;
+}
+
+.wctl-row.is-selected {
+    background-color: var(--rf-bg-dark);
+    border-left-color: var(--wctl-row-border-color, var(--rf-color-border-focus));
+}
+
+    .wctl-row.is-selected:hover {
+        background-color: var(--color-grey-200);
+    }
+
+/* Centinela de paginacion por scroll infinito */
+.wctl-load-sentinel {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 0;
+    flex-shrink: 0;
+}
+
+.wctl-load-sentinel::before {
+    content: '';
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--rf-color-border-light, #e5e7eb);
+    border-top-color: var(--rf-color-primary, #3b82f6);
+    border-radius: var(--radius-circle);
+    animation: wctl-spin 0.7s linear infinite;
+}
+
+@keyframes wctl-spin {
+    to { transform: rotate(360deg); }
+}
+
+/* --- DRAG & DROP (Fase 5) ------------------------------------------------- */
+
+/* Columna del asa: primera de la fila (antes de la sangria), asi el asa queda siempre en el borde
+   izquierdo, sea padre o hijo. Se reserva en TODAS las filas de un arbol sortable (vacia en las
+   que no se pueden arrastrar) para que el contenido de todas arranque alineado. */
+.wctl-drag-gutter {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 20px;
+}
+
+/* Asa de arrastre. Visibilidad segun capacidad de puntero, NO segun un atributo: en tactil no
+   existe :hover real, asi que ocultarla hasta el hover la dejaria invisible para siempre. */
+.wctl-drag-handle {
+    width: 20px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--rf-color-text-sec);
+    cursor: grab;
+    touch-action: none; /* el dedo arrastra la fila, no hace scroll de la lista */
+    opacity: 0;
+    transition: opacity 0.15s, color 0.2s;
+}
+
+    .wctl-drag-handle svg {
+        width: 16px;
+        height: 16px;
+    }
+
+/* Raton/trackpad: solo aparece al hover o foco de la fila (igual criterio que buttons-on-focus) */
+@media (hover: hover) {
+    .wctl-row:hover .wctl-drag-handle,
+    .wctl-row:focus-within .wctl-drag-handle {
+        opacity: 1;
+    }
+}
+
+/* Tactil/lapiz: no hay hover real que la revele, asi que se ve siempre */
+@media (hover: none) {
+    .wctl-drag-handle {
+        opacity: 1;
+    }
+}
+
+.wctl-drag-handle:hover {
+    color: var(--rf-color-text);
+}
+
+/* Fila que se esta arrastrando: se atenua solo la fila (sus hijos ya renderizados, si los
+   tuviera, siguen viendose con normalidad mientras dura el arrastre — no se reubican hasta soltar). */
+.wctl-node.is-dragging > .wctl-row {
+    opacity: 0.4;
+}
+
+/* Mientras el arrastre esta activo, cursor "grabbing" en toda la lista y sin seleccion de texto
+   (moverse rapido con el raton no debe pintar texto de las filas). */
+.wctl-tree-root.wctl-dnd-active {
+    cursor: grabbing;
+    user-select: none;
+}
+
+    .wctl-tree-root.wctl-dnd-active .wctl-row {
+        cursor: grabbing;
+    }
+
+/* Indicador de destino: clases sobre la propia fila candidata, sin overlay flotante (al estar ya
+   en flujo normal no hay contexto de apilamiento que resolver — a diferencia del fantasma, que
+   si necesita top layer por moverse libremente sobre toda la pantalla). */
+.wctl-row.wctl-drop-before {
+    box-shadow: inset 0 2px 0 0 var(--rf-color-primary, #3b82f6);
+}
+
+.wctl-row.wctl-drop-after {
+    box-shadow: inset 0 -2px 0 0 var(--rf-color-primary, #3b82f6);
+}
+
+.wctl-row.wctl-drop-inside {
+    background-color: color-mix(in srgb, var(--rf-color-primary, #3b82f6) 12%, transparent);
+    outline: 2px dashed var(--rf-color-primary, #3b82f6);
+    outline-offset: -2px;
+}
+
+.wctl-row.wctl-drop-invalid {
+    outline: 2px dashed var(--rf-color-error, #ef4444);
+    outline-offset: -2px;
+    cursor: not-allowed;
+}
+
+/* Fantasma flotante que sigue al puntero durante el arrastre. TOP LAYER (popover nativo, ver
+   ButtonBar._openPopover para el mismo patron): un position:fixed + z-index normal no basta si
+   el tree-list vive dentro de un contenedor con transform/contain/opacity<1 (modal, right-sidebar),
+   que lo recortaria o lo dejaria tapado por contenido posterior de la pagina. Al llevar el
+   atributo [popover], el navegador aplica su hoja de estilos UA (inset:0; margin:auto; border:
+   solid; padding:.25em; color:CanvasText) y hay que neutralizar lo que rompe el layout.
+   El z-index se mantiene para el fallback en navegadores sin la API. */
+.wctl-drag-ghost {
+    position: fixed;
+    inset: auto;   /* anula inset:0 del UA (right/bottom:0 fijarian el ancho) */
+    margin: 0;     /* anula margin:auto del UA */
+    top: 0;
+    left: 0;
+    z-index: 9999;
+    background: var(--rf-bg-white);
+    border: 1px solid var(--rf-color-border-light);
+    border-radius: var(--rf-radius);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    padding: 0.4rem 0.8rem;
+    box-sizing: border-box;
+    font-family: var(--font-family-title);
+    font-size: var(--font-size-title);
+    font-weight: var(--font-weight-title);
+    color: var(--rf-color-text);
+    max-width: 240px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    pointer-events: none;
+}
+
+/* Region aria-live (Fase 4): anuncia cada movimiento a lectores de pantalla sin mostrar nada en
+   pantalla. Receta estandar de "visualmente oculto pero accesible" (misma que .sr-only de
+   Bootstrap, replicada aqui porque esa clase vive en el DOM ligero y no atraviesa el Shadow DOM). */
+.wctl-sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.wctl-row.registro-modificado {
+    border-left: 4px solid var(--color-warning-500, #f59e0b);
+    background: rgba(245, 158, 11, 0.08);
+}
+
+    .wctl-row.registro-modificado .wctl-title::before {
+        content: "✦";
+        color: var(--color-warning-600, #d97706);
+        font-weight: 700;
+        margin-right: 0.35rem;
+    }
+
+    .wctl-row.registro-modificado .wctl-right-title {
+        color: var(--color-warning-700, #b45309);
+        font-weight: 700;
+    }

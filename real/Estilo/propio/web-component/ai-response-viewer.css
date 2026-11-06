@@ -1,0 +1,1418 @@
+﻿/* ===========================================================================
+   AI-RESPONSE-VIEWER - Visor de respuestas de IA (markdown + trazas)
+   ===========================================================================
+   Indice:
+     01. Variables CSS
+     02. Host
+     03. Tarjeta y cabecera
+     04. Cuerpo: estado de carga
+     05. Cuerpo: markdown
+     06. Cuerpo: estados error / vacio
+     07. Pie: consultas realizadas y aviso
+     08. Responsive
+     09. Movimiento reducido
+     10. Exportacion: imprimir y guardar como PDF
+
+   Identidad IA: misma familia visual que el boton de Acciones IA
+   (acciones-ia/ia-acciones-button.css): morado de descubrimiento, marco lila
+   y estrellas cian/verde/amarilla del destello.
+   =========================================================================== */
+
+@import url("internal-layout.css");
+@import url("icon-catalog.css"); /* glifo `copiar` del boton de la cabecera */
+
+
+/* 01. VARIABLES CSS ======================================================== */
+
+/* Los tokens se declaran tambien sobre .arv-export porque el documento que se imprime y el que
+   se convierte a PDF son un documento aparte (ver _htmlExportable en AiResponseViewer.js): ahi no
+   hay shadow host, asi que un `:host` a secas no casa con nada y TODOS los --arv-* quedarian sin
+   valor. Era la causa de que lo impreso saliera plano y sin colores. */
+:host,
+.arv-export {
+    /* Identidad IA (mismos primitivos que ia-acciones-button.css) */
+    --arv-color-ia: var(--color-purple-500, #6352C7);
+    --arv-color-ia-suave: var(--color-purple-50, #F1EFFA);
+    --arv-color-marco: var(--color-purple-200, #DAD6F2);
+    /* Paso de carga activo. Verde Alexia y no el morado de la IA: el morado ya lo llevan el
+       titulo de la tarjeta y el mensaje de carga, asi que repetirlo dejaba el paso actual sin
+       destacar sobre ellos. Se usa green-700, el verde primario de la paleta: los verdes mas
+       claros (incluido el #7cbf86 pedido) se quedan en 2-3:1 sobre blanco y no llegan al 4.5:1
+       que exige un texto de este tamano; green-700 esta documentado en colors.css como 4.87:1 AA. */
+    --arv-paso-activo: var(--color-green-700, #4E7D36);
+
+    /* Onda que recorre el paso activo. Va hacia un verde MAS OSCURO, no mas claro: aclarando,
+       las letras del pico casi desaparecian sobre blanco y parecia un fallo de pintado en vez
+       de un efecto. Oscureciendo, la onda solo puede mejorar el contraste respecto al base. */
+    --arv-shimmer: var(--color-green-900, #2F4E22);
+    --arv-estrella-cian: var(--color-cyan-500, #3F96B4);
+    --arv-estrella-verde: var(--color-green-600, #71A850);
+    --arv-estrella-amarilla: var(--color-yellow-400, #F5D83E);
+
+    /* Superficie y texto */
+    --arv-bg: var(--rf-bg-white);
+    --arv-bg-footer: var(--rf-bg-light);
+    --arv-text: var(--rf-color-text);
+    --arv-text-sec: var(--rf-color-text-sec);
+    --arv-border: var(--arv-color-marco);
+    --arv-border-suave: var(--rf-color-border-light);
+    --arv-radius: var(--radius-lg);
+
+    /* Ritmo vertical */
+    --arv-padding: 20px;
+    --arv-gap: 16px;
+
+    /* Medida de lectura del cuerpo. Sin limite por defecto: el visor ocupa lo que le da su
+       anfitrion, y en un panel lateral eso ya es una columna estrecha. Un anfitrion ancho la fija
+       (la pestaña de ficha pasa de 150 caracteres por linea y ahi el ojo pierde el renglon al
+       volver a la izquierda). */
+    --arv-medida-lectura: none;
+
+    /* Escenas de carga (AiResponseViewer.js): paleta de la web de Alexia mapeada a tokens.
+       El verde pizarra no existe en la escala green (misma excepcion que --ia-color-marco). */
+    --arv-esc-azul: var(--color-blue-500, #285A92);
+    --arv-esc-cian: var(--color-cyan-500, #3F96B4);
+    --arv-esc-verde: var(--color-green-600, #71A850);
+    --arv-esc-amarillo: var(--color-yellow-500, #EEC147);
+    --arv-esc-gris: var(--color-grey-700, #5C5C5C);
+    --arv-esc-suave: var(--color-blue-200, #D3E3F2);
+    --arv-esc-suave-oscuro: var(--color-blue-300, #91B3D7);
+    --arv-esc-claro: var(--color-grey-300, #F4F5F7);
+    --arv-esc-blanco: var(--rf-bg-white, #FFFFFF);
+    --arv-esc-pizarra: #2B5B4F;
+    --arv-esc-madera: var(--color-yellow-700, #CC9E43);
+    --arv-esc-madera-oscura: var(--color-yellow-800, #B07B1A);
+    --arv-esc-tiza: var(--color-grey-100, #FDFDFD);
+    --arv-esc-tiza-amarilla: var(--color-yellow-300, #FBE77A);
+    --arv-esc-tiza-rosa: var(--color-red-300, #F0A6A6);
+    --arv-esc-manzana: var(--color-red-500, #D94A4A);
+    --arv-esc-hoja-oscura: var(--color-green-700, #4E7D36);
+    /* Piel y pelo de los personajes: sin token en colors.css (paleta de ilustracion de la web). */
+    --arv-piel-a: #E0B48C;
+    --arv-piel-b: #D9A97F;
+    --arv-piel-c: #B98F66;
+    --arv-piel-d: #A97F5A;
+    --arv-piel-e: #F0C8A0;
+    --arv-piel-f: #8D6547;
+    --arv-pelo-a: #7A3324;
+    --arv-pelo-b: #1F1F1F;
+    --arv-pelo-c: #C2A06A;
+    --arv-pelo-d: #3B2A20;
+    --arv-pelo-e: #A0522D;
+    /* Multiplicador de duracion de las escenas: 1 normal, 3 con prefers-reduced-motion. */
+    --arv-esc-v: 1;
+
+}
+
+
+/* 02. HOST ================================================================= */
+
+/* Mismo motivo que en la seccion 01: .arv-export es la raiz del documento exportado y necesita la
+   tipografia, el color y el contenedor de consulta que aqui recibe el host. */
+:host,
+.arv-export {
+    display: block;
+    width: 100%;
+    container-type: inline-size;
+    font-family: var(--font-family-ui);
+    color: var(--arv-text);
+}
+
+:host([hidden]) {
+    display: none;
+}
+
+/* El [hidden] del navegador es una regla del UA: no gana a una regla de autor con display
+   explicito (aqui hay varios flex). Sin esto, la escena de carga y el pie se quedarian
+   visibles al pasar a error o a exito. Mismo caso que .header-badge[hidden] en content-section. */
+.arv-loading[hidden],
+.arv-scene[hidden],
+.arv-loading-steps[hidden],
+.arv-markdown[hidden],
+.arv-charts[hidden],
+.arv-state[hidden],
+.arv-footer[hidden],
+.arv-traces[hidden],
+.arv-notice[hidden],
+.arv-subtitle[hidden],
+.arv-heading[hidden],
+.arv-accion[hidden],
+.arv-header[hidden] {
+    display: none !important;
+}
+
+
+/* 03. TARJETA Y CABECERA =================================================== */
+
+/* Tamaño base de todo el visor: cabecera, pie y cualquier texto que no fije el suyo lo
+   heredan de aqui. Es el unico sitio donde subir o bajar el cuerpo del componente. */
+.arv-card {
+    display: flex;
+    flex-direction: column;
+    font-size: var(--font-size-300);
+    line-height: var(--line-height-300);
+    background: var(--arv-bg);
+    border: 1px solid var(--arv-border);
+    border-radius: var(--arv-radius);
+    /* Sin overflow:hidden a proposito: recortaba, pero tambien anulaba el position:sticky de la
+       cabecera (basta un ancestro con overflow distinto de visible). No hay nada que recortar: el
+       texto sin espacios lo parte overflow-wrap:anywhere y las tablas scrollan solas. Las esquinas
+       de arriba las redondea la propia cabecera. */
+}
+
+.arv-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px var(--arv-padding);
+    background: var(--arv-bg);
+    border-bottom: 1px solid var(--arv-border);
+    /* El informe mide varias pantallas: la marca de tiempo y las acciones (imprimir, guardar como
+       PDF, copiar) tienen que seguir a mano sin volver arriba del todo. Opaca por lo mismo: con
+       fondo transparente el contenido se ve pasar por debajo. */
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    border-radius: calc(var(--arv-radius) - 1px) calc(var(--arv-radius) - 1px) 0 0;
+}
+
+/* Logo del centro. Acompana al titulo, asi que solo sale en el documento que se imprime o se
+   guarda como PDF, el unico que se titula (igual que el visor del asistente de texto). */
+.arv-header-logo {
+    flex-shrink: 0;
+    max-height: 40px;
+    max-width: 160px;
+    width: auto;
+    object-fit: contain;
+}
+
+/* Con logo del centro, el destello sobra: dos marcas juntas compiten y el aviso del pie ya dice
+   que el contenido lo ha generado una IA. Se resuelve por hermano adyacente porque el logo va
+   justo antes del destello en el marcado. */
+.arv-header-logo:not([hidden]) + .arv-header-icon {
+    display: none;
+}
+
+.arv-header-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-circle);
+    background: var(--rf-bg-white);
+}
+
+.arv-header-icon svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* min-width:0 para que el titulo pueda encogerse: un flex item no baja de su contenido
+   minimo por defecto y empujaria la cabecera fuera de la tarjeta. */
+.arv-header-texts {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    flex: 1;
+}
+
+.arv-heading {
+    margin: 0;
+    font-family: var(--font-family-title);
+    font-size: var(--font-size-title);
+    font-weight: var(--font-weight-title);
+    line-height: var(--line-height-title);
+    letter-spacing: var(--letter-spacing-title);
+    color: var(--arv-color-ia);
+    overflow-wrap: break-word;
+}
+
+/* Segunda linea del titulo: el nombre del informe debajo del nombre del objeto
+   ("Primero de Bachillerato A" / "Situacion 360 IA"). Ni tan marcado como el titulo ni tan
+   apagado como la marca de tiempo. */
+.arv-report-name {
+    margin: 0;
+    font-weight: var(--font-weight-semibold);
+    color: var(--arv-text);
+}
+
+.arv-subtitle {
+    margin: 0;
+    color: var(--arv-text-sec);
+}
+
+/* Barra de meta, la cabecera en pantalla: el anfitrion ya titula, asi que solo lleva el destello
+   de IA, la marca de tiempo y las acciones. Mas baja y con el icono pequeño, para que no compita
+   con el titulo de la pestaña o del panel. Va en blanco: una franja teñida que solo lleva la hora
+   pasaba por cabecera de la pantalla. El documento exportado le quita esta clase y se titula. */
+.arv-header--meta {
+    padding: 8px var(--arv-padding);
+    gap: 8px;
+    /* Alto reservado desde el principio: mientras se genera, la barra solo lleva el destello (no
+       hay marca de tiempo ni acciones todavia) y al llegar la respuesta crecia de golpe. */
+    min-height: 48px;
+}
+
+.arv-header--meta .arv-header-icon {
+    width: 22px;
+    height: 22px;
+    background: var(--arv-color-ia-suave);
+}
+
+.arv-header--meta .arv-header-icon svg {
+    width: 14px;
+    height: 14px;
+}
+
+/* Acciones de la cabecera (imprimir, guardar como PDF, copiar): cuadrado de 32 px, borde y
+   fondo claro (variant white) y el glifo del catalogo. Es la medida y el look de
+   .text-assistant-copy-btn del visor del asistente de texto, pero sobre wc-button para no
+   duplicar estilos de boton. */
+.arv-accion .wcb-btn {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+}
+
+.arv-accion .wcb-btn .wcb-mask-icon::before {
+    background-color: var(--arv-text-sec);
+}
+
+.arv-accion .wcb-btn:hover:not(:disabled) .wcb-mask-icon::before {
+    background-color: var(--arv-text);
+}
+
+/* Plegar y desplegar todo. El icono va como SVG en el atributo `icon` (no hay glifo de plegado
+   en el catalogo) y wc-button lo mete entonces en .wcb-icon, no en la mascara: sin esto tomaria
+   el color del texto del boton en vez del gris de las demas acciones. */
+.arv-plegado .wcb-btn .wcb-icon { color: var(--arv-text-sec); }
+.arv-plegado .wcb-btn:hover:not(:disabled) .wcb-icon { color: var(--arv-text); }
+
+/* Confirmacion: verde de exito 1,8 s, igual que .text-assistant-copy-btn.copied */
+.arv-copiar.arv-copied .wcb-btn {
+    background: var(--color-green-50, #EDF7EE);
+    border-color: var(--rf-color-success, #4E7D36);
+    color: var(--rf-color-success, #4E7D36);
+}
+
+/* Mismo tamaño que los glifos del catalogo del resto de la botonera. Los botones son `sm`, y ahi
+   wc-button pinta la mascara a --wcb-icon-size-sm (14 px): con 16 px fijos aqui, el unico icono
+   que llega como svg propio (plegar/desplegar) salia mas grande que sus vecinos. */
+.arv-accion .wcb-icon svg {
+    width: var(--wcb-icon-size-sm, 14px);
+    height: var(--wcb-icon-size-sm, 14px);
+}
+
+/* El glifo `descargar` del catalogo ocupa 8 x 13 de su caja de 24 (el de copiar, 18 x 18), asi que
+   dentro del mismo cuadro se veia visiblemente mas pequeño. Se agranda el dibujo dentro de su
+   caja, sin tocar la caja: el boton no cambia de medida y el catalogo, que se usa en el resto de
+   Alexia, se queda como esta. */
+.arv-accion.descargar .wcb-mask-icon::before {
+    -webkit-mask-size: 135%;
+    mask-size: 135%;
+}
+
+.arv-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+
+/* 04. CUERPO: ESTADO DE CARGA ============================================== */
+
+.arv-body {
+    padding: var(--arv-padding);
+}
+
+.arv-loading {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 0;
+    color: var(--arv-color-ia);
+}
+
+/* Mensaje principal + pista de espera apilados, mismo patron que .arv-header-texts
+   (titulo + subtitulo): dos lineas, la segunda mas pequeña y en gris. */
+.arv-loading-texts {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+/* Mensaje de espera: al tamaño del cuerpo del visor. Con la escena al lado no necesita ir un paso
+   por encima (--font-size-400), que competia con ella. */
+.arv-loading-text {
+    font-size: var(--font-size-300);
+    line-height: var(--line-height-300);
+    font-weight: var(--font-weight-semibold);
+}
+
+/* Escena animada (loading-scene) y, si hay loading-estimate, su barra de progreso debajo, a la
+   izquierda del mensaje. La escena mide 73,5 px de alto en la pestaña; en el panel de 320 px baja a
+   48 px (container query, mas abajo), lo que ocupan mensaje + pasos. La barra toma su ancho. */
+.arv-scene {
+    --arv-escena-alto: 73.5px;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.arv-scene svg {
+    display: block;
+    height: var(--arv-escena-alto);
+    width: auto;
+    overflow: visible;
+}
+
+/* --- Barra de progreso simulada (aiViewerBarraProgreso) ---------------------------------------- */
+/* Misma escala que la escena (viewBox de 160 unidades de ancho en las dos). El margen negativo
+   recoge el aire que queda bajo la sombra de la escena. El avance lo escribe el JS en cada
+   fotograma; aqui solo viven los colores. */
+.arv-scene .arv-progreso {
+    width: calc(var(--arv-escena-alto) * 160 / 76);
+    height: auto;
+    margin-top: -5px;
+    animation: arv-esc-entrada 450ms cubic-bezier(.2, 0, 0, 1) both;
+}
+
+.arv-bp-pista {
+    stroke: var(--arv-esc-azul);
+    stroke-opacity: .5;
+    stroke-linecap: round;
+}
+
+.arv-bp-origen { fill: var(--arv-esc-azul); }
+
+.arv-bp-hecha {
+    stroke: var(--arv-color-ia);
+    stroke-linecap: round;
+}
+
+/* El anillo existe en amarillo y en morado: al llegar, el JS cruza la opacidad de uno a otro. */
+.arv-bp-anillo {
+    fill: none;
+    stroke-linecap: round;
+}
+
+.arv-bp-anillo--amarillo { stroke: var(--arv-esc-amarillo); }
+.arv-bp-anillo--ia { stroke: var(--arv-color-ia); }
+
+.arv-bp-disco { fill: var(--arv-esc-verde); }
+.arv-bp-crater { fill: var(--arv-esc-hoja-oscura); }
+
+.arv-bp-brillo {
+    fill: none;
+    stroke: var(--arv-esc-blanco);
+    stroke-opacity: .45;
+    stroke-linecap: round;
+}
+
+.arv-bp-llama { fill: var(--arv-esc-amarillo); }
+.arv-bp-aleta { fill: var(--arv-esc-cian); }
+.arv-bp-cuerpo { fill: var(--arv-esc-azul); }
+
+.arv-bp-ventana {
+    fill: var(--arv-esc-cian);
+    stroke: var(--arv-esc-blanco);
+}
+
+.arv-bp-chispa--0 { fill: var(--arv-esc-cian); }
+.arv-bp-chispa--1 { fill: var(--arv-esc-verde); }
+.arv-bp-chispa--2 { fill: var(--arv-esc-amarillo); }
+
+/* --- Escenas: composicion y movimiento comunes ------------------------------------------------- */
+/* Composicion (aiViewerEscena en AiResponseViewer.js): orbita de atras, sombra, motivo y orbita de
+   delante, en ese orden, asi el motivo tapa siempre lo que pasa por detras. Solo la estrella se
+   mueve por si misma; el motivo reacciona a su paso, 100 ms antes, con las mismas curvas en todas:
+   subida y encendido cubic-bezier(.2,0,0,1), bajada y reinicio cubic-bezier(.4,0,.2,1).
+   Una vuelta dura 6 s x --arv-esc-v (1 % = 60 ms) y la estrella cruza la vertical x en
+   t = acos((80 - x) / 66) / 2pi por detras y en 1 - t por delante. En los motivos, 0 % y 100 % de
+   cada keyframe coinciden: la vuelta empalma sin saltos. */
+
+/* Entrada, una sola vez al aparecer la escena. Duracion fija: no forma parte de la vuelta. */
+.arv-esc {
+    transform-origin: 50% 50%;
+    animation: arv-esc-entrada 450ms cubic-bezier(.2, 0, 0, 1) both;
+}
+
+@keyframes arv-esc-entrada {
+    from { opacity: 0; transform: scale(.96); }
+}
+
+/* --- Orbita 360 (aiViewerOrbita360) ------------------------------------------------------------ */
+/* Pista, arco de progreso y estrella IA, en dos capas. La pista y el arco de atras van mas finos y
+   tenues que los de delante: es la mitad que queda lejos. */
+.arv-o3 path {
+    fill: none;
+    stroke: var(--arv-color-ia);
+}
+
+.arv-o3-pista { stroke-width: 1.2; opacity: .3; }
+.arv-o3-delante .arv-o3-pista { stroke-width: 1.4; opacity: .5; }
+
+/* Trazo del arco y del anillo lleno. La opacidad de atras va en stroke-opacity porque la del
+   elemento la usa el anillo para desvanecerse. */
+.arv-o3-trazo { stroke-width: 2; stroke-opacity: .7; stroke-linecap: round; }
+.arv-o3-delante .arv-o3-trazo { stroke-width: 2.4; stroke-opacity: 1; }
+
+/* Halo claro bajo el trazo de delante: lo separa del motivo cuando pasa por encima de algo oscuro. */
+.arv-o3 .arv-o3-halo {
+    stroke: var(--arv-bg, #fff);
+    stroke-width: 4.4;
+    stroke-opacity: .9;
+    stroke-linecap: round;
+}
+
+/* Arco de progreso: cada mitad (pathLength 50) se rellena con las mismas curvas que la estrella, asi
+   su cabeza va siempre justo debajo de ella. Mientras esta vacio se oculta: el dash siguiente empieza
+   justo en el final del trazado y la punta redonda pintaria ahi un punto. */
+.arv-o3-arco {
+    stroke-dasharray: 50;
+    stroke-dashoffset: 50;
+    animation: arv-o3-arco-atras calc(6s * var(--arv-esc-v)) linear infinite,
+        arv-o3-vacio-atras calc(6s * var(--arv-esc-v)) linear infinite;
+}
+
+.arv-o3-delante .arv-o3-arco { animation-name: arv-o3-arco-delante, arv-o3-vacio-delante; }
+
+/* Anillo lleno de la vuelta anterior: al cerrar la vuelta sustituye sin que se note al arco lleno y
+   se desvanece mientras empieza el nuevo. En la primera vuelta no hay vuelta anterior: arranca con
+   una vuelta de retraso y sin fill-mode, asi hasta entonces vale su opacidad 0. */
+.arv-o3-anillo {
+    opacity: 0;
+    animation: arv-o3-anillo calc(6s * var(--arv-esc-v)) linear calc(6s * var(--arv-esc-v)) infinite none;
+}
+
+/* Estrella: el grupo exterior la lleva por la elipse y decide en que capa se ve; dentro, la escala
+   por profundidad y el giro sobre si misma (una vuelta por vuelta). */
+.arv-o3-estrella {
+    offset-path: path('M14 64 A66 20 0 1 1 146 64 A66 20 0 1 1 14 64');
+    offset-rotate: 0deg;
+    animation: arv-o3-recorrido calc(6s * var(--arv-esc-v)) linear infinite,
+        arv-o3-capa-atras calc(6s * var(--arv-esc-v)) linear infinite;
+}
+
+.arv-o3-delante .arv-o3-estrella { animation-name: arv-o3-recorrido, arv-o3-capa-delante; }
+.arv-o3-prof { animation: arv-o3-prof calc(6s * var(--arv-esc-v)) linear infinite; }
+.arv-o3-gira { animation: arv-o3-gira calc(6s * var(--arv-esc-v)) linear infinite; }
+
+/* Contorno claro fino: la estrella se lee tambien cuando cruza sobre el motivo. */
+.arv-o3-estrella use {
+    stroke: var(--arv-bg, #fff);
+    stroke-width: .7;
+    stroke-linejoin: round;
+}
+
+/* Velocidad angular constante, como un anillo circular visto en perspectiva: rapida por delante y
+   por detras, lenta en los lados. Las cubic-bezier estan calculadas para un cuarto de elipse de
+   66 x 20 (lado -> centro y centro -> lado); con linear la estrella iria a velocidad constante sobre
+   el trazo y se leeria como un punto en una pista plana. */
+@keyframes arv-o3-recorrido {
+    0%   { offset-distance: 0%;   animation-timing-function: cubic-bezier(.398, .145, .667, .528); }
+    25%  { offset-distance: 25%;  animation-timing-function: cubic-bezier(.333, .472, .602, .855); }
+    50%  { offset-distance: 50%;  animation-timing-function: cubic-bezier(.398, .145, .667, .528); }
+    75%  { offset-distance: 75%;  animation-timing-function: cubic-bezier(.333, .472, .602, .855); }
+    100% { offset-distance: 100%; }
+}
+
+/* Mismas cubic-bezier por cuarto que arv-o3-recorrido (velocidad angular constante): la cabeza del
+   arco coincide con la estrella. */
+@keyframes arv-o3-arco-atras {
+    0%   { stroke-dashoffset: 50; animation-timing-function: cubic-bezier(.398, .145, .667, .528); }
+    25%  { stroke-dashoffset: 25; animation-timing-function: cubic-bezier(.333, .472, .602, .855); }
+    50%, 100% { stroke-dashoffset: 0; }
+}
+
+@keyframes arv-o3-arco-delante {
+    0%, 50% { stroke-dashoffset: 50; animation-timing-function: cubic-bezier(.398, .145, .667, .528); }
+    75%  { stroke-dashoffset: 25; animation-timing-function: cubic-bezier(.333, .472, .602, .855); }
+    100% { stroke-dashoffset: 0; }
+}
+
+/* Visible en cuanto el arco tiene longitud (la estrella tapa su arranque). */
+@keyframes arv-o3-vacio-atras   { 0% { opacity: 0; } .1%, 100% { opacity: 1; } }
+@keyframes arv-o3-vacio-delante { 0%, 50% { opacity: 0; } 50.1%, 100% { opacity: 1; } }
+
+/* Escala por profundidad: sigue el seno del angulo (lado 1.12, fondo .8, frente 1.46). */
+@keyframes arv-o3-prof {
+    0%   { transform: scale(1.12); animation-timing-function: cubic-bezier(.61, 1, .88, 1); }
+    25%  { transform: scale(.8);   animation-timing-function: cubic-bezier(.12, 0, .39, 0); }
+    50%  { transform: scale(1.12); animation-timing-function: cubic-bezier(.61, 1, .88, 1); }
+    75%  { transform: scale(1.46); animation-timing-function: cubic-bezier(.12, 0, .39, 0); }
+    100% { transform: scale(1.12); }
+}
+
+/* La copia de atras se ve la primera media vuelta y la de delante la segunda. El cambio ocurre en
+   los extremos de la elipse, fuera del motivo, donde las dos copias son identicas. */
+@keyframes arv-o3-capa-atras   { 0%, 49.9% { opacity: 1; } 50%, 100% { opacity: 0; } }
+@keyframes arv-o3-capa-delante { 0%, 49.9% { opacity: 0; } 50%, 100% { opacity: 1; } }
+
+@keyframes arv-o3-gira { to { transform: rotate(360deg); } }
+
+@keyframes arv-o3-anillo {
+    0%        { opacity: 1; animation-timing-function: cubic-bezier(.4, 0, .2, 1); }
+    15%, 100% { opacity: 0; }
+}
+
+/* --- Alumno, y la alumna de ciclo: la cabeza sigue a la estrella -------------------------------- */
+/* Balanceo alrededor del cuello: -3 grados con la estrella a la izquierda (0 %) y +3 a la derecha
+   (50 %), con la misma forma senoidal que su posicion horizontal. */
+.arv-esc-alumno .arv-cabeza,
+.arv-esc-ciclo .arv-cabeza {
+    transform-origin: 70px 66px;
+    animation: arv-esc-balanceo calc(6s * var(--arv-esc-v)) linear infinite;
+}
+
+@keyframes arv-esc-balanceo {
+    0%, 100% { transform: rotate(-3deg); animation-timing-function: cubic-bezier(.37, 0, .63, 1); }
+    50%      { transform: rotate(3deg);  animation-timing-function: cubic-bezier(.37, 0, .63, 1); }
+}
+
+/* --- Grupo: cada alumno da un toque cuando la estrella pasa por delante ------------------------ */
+/* Toque: sube 2 px en 250 ms, aguanta 150 ms y baja en 700 ms. Pasos por delante: x 104 (alumno 3)
+   a t .691, x 80 (alumno 2) a .75 y x 56 (alumno 1) a .809. */
+.arv-esc-grupo .arv-alu {
+    animation-duration: calc(6s * var(--arv-esc-v));
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+}
+
+.arv-esc-grupo .arv-alu-1 { animation-name: arv-esc-grupo-1; }
+.arv-esc-grupo .arv-alu-2 { animation-name: arv-esc-grupo-2; }
+.arv-esc-grupo .arv-alu-3 { animation-name: arv-esc-grupo-3; }
+
+@keyframes arv-esc-grupo-1 {
+    0%, 79.26%   { transform: translateY(0); animation-timing-function: cubic-bezier(.2, 0, 0, 1); }
+    83.42%       { transform: translateY(-2px); }
+    85.92%       { transform: translateY(-2px); animation-timing-function: cubic-bezier(.4, 0, .2, 1); }
+    97.59%, 100% { transform: translateY(0); }
+}
+
+@keyframes arv-esc-grupo-2 {
+    0%, 73.33%   { transform: translateY(0); animation-timing-function: cubic-bezier(.2, 0, 0, 1); }
+    77.5%        { transform: translateY(-2px); }
+    80%          { transform: translateY(-2px); animation-timing-function: cubic-bezier(.4, 0, .2, 1); }
+    91.67%, 100% { transform: translateY(0); }
+}
+
+@keyframes arv-esc-grupo-3 {
+    0%, 67.41%   { transform: translateY(0); animation-timing-function: cubic-bezier(.2, 0, 0, 1); }
+    71.58%       { transform: translateY(-2px); }
+    74.08%       { transform: translateY(-2px); animation-timing-function: cubic-bezier(.4, 0, .2, 1); }
+    85.74%, 100% { transform: translateY(0); }
+}
+
+/* --- Oferta: la tiza escribe en el encerado ----------------------------------------------------- */
+/* Las tres lineas se escriben durante la media vuelta de atras y el tic cuando la estrella cruza por
+   delante (70-78 %); entre el 90 y el 97 % se borra todo y la vuelta siguiente empieza en blanco. */
+.arv-esc-oferta .arv-tiza {
+    animation: arv-esc-oferta-borra calc(6s * var(--arv-esc-v)) linear infinite;
+}
+
+.arv-esc-oferta .arv-tiza path {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    animation-duration: calc(6s * var(--arv-esc-v));
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+}
+
+.arv-esc-oferta .arv-tiza-1 { animation-name: arv-esc-oferta-1; }
+.arv-esc-oferta .arv-tiza-2 { animation-name: arv-esc-oferta-2; }
+.arv-esc-oferta .arv-tiza-3 { animation-name: arv-esc-oferta-3; }
+.arv-esc-oferta .arv-tic { animation-name: arv-esc-oferta-tic; }
+
+/* Los trazos vuelven a su inicio entre el 97 y el 98 %, con la tiza ya fundida. */
+@keyframes arv-esc-oferta-borra {
+    0%, 90%  { opacity: 1; animation-timing-function: cubic-bezier(.4, 0, .2, 1); }
+    97%, 98% { opacity: 0; }
+    100%     { opacity: 1; }
+}
+
+@keyframes arv-esc-oferta-1 {
+    0%, 5%    { stroke-dashoffset: 1; animation-timing-function: cubic-bezier(.4, 0, .2, 1); }
+    18%, 97%  { stroke-dashoffset: 0; }
+    98%, 100% { stroke-dashoffset: 1; }
+}
+
+@keyframes arv-esc-oferta-2 {
+    0%, 20%   { stroke-dashoffset: 1; animation-timing-function: cubic-bezier(.4, 0, .2, 1); }
+    33%, 97%  { stroke-dashoffset: 0; }
+    98%, 100% { stroke-dashoffset: 1; }
+}
+
+@keyframes arv-esc-oferta-3 {
+    0%, 35%   { stroke-dashoffset: 1; animation-timing-function: cubic-bezier(.4, 0, .2, 1); }
+    48%, 97%  { stroke-dashoffset: 0; }
+    98%, 100% { stroke-dashoffset: 1; }
+}
+
+@keyframes arv-esc-oferta-tic {
+    0%, 70%   { stroke-dashoffset: 1; animation-timing-function: cubic-bezier(.4, 0, .2, 1); }
+    78%, 97%  { stroke-dashoffset: 0; }
+    98%, 100% { stroke-dashoffset: 1; }
+}
+
+/* --- Curso: se enciende la luz de cada aula ---------------------------------------------------- */
+/* La ventanita de cada aula se enciende en 350 ms al pasar la estrella por detras de su puerta
+   (A x 56 a t .191, B x 80 a .25, C x 104 a .309) y se apagan juntas entre el 90 y el 97 %. */
+.arv-esc-curso .arv-luz {
+    opacity: 0;
+    animation-duration: calc(6s * var(--arv-esc-v));
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+}
+
+.arv-esc-curso .arv-luz-1 { animation-name: arv-esc-curso-1; }
+.arv-esc-curso .arv-luz-2 { animation-name: arv-esc-curso-2; }
+.arv-esc-curso .arv-luz-3 { animation-name: arv-esc-curso-3; }
+
+@keyframes arv-esc-curso-1 {
+    0%, 17.41%  { opacity: 0; animation-timing-function: cubic-bezier(.2, 0, 0, 1); }
+    23.24%, 90% { opacity: 1; animation-timing-function: cubic-bezier(.4, 0, .2, 1); }
+    97%, 100%   { opacity: 0; }
+}
+
+@keyframes arv-esc-curso-2 {
+    0%, 23.33%  { opacity: 0; animation-timing-function: cubic-bezier(.2, 0, 0, 1); }
+    29.17%, 90% { opacity: 1; animation-timing-function: cubic-bezier(.4, 0, .2, 1); }
+    97%, 100%   { opacity: 0; }
+}
+
+@keyframes arv-esc-curso-3 {
+    0%, 29.26%  { opacity: 0; animation-timing-function: cubic-bezier(.2, 0, 0, 1); }
+    35.09%, 90% { opacity: 1; animation-timing-function: cubic-bezier(.4, 0, .2, 1); }
+    97%, 100%   { opacity: 0; }
+}
+
+/* --- Ciclo: las barras crecen al paso de la estrella ------------------------------------------- */
+/* Cada barra parte 10 px hundida en el suelo (la recorta el clipPath) y sube en 600 ms al pasar la
+   estrella por detras de ella (x 87,75 a t .269, x 101,75 a .303, x 115,75 a .341); bajan juntas
+   entre el 88 y el 97 %. Se desplazan en vez de escalarse para no deformar las esquinas. */
+.arv-esc-ciclo .arv-barra {
+    transform: translateY(10px);
+    animation-duration: calc(6s * var(--arv-esc-v));
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+}
+
+.arv-esc-ciclo .arv-barra-1 { animation-name: arv-esc-ciclo-1; }
+.arv-esc-ciclo .arv-barra-2 { animation-name: arv-esc-ciclo-2; }
+.arv-esc-ciclo .arv-barra-3 { animation-name: arv-esc-ciclo-3; }
+
+@keyframes arv-esc-ciclo-1 {
+    0%, 25.21%  { transform: translateY(10px); animation-timing-function: cubic-bezier(.05, .7, .1, 1); }
+    35.21%, 88% { transform: translateY(0); animation-timing-function: cubic-bezier(.4, 0, .2, 1); }
+    97%, 100%   { transform: translateY(10px); }
+}
+
+@keyframes arv-esc-ciclo-2 {
+    0%, 28.68%  { transform: translateY(10px); animation-timing-function: cubic-bezier(.05, .7, .1, 1); }
+    38.68%, 88% { transform: translateY(0); animation-timing-function: cubic-bezier(.4, 0, .2, 1); }
+    97%, 100%   { transform: translateY(10px); }
+}
+
+@keyframes arv-esc-ciclo-3 {
+    0%, 32.44%  { transform: translateY(10px); animation-timing-function: cubic-bezier(.05, .7, .1, 1); }
+    42.44%, 88% { transform: translateY(0); animation-timing-function: cubic-bezier(.4, 0, .2, 1); }
+    97%, 100%   { transform: translateY(10px); }
+}
+
+/* --- Estudio: el icono respira cuando la estrella cruza por delante (t .75) --------------------- */
+/* Sube 1,5 px y crece un 3 % en 350 ms y vuelve en 700 ms. */
+.arv-esc-estudio .arv-motivo {
+    transform-box: fill-box;
+    transform-origin: 50% 50%;
+    animation: arv-esc-estudio calc(6s * var(--arv-esc-v)) linear infinite;
+}
+
+@keyframes arv-esc-estudio {
+    0%, 73.33%   { transform: translateY(0) scale(1); animation-timing-function: cubic-bezier(.2, 0, 0, 1); }
+    79.17%       { transform: translateY(-1.5px) scale(1.03); animation-timing-function: cubic-bezier(.4, 0, .2, 1); }
+    90.83%, 100% { transform: translateY(0) scale(1); }
+}
+
+/* Pasos del estado de carga: se apilan y solo el ultimo esta activo. La lista creciendo es la
+   senal de que se sigue trabajando, mucho mas visible que sustituir una linea de texto gris.
+   OJO: no es progreso real (no hay SSE con el servidor). Por eso los pasos ya recorridos llevan
+   un punto y NO una marca de verificacion: un check afirmaria que ese paso se completo, y eso
+   no lo sabemos. */
+.arv-loading-steps {
+    list-style: none;
+    margin: 4px 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.arv-loading-step {
+    position: relative;
+    padding-left: 14px;
+    font-size: var(--font-size-200);
+    line-height: var(--line-height-200);
+    color: var(--arv-text-sec);
+    transition: color 0.2s ease;
+}
+
+.arv-loading-step::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.5em;
+    width: 5px;
+    height: 5px;
+    border-radius: var(--radius-circle);
+    background: currentColor;
+    opacity: 0.45;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+/* Entrada del paso nuevo: sube y aparece. Es el movimiento que hace que el cambio se note sin
+   tener que estar mirando la linea. */
+.arv-loading-step--nuevo {
+    animation: arv-paso-entra 0.18s ease-out both;
+}
+
+@keyframes arv-paso-entra {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Paso activo: color de la IA y un brillo que lo recorre en bucle. El shimmer es la senal
+   continua: se ve que trabaja aunque se mire mucho despues del ultimo cambio.
+   El color de respaldo va antes del degradado: si el navegador no soporta text-fill-color
+   transparente, el texto se queda en morado solido en vez de invisible. */
+.arv-loading-step--activo {
+    color: var(--arv-paso-activo);
+    font-weight: var(--font-weight-semibold);
+    background-image: linear-gradient(100deg,
+        var(--arv-paso-activo) 35%,
+        var(--arv-shimmer) 50%,
+        var(--arv-paso-activo) 65%);
+    background-size: 260% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: arv-shimmer 2.4s linear infinite;
+}
+
+/* El punto no se clipa con el texto (es otra caja): con currentColor se pone en el mismo
+   verde que el texto del paso activo, sin repetir el color en una segunda regla. */
+.arv-loading-step--activo::before {
+    opacity: 1;
+    transform: scale(1.3);
+}
+
+@keyframes arv-shimmer {
+    from { background-position: 150% 0; }
+    to   { background-position: -50% 0; }
+}
+
+/* Esqueleto del informe (opt-in con el atributo loading-skeleton).
+   La espera es larga y hasta ahora solo decia que se estaba trabajando; el esqueleto dice ademas
+   QUE va a llegar: el bloque del resumen y unas cuantas secciones con su marca a la izquierda.
+   Es decorativo (aria-hidden): lo que se anuncia al lector de pantalla son los pasos. */
+/* Dos movimientos a la vez y los dos sobre propiedades que el navegador compone sin repintar
+   (`opacity` y `transform`): la barra respira y una onda lila la recorre. La version anterior
+   desplazaba un degradado con `background-position`, que obliga a repintar cada fotograma y
+   pasaba tan desapercibida que la espera parecia congelada, justo lo que el esqueleto venia a
+   evitar.
+   La onda va en un ::after del tamano de la barra, asi que su recorrido de -100 % a 100 % la
+   cruza entera mida lo que mida la linea. */
+@keyframes arv-sk-respira {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.4; }
+}
+
+@keyframes arv-sk-onda {
+    from { transform: translateX(-100%); }
+    to   { transform: translateX(100%); }
+}
+
+.arv-skeleton {
+    margin-top: var(--arv-gap);
+    padding-top: 14px;
+    border-top: 1px solid var(--arv-border-suave);
+    max-width: var(--arv-medida-lectura);
+}
+
+.arv-sk {
+    position: relative;
+    overflow: hidden;
+    background-color: var(--color-grey-400, #E8E9EB);
+    border-radius: var(--radius-sm);
+    animation: arv-sk-respira 1.8s ease-in-out infinite;
+}
+
+.arv-sk::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg,
+        rgba(99, 82, 199, 0) 0%,
+        rgba(99, 82, 199, 0.5) 50%,
+        rgba(99, 82, 199, 0) 100%);
+    animation: arv-sk-onda 1.8s linear infinite;
+}
+
+/* Desfase por bloque: a la vez, las tres secciones laten como un unico parpadeo; escalonadas se
+   lee como algo que avanza. */
+.arv-skeleton > :nth-child(3) .arv-sk,
+.arv-skeleton > :nth-child(3) .arv-sk::after { animation-delay: 0.15s; }
+.arv-skeleton > :nth-child(4) .arv-sk,
+.arv-skeleton > :nth-child(4) .arv-sk::after { animation-delay: 0.3s; }
+
+.arv-sk-resumen { height: 84px; border-radius: var(--radius-md); margin-bottom: 18px; }
+.arv-sk-seccion { position: relative; margin-bottom: 20px; }
+.arv-sk-marca   { position: absolute; left: 0; top: 0; width: 3px; height: 13px;
+                  border-radius: 2px; background: var(--arv-color-marco); }
+.arv-sk-titulo  { height: 13px; margin: 0 0 10px 13px; }
+.arv-sk-linea   { height: 9px; margin-bottom: 8px; }
+
+
+/* 05. CUERPO: MARKDOWN ===================================================== */
+
+/* Texto e indice, uno al lado del otro. Los dos son hermanos del mismo flex para que el indice
+   quede pegado a la columna de lectura y no tirado contra el borde derecho de la tarjeta. */
+/* El texto ocupa todo lo que le deja el indice; el indice, solo lo que necesita. Se probo a
+   limitar la columna de lectura y centrarla, y en la pestana de ficha dejaba media pantalla en
+   blanco: el informe se recorria mas de lo que se leia. */
+.arv-layout {
+    display: flex;
+    align-items: flex-start;
+    gap: 40px;
+}
+
+.arv-col {
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: var(--arv-medida-lectura);
+}
+
+.arv-markdown {
+    font-family: var(--font-family-reading);
+    font-size: var(--font-size-300);
+    line-height: var(--line-height-300);
+    color: var(--arv-text);
+    max-width: var(--arv-medida-lectura);
+    /* La respuesta llega de golpe tras la espera: un fundido corto evita el salto brusco. */
+    animation: arv-entrada 0.18s ease-out both;
+    /* La respuesta la escribe un modelo: puede colar un identificador o una URL sin espacios.
+       Sin esto, en un iframe estrecho el texto se saldria de la tarjeta (que recorta por
+       overflow:hidden) y se perderia. */
+    overflow-wrap: anywhere;
+}
+
+@keyframes arv-entrada {
+    from { opacity: 0; transform: translateY(4px); }
+    to   { opacity: 1; transform: none; }
+}
+
+.arv-markdown > :first-child { margin-top: 0; }
+.arv-markdown > :last-child  { margin-bottom: 0; }
+
+.arv-markdown h1,
+.arv-markdown h2,
+.arv-markdown h3,
+.arv-markdown h4 {
+    margin: 24px 0 8px;
+    font-family: var(--font-family-ui);
+    color: var(--arv-text);
+    line-height: var(--line-height-400);
+}
+
+/* El titulo de seccion tiene que pesar mas que el cuerpo. Al mismo tamaño que el texto, en un
+   informe de diez secciones y varias pantallas de alto, la negrita y la marca lila no bastaban
+   para ver de un vistazo donde empieza cada apartado. */
+.arv-markdown h1 { font-size: var(--font-size-500); font-weight: var(--font-weight-extrabold); line-height: var(--line-height-500); }
+.arv-markdown h2 { font-size: var(--font-size-400); font-weight: var(--font-weight-extrabold); }
+/* Tercer nivel como etiqueta, no como titulo pequeño: a tamaño de cuerpo se confundia con un
+   parrafo en negrita. */
+.arv-markdown h3,
+.arv-markdown h4 {
+    font-size: var(--font-size-200);
+    font-weight: var(--font-weight-bold);
+    line-height: var(--line-height-200);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--arv-text-sec);
+}
+
+/* Los titulos de seccion llevan una marca de color a la izquierda: da jerarquia sin recargar
+   de lineas horizontales. */
+.arv-markdown h2 {
+    padding-left: 10px;
+    border-left: 3px solid var(--arv-color-ia);
+}
+
+/* Ciclo de 3 colores por seccion (mismo trio que las estrellas del destello de IA, para que se
+   sienta de la misma familia visual): con muchas secciones seguidas del mismo patron, el texto
+   es lo unico que las distingue de un vistazo. El color no sustituye al texto, lo refuerza: cada
+   apartado sigue teniendo su propio titulo. El resumen queda fuera del ciclo.
+
+   El turno lo numera AiResponseViewer._colorearSecciones y no un nth-of-type: al plegar, cada h2
+   pasa a ser el unico de su tipo dentro de su propio <summary> y el ciclo se quedaba clavado en
+   el primer color. */
+.arv-markdown h2[data-marca="0"] { border-left-color: var(--arv-estrella-cian); }
+.arv-markdown h2[data-marca="1"] { border-left-color: var(--arv-estrella-verde); }
+.arv-markdown h2[data-marca="2"] { border-left-color: var(--arv-estrella-amarilla); }
+
+/* Resumen: primera seccion del informe, la que el profesor lee primero. Va en el lila de la IA y
+   no en amarillo: el amarillo tenue son los mismos tokens con los que Alexia avisa
+   (wc-status[status="warning"], badges de aviso), y el bloque mas importante del informe se leia
+   como una advertencia. El lila ademas lo ata a la identidad del visor. Construido por
+   AiResponseViewer.js porque agrupa varios nodos (titulo + parrafos), no solo el propio h2. */
+.arv-resumen {
+    margin: 0 0 20px;
+    padding: 14px 16px;
+    border: 1px solid var(--arv-color-marco);
+    border-radius: var(--radius-md);
+    background: var(--arv-color-ia-suave);
+}
+
+.arv-resumen > :first-child { margin-top: 0; }
+.arv-resumen > :last-child  { margin-bottom: 0; }
+
+/* Dentro de la tarjeta el marco de color ya no hace falta: el fondo lila es la marca. */
+.arv-markdown .arv-resumen h2 {
+    padding-left: 0;
+    border-left: none;
+}
+
+/* Secciones plegables (las monta quien compone el informe; el visor solo las pinta).
+   Un informe de diez apartados son varias pantallas de scroll seguido: plegando lo secundario, el
+   profesor ve de una vez todo lo que trae y abre lo que le interesa. Mismo lenguaje que el
+   desplegable de "Consultas realizadas" del pie, que ya existia. */
+.arv-seccion {
+    border-top: 1px solid var(--arv-border-suave);
+    margin-top: 8px;
+}
+
+.arv-seccion > summary {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 2px 0;
+    cursor: pointer;
+    list-style: none;
+}
+
+.arv-seccion > summary::-webkit-details-marker { display: none; }
+.arv-seccion > summary::marker { content: ''; }
+
+.arv-seccion > summary:focus-visible {
+    outline: 2px solid var(--arv-color-ia);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+}
+
+.arv-seccion > summary h2 { flex: 1; margin: 10px 0; }
+
+.arv-seccion-flecha {
+    display: inline-flex;
+    flex-shrink: 0;
+    width: 14px;
+    height: 14px;
+    color: var(--arv-text-sec);
+    transition: transform 0.18s ease;
+}
+
+.arv-seccion[open] .arv-seccion-flecha { transform: rotate(90deg); }
+
+/* El salto a una seccion deja sitio a la cabecera, que es sticky y se le pondria encima.
+   El alto lo mide el JS (_fijarAltoCabecera) porque cambia segun lo que lleve la cabecera. */
+.arv-markdown h2 { scroll-margin-top: var(--arv-alto-cabecera, 64px); }
+
+/* Indice de secciones. Se queda a la vista mientras se recorre el informe, que es de lo que se
+   trata: saber donde se esta y que falta por leer. */
+.arv-indice {
+    position: sticky;
+    top: var(--arv-alto-cabecera, 64px);
+    flex: 0 0 230px;
+    align-self: flex-start;
+    /* Un informe de doce apartados da un indice mas alto que la pantalla, y entonces el final de
+       la lista queda debajo del borde y no hay forma de llegar a el: la lista se desplaza sola. */
+    max-height: calc(100vh - var(--arv-alto-cabecera, 64px) - 24px);
+    overflow-y: auto;
+}
+
+.arv-indice-titulo {
+    display: block;
+    margin-bottom: 10px;
+    font-family: var(--font-family-ui);
+    font-size: var(--font-size-200);
+    font-weight: var(--font-weight-bold);
+    line-height: var(--line-height-200);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--arv-text-sec);
+}
+
+.arv-indice-item {
+    display: block;
+    padding: 5px 10px;
+    border-left: 2px solid var(--arv-border-suave);
+    font-size: var(--font-size-200);
+    line-height: var(--line-height-200);
+    color: var(--arv-text-sec);
+    text-decoration: none;
+}
+
+.arv-indice-item:hover,
+.arv-indice-item:focus-visible {
+    color: var(--arv-color-ia);
+    border-left-color: var(--arv-color-ia);
+    background: var(--arv-color-ia-suave);
+}
+
+/* Cada entrada repite el color de la marca de su seccion, pero SOLO al apuntarla: en reposo el
+   indice es una lista de diez lineas y con los colores puestos competia con el informe, que es lo
+   que hay que leer. Apuntada, el color empareja la entrada con su titulo. El turno lo numera
+   _colorearSecciones y lo copia _renderIndice; el resumen lleva el lila de su tarjeta. Van despues
+   de la regla generica de :hover para ganarle el color. */
+.arv-indice-item[data-marca="0"]:hover { border-left-color: var(--arv-estrella-cian); }
+.arv-indice-item[data-marca="1"]:hover { border-left-color: var(--arv-estrella-verde); }
+.arv-indice-item[data-marca="2"]:hover { border-left-color: var(--arv-estrella-amarilla); }
+.arv-indice-item[data-marca="resumen"]:hover { border-left-color: var(--arv-color-ia); }
+
+.arv-markdown p { margin: 0 0 12px; }
+
+.arv-markdown ul,
+.arv-markdown ol {
+    margin: 0 0 12px;
+    padding-left: 22px;
+}
+
+.arv-markdown li { margin-bottom: 6px; }
+
+.arv-markdown strong { font-weight: var(--font-weight-bold); }
+
+.arv-markdown a {
+    color: var(--rf-color-primary);
+    text-decoration: underline;
+}
+
+.arv-markdown code {
+    padding: 1px 5px;
+    border-radius: var(--radius-sm);
+    background: var(--rf-bg-normal);
+    font-family: var(--font-family-mono);
+    font-size: 0.9em;
+    overflow-wrap: anywhere;
+}
+
+.arv-markdown pre {
+    margin: 0 0 12px;
+    padding: 12px;
+    border-radius: var(--radius-md);
+    background: var(--rf-bg-normal);
+    overflow-x: auto;
+}
+
+.arv-markdown pre code {
+    padding: 0;
+    background: none;
+}
+
+.arv-markdown blockquote {
+    margin: 0 0 12px;
+    padding: 8px 14px;
+    border-left: 3px solid var(--arv-border);
+    background: var(--arv-color-ia-suave);
+    color: var(--arv-text-sec);
+}
+
+/* Las tablas del MCP pueden ser anchas: scrollan ellas, nunca la pagina.
+   El contenedor propio permite el scroll sin romper el flujo del texto.
+
+   Sin sombra de desbordamiento en los cantos: se pintaba sobre la tabla, por debajo de las
+   celdas, asi que solo asomaba en las filas sin fondo de cebra y el borde derecho salia distinto
+   fila a fila. Que la tabla sigue lo dice su barra de desplazamiento. */
+.arv-markdown table {
+    display: block;
+    width: max-content;
+    max-width: 100%;
+    margin: 0 0 12px;
+    overflow-x: auto;
+    border-collapse: collapse;
+    font-size: var(--font-size-200);
+}
+
+.arv-markdown th,
+.arv-markdown td {
+    padding: 8px 12px;
+    border: 1px solid var(--arv-border-suave);
+    text-align: left;
+    vertical-align: top;
+    /* En una celda no se parten las palabras: la tabla ya scrollea, y "Matem-aticas" partido
+       se lee peor que desplazar la tabla. El overflow-wrap:anywhere del cuerpo no llega aqui. */
+    overflow-wrap: normal;
+}
+
+.arv-markdown th {
+    background: var(--arv-color-ia-suave);
+    font-weight: var(--font-weight-semibold);
+    white-space: nowrap;
+}
+
+.arv-markdown tbody tr:nth-child(even) td {
+    background: var(--rf-bg-light);
+}
+
+.arv-markdown hr {
+    margin: 20px 0;
+    border: none;
+    border-top: 1px solid var(--arv-border-suave);
+}
+
+
+/* 06. CUERPO: ESTADOS ERROR / VACIO ======================================== */
+
+.arv-state {
+    display: flex;
+    justify-content: center;
+    padding: 8px 0;
+    animation: arv-entrada 0.18s ease-out both;
+}
+
+
+/* 07. PIE: CONSULTAS REALIZADAS Y AVISO ==================================== */
+
+.arv-footer {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 12px var(--arv-padding);
+    background: var(--arv-bg-footer);
+    border-top: 1px solid var(--arv-border-suave);
+}
+
+.arv-traces summary {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    list-style: none;
+    font-size: var(--font-size-300);
+    font-weight: var(--font-weight-semibold);
+    color: var(--arv-color-ia);
+    border-radius: var(--radius-sm);
+}
+
+/* Ocultamos el marcador nativo en ambos motores. */
+.arv-traces summary::-webkit-details-marker { display: none; }
+.arv-traces summary::marker { content: ''; }
+
+.arv-traces summary:focus-visible {
+    outline: 2px solid var(--arv-color-ia);
+    outline-offset: 2px;
+}
+
+.arv-traces-icon {
+    display: inline-flex;
+    flex-shrink: 0;
+    width: 15px;
+    height: 15px;
+    transition: transform 0.2s ease;
+}
+
+.arv-traces[open] .arv-traces-icon {
+    transform: scale(1.05);
+}
+
+.arv-traces-list {
+    margin: 10px 0 0;
+    padding-left: 22px;
+    font-size: var(--font-size-300);
+    line-height: var(--line-height-300);
+    color: var(--arv-text-sec);
+}
+
+.arv-traces-list li { margin-bottom: 4px; }
+
+/* Las trazas vienen en markdown ligero (negritas con el nombre del alumno): sin
+   margenes de parrafo para que cada consulta ocupe una linea. */
+.arv-traces-list p {
+    display: inline;
+    margin: 0;
+}
+
+.arv-notice {
+    margin: 0;
+    color: var(--arv-text-sec);
+}
+
+
+/* 08. RESPONSIVE =========================================================== */
+
+/* El indice solo cabe cuando el visor es ancho de verdad (la pestaña de ficha). En el panel
+   lateral se comeria el ancho de lectura, que es justo lo que se estaba protegiendo. */
+@container (max-width: 900px) {
+    .arv-layout { display: block; }
+    .arv-indice { display: none; }
+}
+
+/* Panel lateral o iframe estrecho: se reduce el padding y las acciones de la barra de meta pasan
+   a su propia fila antes de apretar la marca de tiempo. */
+@container (max-width: 480px) {
+    .arv-card {
+        --arv-padding: 14px;
+    }
+
+    .arv-header {
+        flex-wrap: wrap;
+    }
+
+    .arv-header-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    /* La escena de carga baja a 48 px, y su barra con ella: mismo alto que hoy ocupan mensaje + pasos. */
+    .arv-scene {
+        --arv-escena-alto: 48px;
+    }
+}
+
+
+/* 09. MOVIMIENTO REDUCIDO ================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+    .arv-markdown,
+    .arv-state {
+        animation: none;
+    }
+
+    /* Los pasos de carga no se desplazan ni brillan. El cambio pasa a ser instantaneo, pero
+       sigue distinguiendose el activo por color y peso, que no dependen de animacion. */
+    .arv-loading-step--nuevo {
+        animation: none;
+    }
+
+    .arv-loading-step--activo {
+        animation: none;
+        background-image: none;
+        -webkit-text-fill-color: currentColor;
+    }
+
+    /* Las escenas siguen el mismo criterio: todo x3 mas lento, nada se congela. */
+    :host {
+        --arv-esc-v: 3;
+    }
+
+    /* La barra sigue avanzando, que es informacion, pero sin entrada ni chispas. */
+    .arv-scene .arv-progreso {
+        animation: none;
+    }
+
+    .arv-bp-chispa {
+        display: none;
+    }
+
+    .arv-traces-icon {
+        transition: none;
+    }
+
+    .arv-seccion-flecha {
+        transition: none;
+    }
+
+    /* La onda se retira (es un desplazamiento), pero la barra sigue respirando: la opacidad no
+       mueve nada y es lo unico que dice que se sigue trabajando cuando los pasos no cambian. */
+    .arv-sk {
+        animation-duration: 3s;
+    }
+
+    .arv-sk::after {
+        animation: none;
+        opacity: 0;
+    }
+}
+
+
+/* 10. EXPORTACION: IMPRIMIR Y GUARDAR COMO PDF ============================= */
+
+/* Imprimir y guardar como PDF montan un documento aparte que carga esta misma hoja y cuya raiz
+   lleva la clase .arv-export (ver _htmlExportable en AiResponseViewer.js). Ahi no hay panel ni
+   pagina alrededor, asi que la tarjeta sobra: fuera marco, sombra y fondo, que solo gastan tinta
+   y margen.
+
+   Se scopea por clase y NO por @media print a proposito: html2pdf rasteriza en medio 'screen',
+   asi que con @media print el papel y el PDF habrian salido distintos. */
+
+.arv-export {
+    /* Chrome (y Edge) NO imprimen fondos si el usuario no marca "Graficos de fondo" en el dialogo
+       de impresion. Sin esto el resumen en lila y la cabecera de las tablas salen en blanco, que es justo la sensacion de "informe plano". El PDF no lo
+       necesita (html2canvas rasteriza lo que ve), pero declararlo aqui deja papel y PDF iguales. */
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+}
+
+/* La tarjeta es el envoltorio que encaja el visor en el panel o en la pestana; en un documento
+   suelto no hay nada a lo que encajarse, asi que el marco y el fondo solo gastan tinta.
+   Lo que SI se conserva es la identidad del contenido (colores del markdown, tarjeta del resumen,
+   tablas): es lo que hace que el informe impreso se reconozca como el de pantalla. */
+.arv-export .arv-card {
+    border: 0;
+    background: none;
+}
+
+.arv-export .arv-body {
+    padding: 0;
+}
+
+/* La raya bajo la cabecera separa el titulo de la barra de acciones en pantalla; en el documento
+   exportado quedaba pegada al recuadro del resumen. Se cambia por un hueco en blanco. */
+.arv-export .arv-header {
+    border-bottom: 0;
+    margin-bottom: 16px;
+}
+
+/* En papel no se puede desplegar nada: las secciones plegadas salen abiertas y sin la flecha.
+   El open se pone tambien al clonar (_htmlExportable); esto cubre el caso de que el clon llegue
+   de otra via. */
+.arv-export .arv-seccion > :not(summary) { display: revert; }
+.arv-export .arv-seccion { border-top: 0; }
+.arv-export .arv-seccion-flecha { display: none; }
+
+/* Nada se anima en un documento exportado. Importa por algo que no se ve venir: html2canvas
+   CLONA el documento para rasterizarlo, y en el clon las animaciones arrancan de cero. El fundido
+   de entrada del markdown (arv-entrada, seccion 05) empieza en opacity 0, asi que el PDF salia con
+   el texto desvaido segun donde pillara la captura. */
+.arv-export *,
+.arv-export *::before,
+.arv-export *::after {
+    animation: none !important;
+    transition: none !important;
+}
+
+/* Que el salto de pagina no parta una linea por la mitad. Va FUERA de @media print a proposito:
+   html2pdf pagina leyendo los estilos calculados en medio 'screen', asi que dentro de @media
+   print estas reglas valdrian para el papel pero no para el PDF, que es donde se veian parrafos
+   cortados a media altura. */
+.arv-export .arv-markdown p,
+.arv-export .arv-markdown li,
+.arv-export .arv-markdown tr,
+.arv-export .arv-markdown table,
+.arv-export .arv-markdown pre,
+.arv-export .arv-markdown blockquote,
+.arv-export .arv-resumen {
+    break-inside: avoid;
+    page-break-inside: avoid;
+}
+
+/* Un titulo al pie de una pagina con su contenido en la siguiente queda huerfano. */
+.arv-export .arv-markdown h1,
+.arv-export .arv-markdown h2,
+.arv-export .arv-markdown h3 {
+    break-after: avoid;
+    page-break-after: avoid;
+}

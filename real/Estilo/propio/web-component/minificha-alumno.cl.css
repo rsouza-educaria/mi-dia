@@ -1,0 +1,12 @@
+/* Overrides CL: wc-status alineado con la altura de los inputs.
+   !important necesario porque loadLocalStyles() hace prepend() y este archivo
+   queda antes de dynamic-form.css en el shadow root, invirtiéndose la cascada. */
+wc-status {
+    height: var(--input-height) !important;
+    min-height: var(--input-height) !important;
+    align-items: initial !important;
+}
+
+.status-badge {
+    height: var(--input-height) !important;
+}

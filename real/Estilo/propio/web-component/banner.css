@@ -1,0 +1,276 @@
+/* ===========================================================================
+   WC-BANNER - Componente de avisos/alertas
+   ===========================================================================
+   Prefijo: wcbn-
+   Usado por: <wc-banner>, DynamicForm, ContentSection
+   =========================================================================== */
+
+/* 01. VARIABLES CSS ======================================================== */
+:root, :host {
+    --wcbn-radius: var(--rf-radius);    
+    --wcbn-padding: 8px 16px;
+    --wcbn-icon-size: 1.25rem;
+    --wcbn-font-size: var(--rf-font-size, 0.95rem);
+    
+    /* Colores por tipo - usan variables globales de alerts */
+    --wcbn-info-bg: var(--alert-bg-info, #d1ecf1);
+    --wcbn-info-border: var(--alert-border-info, #bee5eb);
+    --wcbn-info-text: var(--alert-text-info, #0c5460);
+    
+    --wcbn-warning-bg: var(--alert-bg-warning, #fff3cd);
+    --wcbn-warning-border: var(--alert-border-warning, #ffeeba);
+    --wcbn-warning-text: var(--alert-text-warning, #856404);
+    
+    --wcbn-error-bg: var(--alert-bg-error, #f8d7da);
+    --wcbn-error-border: var(--alert-border-error, #f5c6cb);
+    --wcbn-error-text: var(--alert-text-error, #721c24);
+
+    --wcbn-success-bg: var(--alert-bg-success, #d4edda);
+    --wcbn-success-border: var(--alert-border-success, #c3e6cb);
+    --wcbn-success-text: var(--alert-text-success, #155724);
+
+    --wcbn-news-bg: var(--alert-bg-news, #F1EFFA);
+    --wcbn-news-border: var(--alert-border-news, #DAD6F2);
+    --wcbn-news-text: var(--alert-text-news, #3F3666);
+}
+
+/* 02. ESTRUCTURA BASE ====================================================== */
+wc-banner {
+    display: block;
+    min-height: var(--input-height);
+}
+
+wc-banner[hidden] {
+    display: none !important;
+}
+
+/* Estilos con fallbacks directos para funcionar en cualquier contexto (documento o Shadow DOM) */
+.wcbn-container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-height: 37px;
+    border-radius: var(--wcbn-radius);
+    padding: var(--wcbn-padding, 0.75rem 1rem);
+    border: 1px solid transparent;
+    justify-content: center;
+}
+
+.wcbn-container.is-sticky {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+/* Sticky a nivel de elemento wc-banner (para form.info en DynamicForm) */
+wc-banner[sticky] {
+    display: block;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+/* Contexto: Banner en campos de formulario (field.banner) */
+.form-group > wc-banner .wcbn-container {
+    margin-bottom: 0.5rem;
+}
+
+/* Contexto: Banner en secciones CON borde (alineado con header/grid) */
+/* margin-top separa el banner de la cabecera (evita que quede pegado a la linea de header-divider) */
+.section-banner .wcbn-container {
+    margin: 12px 16px 0;
+}
+
+/* Contexto: Banner en secciones SIN borde (sin margin lateral) */
+.section-borderless .section-banner .wcbn-container {
+    margin: 12px 0 0;
+}
+
+/* 03. ICONO ================================================================ */
+.wcbn-container::before {
+    content: "";
+    position: absolute;
+    left: 1rem;
+    width: var(--wcbn-icon-size, 1.25rem);
+    height: var(--wcbn-icon-size, 1.25rem);
+    min-width: 16px;
+    min-height: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+
+/* 04. VARIANTES DE TIPO ==================================================== */
+
+/* Info (default) */
+.wcbn-container.wcbn-info {
+    background-color: var(--wcbn-info-bg, var(--alert-bg-info, #d1ecf1));
+    border-color: var(--wcbn-info-border, var(--alert-border-info, #bee5eb));
+    color: var(--wcbn-info-text, var(--alert-text-info, #0c5460));
+}
+
+.wcbn-container.wcbn-info::before {
+    background-image: url("data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' fill='%2309488C' viewBox='0 0 16 16'><path d='M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z'/></svg>");
+}
+
+/* Warning */
+.wcbn-container.wcbn-warning {
+    background-color: var(--wcbn-warning-bg, var(--alert-bg-warning, #fff3cd));
+    border-color: var(--wcbn-warning-border, var(--alert-border-warning, #ffeeba));
+    color: var(--wcbn-warning-text, var(--alert-text-warning, #856404));
+}
+
+.wcbn-container.wcbn-warning::before {
+    background-image: url("data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' fill='%23856404' viewBox='0 0 16 16'><path d='M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z'/></svg>");
+}
+
+/* Error */
+.wcbn-container.wcbn-error {
+    background-color: var(--wcbn-error-bg, #f8d7da);
+    border-color: var(--wcbn-error-border, #f5c6cb);
+    color: var(--wcbn-error-text, #721c24);
+}
+
+.wcbn-container.wcbn-error::before {
+    background-image: url("data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' fill='%23a01233' viewBox='0 0 16 16'><path d='M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4zm.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2z'/></svg>");
+}
+
+/* Success */
+.wcbn-container.wcbn-success {
+    background-color: var(--wcbn-success-bg, #d4edda);
+    border-color: var(--wcbn-success-border, #c3e6cb);
+    color: var(--wcbn-success-text, #155724);
+}
+
+.wcbn-container.wcbn-success::before {
+    background-image: url("data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' fill='%233e652c' viewBox='0 0 16 16'><path d='M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z'/></svg>");
+}
+
+/* news */
+.wcbn-container.wcbn-news {
+    background-color: var(--wcbn-news-bg, var(--alert-bg-news, #F1EFFA));
+    border-color: var(--wcbn-news-border, var(--alert-border-news, #DAD6F2));
+    color: var(--wcbn-news-text, var(--alert-text-news, #3F3666));
+}
+
+.wcbn-container.wcbn-news::before {
+    /* Icono "noun-bulb-3316693" (Noun Project, autor Vectors Point), pendiente
+       confirmar licencia de atribucion antes de llevar esto a produccion real. */
+    background-image: url("data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 50 48' fill='%233F3666'><path d='M23.3075,1.1385c-6.88,0.75-12.47,6.32-13.24,13.19c-0.52,4.72,1.13,9.04,4.08,12.13c1.84,1.92,3,4.39,3.41,7.01h14.9c0.45-2.7,1.73-5.19,3.61-7.23c2.46-2.68,3.96-6.25,3.96-10.17C40.0275,7.2085,32.3675,0.1484,23.3075,1.1385z M34.9775,16.2284c-0.53,0-0.97-0.44-0.97-0.97c0-4.4145-3.7938-8.0701-8.47-7.56c-0.53,0.05-1.01-0.33-1.07-0.86c-0.06-0.54,0.33-1.02,0.86-1.08c5.7893-0.6173,10.63,3.8917,10.63,9.5C35.9575,15.7884,35.5175,16.2284,34.9775,16.2284z'/><path d='M17.5275,43.1285c0,1.32,1.07,2.39,2.39,2.39h0.6285c0.5298,1.9761,2.3128,3.4359,4.4515,3.4359s3.9218-1.4598,4.4515-3.4359h0.6285c1.31,0,2.38-1.07,2.38-2.39H17.5275z'/><rect x='17.5275' y='35.4684' width='14.93' height='1.83'/><rect x='17.5275' y='39.2985' width='14.93' height='1.83'/></svg>");
+}
+
+/* 05. BOTÓN DE CERRAR (wc-button) ========================================== */
+/* Estilo Bootstrap: solo opacidad, sin background */
+wc-button.wcbn-close {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+}
+
+wc-button.wcbn-close .wcb-btn {
+    opacity: 0.5;
+    background: transparent !important;
+    transition: opacity 0.15s ease-in-out;
+    /* Forzar dimensiones y centrado del icono */
+    min-width: 22px !important;
+    min-height: 22px !important;
+    padding: 4px !important;
+}
+
+wc-button.wcbn-close .wcb-btn .wcb-mask-icon {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+wc-button.wcbn-close .wcb-btn .wcb-mask-icon::before {
+    width: 10px !important;
+    height: 10px !important;
+}
+
+wc-button.wcbn-close .wcb-btn:hover {
+    opacity: 0.75;
+    background: transparent !important;
+}
+
+wc-button.wcbn-close .wcb-btn:focus {
+    opacity: 1;
+}
+
+/* Color del icono según tipo de banner */
+.wcbn-info wc-button.wcbn-close .wcb-mask-icon::before {
+    background-color: var(--wcbn-info-text, var(--alert-text-info, #0c5460));
+}
+
+.wcbn-warning wc-button.wcbn-close .wcb-mask-icon::before {
+    background-color: var(--wcbn-warning-text, var(--alert-text-warning, #856404));
+}
+
+.wcbn-error wc-button.wcbn-close .wcb-mask-icon::before {
+    background-color: var(--wcbn-error-text, #721c24);
+}
+
+.wcbn-success wc-button.wcbn-close .wcb-mask-icon::before {
+    background-color: var(--wcbn-success-text, #155724);
+}
+
+.wcbn-news wc-button.wcbn-close .wcb-mask-icon::before {
+    background-color: var(--wcbn-news-text, #3F3666);
+}
+
+/* 06. CONTENIDO ============================================================ */
+.wcbn-content {
+    padding-left: 2rem;
+    padding-right: 1.5rem;
+}
+
+.wcbn-content ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.wcbn-content li {
+    font-size: var(--wcbn-font-size, var(--rf-font-size, 0.95rem));
+    padding: 4px 0;
+}
+
+.wcbn-content li + li {
+    border-top: 1px solid var(--alert-divider, rgba(0,0,0,0.08));
+    margin-top: 4px;
+    padding-top: 8px;
+}
+
+/* Mensaje simple (sin lista) */
+.wcbn-content .wcbn-message {
+    font-size: var(--wcbn-font-size, var(--rf-font-size, 0.95rem));
+}
+
+/* 07. MENSAJES INTERACTIVOS ================================================ */
+.wcbn-content .clickable {
+    cursor: pointer;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 2px;
+    padding: 2px 4px;
+    border-radius: var(--radius-sm);
+    transition: all 0.2s ease-in-out;
+    display: inline-block;
+}
+
+.wcbn-content .clickable:hover {
+    background-color: rgba(0,0,0,0.08);
+    filter: contrast(1.1);
+}
+
+.wcbn-content .clickable:active {
+    transform: scale(0.96);
+}
+
+/* Colores de clickable según tipo */
+.wcbn-info .clickable { color: var(--wcbn-info-text); }
+.wcbn-warning .clickable { color: var(--wcbn-warning-text); }
+.wcbn-error .clickable { color: var(--wcbn-error-text); }
+.wcbn-success .clickable { color: var(--wcbn-success-text); }
+.wcbn-news .clickable { color: var(--wcbn-news-text); }

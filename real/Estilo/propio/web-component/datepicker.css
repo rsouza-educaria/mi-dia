@@ -1,0 +1,579 @@
+/* ===========================================================================
+   WC-DATEPICKER - Sistema de estilos
+   ===========================================================================
+   Indice:
+     01. Variables CSS
+     02. Host y envoltorio
+     03. Campo visible y boton de calendario
+     04. Input nativo oculto
+     05. Panel (top layer y fallback)
+     06. Cabecera de navegacion
+     07. Rejilla de dias y de meses
+     08. Hora y pie
+     09. Modo inline
+     10. Estados (disabled / readonly)
+     11. Responsive (movil: pantalla completa)
+   ===========================================================================
+   Componente base en Light DOM: no lleva @import de internal-layout.css (es
+   internal-layout.css quien importa este fichero). Ningun selector queda sin
+   dueno: todo cuelga de la etiqueta wc-datepicker o de clases con prefijo wcd-.
+   =========================================================================== */
+
+
+/* 01. VARIABLES CSS ======================================================== */
+
+wc-datepicker {
+    --wcd-panel-bg:       var(--rf-bg-white);
+    --wcd-panel-border:    var(--rf-color-border);
+    --wcd-panel-shadow:    0 4px 16px rgba(0, 0, 0, 0.12);
+    --wcd-panel-radius:    var(--rf-radius-lg);
+    --wcd-day-size:        2.4rem;
+    /* Ancho FIJO del panel = 7 columnas de dias + 6 huecos de 2px + padding (2 x 0.5rem) + borde (2 x 1px):
+       no depende del mes que se muestre, asi las flechas no desplazan los botones bajo el raton */
+    --wcd-panel-width:     calc(var(--wcd-day-size) * 7 + 12px + 1rem + 2px);
+    --wcd-day-hover:       var(--rf-bg-dark);
+    --wcd-selected-bg:     var(--rf-color-primary);
+    --wcd-selected-color:  var(--rf-bg-white);
+    --wcd-selected-hover-brightness: 1.15;
+    --wcd-marked-dot:      var(--rf-color-warning);
+    --wcd-outside-color:   var(--rf-text-readonly);
+    --wcd-disabled-color:  var(--rf-text-readonly);
+    --wcd-z-panel:         10600;
+}
+
+
+/* 02. HOST Y ENVOLTORIO ==================================================== */
+
+wc-datepicker {
+    display: block;
+    width: 100%;
+}
+
+.wcd-wrapper {
+    position: relative;
+    width: 100%;
+    box-sizing: border-box; /* el reset de caja solo alcanza a :host y [wc-educaria] */
+}
+
+
+/* 03. CAMPO VISIBLE Y BOTON DE CALENDARIO ================================== */
+
+/* El padding derecho deja sitio al icono. La regla base de inputs de
+   internal-layout.css tiene mas especificidad que una clase simple, por eso
+   !important (mismo criterio que wc-input[clearable] input). */
+.wcd-text {
+    width: 100%;
+    box-sizing: border-box;
+    padding-right: 2.4rem !important;
+}
+
+wc-datepicker .wcd-text,
+wc-datepicker .wcd-time {
+    height: var(--input-height);
+}
+
+.wcd-toggle {
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: var(--input-height);
+    width: 2.4rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    user-select: none;
+    color: var(--rf-color-text-sec);
+    transition: var(--wcb-transition, all 0.18s ease-in-out);
+}
+
+.wcd-toggle:hover {
+    color: var(--rf-color-primary);
+}
+
+.wcd-toggle:focus-visible {
+    outline: 3px solid var(--rf-color-primary);
+    outline-offset: -3px;
+    border-radius: var(--rf-radius);
+}
+
+.wcd-toggle svg {
+    width: 18px;
+    height: 18px;
+    pointer-events: none;
+}
+
+
+/* 04. INPUT NATIVO OCULTO ================================================== */
+
+/* El nativo sigue en el DOM (es el unico que valida), pero no se ve ni se puede
+   usar. El ocultado real va en estilo inline desde el JS: dynamic-form.css da
+   width:100% a todos los inputs y esa regla ganaria a una clase. */
+
+
+/* 05. PANEL (TOP LAYER Y FALLBACK) ========================================= */
+
+/* El panel se promueve al TOP LAYER con popover="manual" + showPopover().
+   Al llevar [popover], el navegador aplica su hoja UA (inset:0; margin:auto;
+   border:solid; padding:.25em; color:CanvasText): se neutraliza lo que rompe el
+   layout. NO se declara display aqui: un display propio ganaria a la regla UA
+   [popover]:not(:popover-open){display:none} y el panel se veria siempre. El
+   layout va en los elementos internos. position:fixed y z-index se mantienen
+   para el fallback de navegadores sin la API. */
+.wcd-panel {
+    position: fixed;
+    inset: auto;
+    margin: 0;
+    color: inherit;
+    z-index: var(--wcd-z-panel);
+    box-sizing: border-box;
+    background: var(--wcd-panel-bg);
+    border: 1px solid var(--wcd-panel-border);
+    border-radius: var(--wcd-panel-radius);
+    box-shadow: var(--wcd-panel-shadow);
+    padding: 0.5rem;
+    width: var(--wcd-panel-width);
+    max-width: calc(100vw - 16px);
+    font-size: var(--rf-font-size);
+}
+
+/* Cabecera movil: solo visible en pantalla completa (ver 11) */
+.wcd-mobile-head {
+    display: none;
+}
+
+.wcd-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+
+/* 06. CABECERA DE NAVEGACION =============================================== */
+
+.wcd-nav {
+    display: flex;
+    align-items: center;
+    gap: 0.15rem;
+}
+
+/* El titulo es un boton: cambia de vista (dias -> meses -> anos) */
+.wcd-nav-title {
+    flex: 1;
+    min-width: 0;
+    height: 2rem;
+    padding: 0 0.25rem;
+    text-align: center;
+    font-weight: 600;
+    color: var(--rf-color-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.wcd-nav-title,
+.wcd-nav-btn,
+.wcd-close,
+.wcd-foot-btn {
+    font: inherit;
+    cursor: pointer;
+    color: var(--rf-color-text);
+    background: transparent;
+    border: none;
+    border-radius: var(--rf-radius);
+    transition: var(--wcb-transition, all 0.18s ease-in-out);
+}
+
+/* Despues del grupo: el "font: inherit" de arriba reiniciaria el peso del titulo */
+.wcd-nav-title {
+    font-weight: 600;
+}
+
+.wcd-nav-btn {
+    width: 1.75rem;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+
+/* display:flex de arriba anula el display:none del atributo hidden: se restablece */
+.wcd-nav-btn[hidden] {
+    display: none;
+}
+
+.wcd-nav-title:hover,
+.wcd-nav-btn:hover,
+.wcd-close:hover,
+.wcd-foot-btn:hover:not(:disabled) {
+    background: var(--wcd-day-hover);
+}
+
+.wcd-nav-title:focus-visible,
+.wcd-nav-btn:focus-visible,
+.wcd-close:focus-visible,
+.wcd-foot-btn:focus-visible,
+.wcd-day:focus-visible,
+.wcd-month:focus-visible {
+    outline: 3px solid var(--rf-color-primary);
+    outline-offset: 2px;
+}
+
+.wcd-nav-btn svg {
+    width: 16px;
+    height: 16px;
+    pointer-events: none;
+}
+
+
+/* 07. REJILLA DE DIAS Y DE MESES =========================================== */
+
+/* Altura fija = cabecera de dias + 6 semanas (6 huecos de 2px mas el de la cabecera): asi el
+   panel no salta al cambiar entre las vistas de dias, meses y anos */
+.wcd-grid-host {
+    display: flex;
+    flex-direction: column;
+    min-height: calc(1.75rem + var(--wcd-day-size) * 6 + 12px);
+}
+
+.wcd-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.wcd-row {
+    display: grid;
+    grid-template-columns: repeat(7, var(--wcd-day-size));
+    gap: 2px;
+}
+
+/* Mismo ancho que la rejilla de dias (7 columnas + 6 huecos de 2px) */
+.wcd-grid.is-months {
+    flex: 1;
+    width: calc(var(--wcd-day-size) * 7 + 12px);
+}
+
+/* Las 4 filas de meses/anos se reparten la altura de la rejilla de dias */
+.wcd-grid.is-months .wcd-row {
+    flex: 1;
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.wcd-grid.is-months .wcd-month {
+    height: auto;
+}
+
+.wcd-weekday {
+    height: 1.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--rf-color-text-sec);
+}
+
+.wcd-day,
+.wcd-month {
+    position: relative;
+    font: inherit;
+    height: var(--wcd-day-size);
+    padding: 0;
+    cursor: pointer;
+    color: var(--rf-color-text);
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--rf-radius);
+    transition: var(--wcb-transition, all 0.18s ease-in-out);
+}
+
+/* El hover gris NO se aplica al seleccionado: con la misma especificidad que la regla de
+   seleccion le ganaba, y el azul no se veia hasta quitar el raton del dia recien elegido */
+.wcd-day:hover:not([aria-disabled="true"]):not([aria-selected="true"]),
+.wcd-month:hover:not([aria-disabled="true"]):not([aria-selected="true"]) {
+    background: var(--wcd-day-hover);
+}
+
+/* Seleccionado + hover: el mismo azul, algo mas tenue (el texto blanco sigue en AA) */
+.wcd-day[aria-selected="true"]:hover,
+.wcd-month[aria-selected="true"]:hover {
+    filter: brightness(var(--wcd-selected-hover-brightness));
+}
+
+.wcd-day.is-outside {
+    color: var(--wcd-outside-color);
+}
+
+.wcd-day.is-today,
+.wcd-month.is-today {
+    border-color: var(--rf-color-primary);
+}
+
+.wcd-day[aria-selected="true"],
+.wcd-month[aria-selected="true"] {
+    background: var(--wcd-selected-bg);
+    color: var(--wcd-selected-color);
+}
+
+/* Dia marcado: punto indicador (la etiqueta va en el title nativo) */
+.wcd-day.is-marked::after,
+.wcd-month.is-marked::after {
+    content: "";
+    position: absolute;
+    bottom: 3px;
+    left: 50%;
+    width: 5px;
+    height: 5px;
+    margin-left: -2.5px;
+    border-radius: var(--radius-circle);
+    background: var(--wcd-marked-dot);
+}
+
+.wcd-day[aria-selected="true"].is-marked::after,
+.wcd-month[aria-selected="true"].is-marked::after {
+    background: var(--wcd-selected-color);
+}
+
+/* Dia deshabilitado: no seleccionable y con estilo diferenciado */
+.wcd-day[aria-disabled="true"],
+.wcd-month[aria-disabled="true"] {
+    color: var(--wcd-disabled-color);
+    text-decoration: line-through;
+    cursor: not-allowed;
+    opacity: var(--wcb-opacity-disabled, 0.45);
+}
+
+
+/* 08. HORA (datetime-local), COLUMNAS DE HORA (time) Y PIE ================= */
+
+.wcd-time-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--rf-color-border-light);
+}
+
+.wcd-time-label {
+    font-size: 0.85rem;
+    color: var(--rf-color-text-sec);
+}
+
+.wcd-time {
+    flex: 1;
+    min-width: 0;
+}
+
+/* Columnas de hora y minuto (type="time"): misma altura que la rejilla de dias, asi el panel
+   mide lo mismo que el del calendario */
+.wcd-cols {
+    display: flex;
+    gap: 0.5rem;
+    height: calc(1.75rem + var(--wcd-day-size) * 6 + 12px);
+}
+
+.wcd-col-wrap {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.wcd-col-title {
+    height: 1.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--rf-color-text-sec);
+}
+
+/* position:relative: el JS usa offsetTop de las opciones para centrar y mantener la visible */
+.wcd-col {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 2px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    border: 1px solid var(--rf-color-border-light);
+    border-radius: var(--rf-radius);
+}
+
+.wcd-opt {
+    flex: 0 0 auto;
+    height: 2rem;
+    padding: 0;
+    font: inherit;
+    cursor: pointer;
+    color: var(--rf-color-text);
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--rf-radius);
+    transition: var(--wcb-transition, all 0.18s ease-in-out);
+}
+
+.wcd-opt:hover:not([aria-disabled="true"]):not([aria-selected="true"]) {
+    background: var(--wcd-day-hover);
+}
+
+.wcd-opt[aria-selected="true"] {
+    background: var(--wcd-selected-bg);
+    color: var(--wcd-selected-color);
+}
+
+.wcd-opt[aria-selected="true"]:hover {
+    filter: brightness(var(--wcd-selected-hover-brightness));
+}
+
+.wcd-opt[aria-disabled="true"] {
+    color: var(--wcd-disabled-color);
+    text-decoration: line-through;
+    cursor: not-allowed;
+    opacity: var(--wcb-opacity-disabled, 0.45);
+}
+
+.wcd-opt:focus-visible {
+    outline: 3px solid var(--rf-color-primary);
+    outline-offset: -3px;
+}
+
+.wcd-foot {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding-top: 0.25rem;
+}
+
+/* El display:flex de arriba anula el display:none del atributo hidden (hide-today + hide-clear) */
+.wcd-foot[hidden] {
+    display: none;
+}
+
+.wcd-foot-btn {
+    padding: 0.3rem 0.6rem;
+    color: var(--rf-color-primary);
+}
+
+/* "Limpiar" siempre a la derecha, tambien sin "Hoy" (type="time" o hide-today) */
+.wcd-foot-btn[data-act="clear"] {
+    margin-left: auto;
+}
+
+.wcd-foot-btn:disabled {
+    cursor: not-allowed;
+    opacity: var(--wcb-opacity-disabled, 0.45);
+}
+
+
+/* 09. MODO INLINE ========================================================== */
+
+/* Sin popover ni campo: el panel es contenido normal de la pagina */
+.wcd-panel.is-inline {
+    position: static;
+    width: var(--wcd-panel-width);
+    max-width: 100%;
+    box-shadow: none;
+    z-index: auto;
+}
+
+
+/* 10. ESTADOS ============================================================== */
+
+.wcd-wrapper.is-disabled .wcd-toggle,
+.wcd-wrapper.is-readonly .wcd-toggle {
+    cursor: default;
+    pointer-events: none;
+}
+
+.wcd-wrapper.is-disabled .wcd-panel.is-inline {
+    opacity: var(--wcb-opacity-disabled, 0.45);
+}
+
+.wcd-wrapper.is-disabled .wcd-panel.is-inline,
+.wcd-wrapper.is-readonly .wcd-panel.is-inline {
+    pointer-events: none;
+}
+
+
+/* 11. RESPONSIVE (MOVIL: PANTALLA COMPLETA) ================================ */
+
+/* Mismo breakpoint que rich-text.css. En movil el panel ocupa toda la pantalla:
+   dias grandes y sin teclado (el JS pone inputmode="none" en el campo). El inset:0
+   es aqui lo que se busca; la anulacion del UA de la seccion 05 solo vale para
+   escritorio. Excluye .is-inline, que sigue siendo contenido de la pagina. */
+@media (max-width: 640px) {
+    .wcd-panel:not(.is-inline) {
+        inset: 0;
+        width: auto;
+        height: auto;
+        max-width: none;
+        border: none;
+        border-radius: 0;
+        padding: 0;
+    }
+
+    .wcd-panel:not(.is-inline) .wcd-mobile-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.5rem 0.75rem;
+        border-bottom: 1px solid var(--rf-color-border-light);
+        font-weight: 600;
+    }
+
+    .wcd-panel:not(.is-inline) .wcd-close {
+        width: 2.5rem;
+        height: 2.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+    }
+
+    .wcd-panel:not(.is-inline) .wcd-body {
+        padding: 0.75rem;
+        height: calc(100% - 3.5rem);
+        overflow-y: auto;
+    }
+
+    .wcd-panel:not(.is-inline) .wcd-grid {
+        flex: 1;
+        width: auto;
+    }
+
+    /* Columnas de hora: ocupan el alto disponible de la pantalla completa */
+    .wcd-panel:not(.is-inline) .wcd-cols {
+        flex: 1;
+        height: auto;
+        min-height: 12rem;
+    }
+
+    .wcd-panel:not(.is-inline) .wcd-opt {
+        height: 2.75rem;
+    }
+
+    .wcd-panel:not(.is-inline) .wcd-row {
+        grid-template-columns: repeat(7, 1fr);
+        flex: 1;
+    }
+
+    .wcd-panel:not(.is-inline) .wcd-grid.is-months .wcd-row {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .wcd-panel:not(.is-inline) .wcd-day,
+    .wcd-panel:not(.is-inline) .wcd-month {
+        height: auto;
+        min-height: 2.75rem;
+    }
+}

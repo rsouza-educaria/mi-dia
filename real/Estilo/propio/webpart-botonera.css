@@ -1,0 +1,1460 @@
+/* ===================================================================================
+   webpart-botonera.css
+   Botonera vertical fija de webparts (ES) + estilos de los listados dentro del panel.
+
+   El contenido del panel es el HTML del webpart existente (Detalle*.ascx) inyectado en
+   light DOM (slot del right-sidebar), dentro de un contenedor con clase ".webpart-panel".
+
+   Para que el aspecto y el comportamiento sean EXACTAMENTE los de la Home, las reglas de
+   listado/item/acciones se han EXTRAIDO TAL CUAL de estilo/propio/home.css y se han prefijado
+   con ".webpart-panel ". Asi:
+     - aplican solo dentro del panel (otro subarbol DOM) -> NO pisan las de la Home ni otras
+       paginas (la Home sigue usando sus propias reglas globales de home.css),
+     - el panel se ve/comporta igual que el detalle del Home.
+   Las URLs de imagen son relativas a estilo/propio/ (este fichero vive ahi) -> resuelven igual.
+
+   Unica diferencia intencionada: se oculta la cabecera propia del webpart (.lienzo_header,
+   con titulo + "ver todos") porque el panel ya muestra el titulo en su cabecera.
+   =================================================================================== */
+
+/* ===================================================================================
+   Filtros listado de comunicados.
+   En home va junto a las acciones del webpart, en el panel va en su propia fila en un dynamic-layout en el slot "extra"
+   =================================================================================== */
+.wp_filtro_lectura {
+    display: flex;
+    gap: 8px;
+    padding-bottom: 8px;
+}
+
+    .wp_filtro_lectura wc-status {
+        cursor: pointer;
+        user-select: none;
+    }
+
+/* ===================================================================================
+   Filtros listado de alumnos: pastillas de tipo de relacion + selector de grupos.
+   Reparto fijo en una unica fila: pastillas 60% / selector de grupos 40% (decision expresa
+   del usuario). Asi el extra ocupa siempre un solo alto de fila, igual que el filtro de
+   comunicados (ver la constante altoTop en pintarListadoEn). Cualquiera de las dos piezas
+   puede no estar (ver _crearFiltroAlumnos); la que quede sola ocupa la fila entera.
+
+   OJO con el selector: `.wp_filtro_alumnos` matchea DOS elementos, porque _crearExtraListado
+   copia la clase al host (`capsula.className = contenido.className`) y este fichero se carga
+   tanto en la pagina (HelperRecursosCss) como dentro del shadow (extraCss). Por eso el reparto
+   va con `>` sobre los hijos: en el host no hay hijos en light DOM, asi que solo aplica al div
+   real de dentro del shadow.
+   =================================================================================== */
+.wp_filtro_alumnos {
+    display: flex;
+    flex-wrap: wrap; /* si no caben las dos con su minimo, el selector baja a su propia fila */
+    align-items: center;
+    gap: 12px;
+    padding-bottom: 8px;
+}
+
+    /* Mismo criterio que la fila de acciones+extra (.wp_acciones_extra_fila, mas abajo): el
+       reparto 60/40 va en los pesos del `flex-grow`, no en un `flex-basis` en porcentaje.
+
+       Un 60% rigido es lo que producia el defecto de "pastillas partidas en dos lineas con el
+       selector flotando al lado": en una columna de 466px ese 60% son 272px y las tres
+       pastillas necesitan ~290px, asi que envolvian por unos pocos pixeles aunque a su lado
+       hubiera sitio de sobra. Con `basis: 0` + `min-width`, las pastillas nunca bajan de su
+       ancho natural: si el 60% no llega, se plantan en 290px y el selector se queda con el
+       resto. Y si ni asi caben las dos, el `flex-wrap: wrap` manda el selector abajo, donde
+       ocupa el 100% (por eso ninguna lleva `max-width`, que se lo impediria).
+
+       Umbral de salto = 290 + 12 + 150 = 452px de ancho del filtro.
+
+       Ya no hace falta regla para `:only-child`: con basis 0, la pieza que se quede sola se
+       lleva todo el espacio libre y ocupa el 100% ella sola. */
+    .wp_filtro_alumnos > .wp_filtro_pastillas {
+        flex: 60 1 0;
+        min-width: 290px;
+    }
+
+    .wp_filtro_alumnos > wc-select {
+        flex: 40 1 0;
+        min-width: 150px;
+    }
+
+    /* Si aun con su minimo no caben en una linea, las pastillas envuelven entre si. */
+    .wp_filtro_alumnos .wp_filtro_pastillas {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .wp_filtro_alumnos wc-status {
+        cursor: pointer;
+        user-select: none;
+    }
+
+    /* `--wcs-min-width` se traduce a un `min-width` REAL sobre el host de wc-select
+       (internal-layout.css) y un min-width anula el encogido de flex. El valor anterior (240px)
+       era mayor que el 40% en un panel estrecho (40% de 372px utiles = ~149px), asi que
+       desbordaria la fila. A 0 el control se cine a su columna, que es de donde saca el ancho
+       ahora (ver wc-select.md, "Ancho del control y etiquetas largas"). */
+    .wp_filtro_alumnos wc-select {
+        --wcs-min-width: 0;
+    }
+
+/* El body del panel (RightSidebar._getOrCreateContainer/"_upsertBody") es flex-column con un
+   unico hijo y altura definida via posicionamiento absoluto (ver right-sidebar.css
+   ::slotted([slot="body"])); height:100% en ese hijo unico basta para que ocupe todo el alto
+   disponible, y la fila 'listado' (1fr, scroll:'vertical') reparte el resto. El tree-list no lleva
+   altura explicita en este caso (a diferencia de Home). Si en pruebas reales el scroll interno no
+   queda bien, revisar esta regla antes de forzar una altura en px sobre el tree-list. */
+.wp_panel_listado_layout {
+    height: 100%;
+}
+
+/* Fila compartida cuando un codigo tiene ACCIONES Y EXTRA a la vez ("compartenFila" en
+   pintarListadoEn): las acciones a la izquierda, el extra a la derecha, a continuacion —
+   decision expresa del usuario. Las dos piezas pierden su propio borde/padding inferior aqui
+   dentro: la fila comun lleva uno solo, no uno cada una. */
+.wp_acciones_extra_fila {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+    .wp_acciones_extra_fila button-bar.acciones_webpart,
+    .wp_acciones_extra_fila .wp_filtro_lectura,
+    .wp_acciones_extra_fila .wp_filtro_alumnos {
+        padding: 0;
+        border-bottom: none;
+    }
+
+    .wp_acciones_extra_fila > .wp_filtro_alumnos {
+        flex: 60 1 0;
+        min-width: 480px;
+    }
+
+@media screen and (min-width: 1582px) {
+    .wp_acciones_extra_fila > button-bar.acciones_webpart {
+        flex-grow: 45;
+    }
+
+    .wp_acciones_extra_fila > .wp_filtro_lectura,
+    .wp_acciones_extra_fila > .wp_filtro_alumnos {
+        flex-grow: 55;
+    }
+}
+
+/* ===================================================================================
+   0) AJUSTE DE LAYOUT — reduce elementos de ancho completo para que no queden bajo la barra.
+      Solo aplica cuando la barra está presente (clase añadida por JS en _render).
+   =================================================================================== */
+body.con-botonera-webpart #cabecera_pagina {
+    width: calc(99% - 64px) !important;
+}
+
+body.con-botonera-webpart .cuerpo_master {
+    width: calc(99% - 64px) !important;
+}
+
+@media screen and (min-width: 1918px) and (max-width: 3000px) {
+    body.con-botonera-webpart .cuerpo_master #agenda {
+        width: 20%;
+    }
+}
+
+body.con-botonera-webpart .cuerpo_master_stick {
+    width: calc(100% - 64px) !important;
+}
+
+body.con-botonera-webpart #content_body.collapsed #divStickemMiga .stickit_miga {
+    width: calc(100% - 136px) !important;
+}
+
+body.con-botonera-webpart #content_body #divStickemMiga .stickit_miga {
+    width: calc(100% - 283px) !important;
+}
+
+body.con-botonera-webpart #validador_alexia {
+    right: 59px !important;
+    border-radius: 0 !important;
+}
+
+body.con-botonera-webpart .herramientas_salir {
+    min-width: 58px !important;
+    border-left: 1px solid #d9dfec !important;
+}
+
+
+/* ===================================================================================
+   1) BARRA VERTICAL FIJA
+   =================================================================================== */
+.webpart-botonera-fija {
+    display: none;
+}
+
+body.con-botonera-webpart .webpart-botonera-fija {
+    position: fixed;
+    top: 0;
+    right: 0;
+    height: 100vh;
+    width: 60px;
+    z-index: 1200; /* por debajo de #poploading / modales */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /*justify-content: center;*/
+    gap: 14px;
+    padding-top: 60px;
+    padding-bottom: 53px;
+    box-sizing: border-box;
+    background: #ffffff;
+    border-left: 1px solid #d9dfec;
+    box-shadow: -2px 0 6px rgba(66, 92, 151, .08);
+}
+
+/* El boton de feedback (fijo abajo-derecha) no debe quedar tapado por la barra */
+body.con-botonera-webpart .paginaFeedback_sitio {
+    z-index: 1201;
+}
+
+/* Tamano del circulo/icono de cada boton de la barra: 40x40 el circulo, 24x24
+   el icono, en vez del size="sm" de button.css (28px circulo, icono ~26px
+   estirado por min-width:100% en su regla text-out+pill). Este archivo se carga
+   dos veces: en el documento (HelperRecursosCss.IncluirCssWebpartBotonera) y via
+   extraCss DENTRO del shadow root del <button-bar> y de los shadow-container de
+   los paneles. :host solo casa dentro de un shadow root, asi que estas reglas
+   aplican a la barra y sus paneles y no al resto de wc-button de la pagina. */
+:host .wcb-icon-frame {
+    width: 40px !important;
+    height: 40px !important;
+}
+
+:host .wcb-mask-icon::before {
+    width: 24px !important;
+    height: 24px !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+}
+
+/* ===================================================================================
+   2) CONTENEDOR DEL PANEL
+   =================================================================================== */
+.webpart-panel {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 400px;
+    box-sizing: border-box;
+}
+
+    /* Cabecera propia del webpart (titulo + icono + ver_todos) — extraido fiel de home.css */
+    .webpart-panel .lienzo_header {
+        overflow: hidden; /* contiene el float de .ver_todos */
+    }
+
+    .webpart-panel .lienzo_header, .webpart-panel .cont_info, .webpart-panel .botones_lienzo_webparts {
+        display: none;
+    }
+
+    /* Enlace "ver todos" */
+    .webpart-panel .ver_todos {
+        clear: both;
+        float: right;
+        margin-top: 10px;
+        margin-right: 35px;
+    }
+
+        .webpart-panel .ver_todos em {
+            font-weight: 600;
+        }
+
+        .webpart-panel .ver_todos i {
+            color: #ffb400;
+            font-style: normal;
+            font-weight: 800;
+            margin-right: 5px;
+        }
+
+        .webpart-panel .ver_todos a span {
+            background: url("../propio/images/home/iconos_tienda_home.png") no-repeat scroll -24px -139px rgba(0, 0, 0, 0);
+            float: right;
+            height: 15px;
+            width: 15px;
+        }
+
+    /* ===================================================================================
+   3) BUSCADOR (.acciones_lienzo_webparts / .div_busqueda_webpart_home) — de home.css
+   =================================================================================== */
+    .webpart-panel .acciones_lienzo_webparts {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 10px;
+        flex: 0 0 auto;
+    }
+
+        .webpart-panel .acciones_lienzo_webparts > .div_busqueda_webpart_home {
+            margin-left: auto;
+        }
+
+    .webpart-panel .div_busqueda_webpart_home {
+        position: relative;
+    }
+
+        .webpart-panel .div_busqueda_webpart_home input {
+            border-radius: 26px;
+            width: 130px;
+            font-size: 13px;
+            padding-left: 45px;
+            padding-right: 32px;
+            background-color: #ffffff;
+            height: 24px;
+            float: right;
+            border: 1px solid #c1d8e3;
+            box-shadow: 0px 2px 1px -1px #425c9736;
+        }
+
+        .webpart-panel .div_busqueda_webpart_home:before {
+            content: "";
+            position: absolute;
+            width: 38px !important;
+            background-color: #7997a5 !important;
+            -webkit-mask-image: url(../propio/images/impresion/magnifier.svg);
+            mask-image: url(../propio/images/impresion/magnifier.svg);
+            -webkit-mask-size: 22px;
+            mask-size: 22px;
+            -webkit-mask-repeat: no-repeat;
+            mask-repeat: no-repeat;
+            -webkit-mask-position: center center;
+            mask-position: center center;
+            height: 25px;
+            left: 3px;
+            top: 4px;
+            z-index: 2;
+        }
+
+    .webpart-panel input.input_busqueda_webpart:focus {
+        outline: 0px none;
+        background-color: rgb(255, 255, 255);
+        box-shadow: 0 0 0 1px #fff, 0 0 0px 3px #002bff33;
+    }
+
+    .webpart-panel .cerrar_busqueda {
+        display: none;
+        float: left;
+        height: 12px;
+        position: absolute;
+        top: 10px;
+        right: 4px;
+        width: 30px;
+        cursor: pointer;
+        background-color: #20536d !important;
+        -webkit-mask-image: url(../propio/images/impresion/close.svg);
+        mask-image: url(../propio/images/impresion/close.svg);
+        -webkit-mask-size: 16px;
+        mask-size: 16px;
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+        -webkit-mask-position: center center;
+        mask-position: center center;
+    }
+
+    /* ===================================================================================
+   4) LISTADO (.lienzo_listado / .listado_item) — extraido fiel de home.css
+   =================================================================================== */
+    .webpart-panel .lienzo_listado {
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding-top: 10px;
+        padding-bottom: 15px;
+        width: 100%;
+        padding-right: 20px;
+        margin: 0;
+        list-style: none;
+        flex: 1 1 auto;
+        min-height: 0;
+        max-height: 100%;
+        box-sizing: border-box;
+    }
+
+        .webpart-panel .lienzo_listado > li {
+            float: left;
+            height: 57px;
+            width: 100%;
+            position: relative;
+            margin-bottom: 29px;
+            list-style: none;
+        }
+
+        .webpart-panel .lienzo_listado.listado_alumnos > li {
+            height: fit-content;
+            margin-top: 4px;
+            margin-bottom: 4px;
+        }
+
+        .webpart-panel .lienzo_listado > li > span {
+            float: left;
+            height: 54px;
+            margin-left: 7px;
+            margin-right: 15px;
+            width: 55px;
+        }
+
+        .webpart-panel .lienzo_listado > li h4 {
+            color: #000000;
+            float: left;
+            transition: height 0.25s ease-in-out 0s;
+            line-height: 20px;
+            margin-top: 10px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            width: 72%;
+            font-weight: 200;
+            font-size: 16px;
+            font-family: 'Nunito';
+        }
+
+        .webpart-panel .lienzo_listado > li:hover h4,
+        .webpart-panel .lienzo_listado > li.hovered h4 {
+            margin-top: -1px;
+            width: auto;
+            margin-left: 7px;
+        }
+
+        .webpart-panel .lienzo_listado > li:hover p {
+            margin-top: 1px;
+            margin-left: 10px;
+            width: auto;
+            display: inline-block;
+            float: left;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            text-align: right;
+        }
+
+        .webpart-panel .lienzo_listado > li:hover em {
+            margin-top: 3px;
+            margin-left: 10px;
+        }
+
+        .webpart-panel .lienzo_listado > li p {
+            color: black;
+            float: left;
+            margin-left: 1px;
+            margin-top: 3px;
+            width: 50%;
+            transition: height 0.25s ease-in-out 0s;
+            font-weight: 200;
+        }
+
+            .webpart-panel .lienzo_listado > li p span {
+                margin-right: 5px;
+            }
+
+    .webpart-panel #encuestas_pendientes h4 a,
+    .webpart-panel #encuestas_enviadas h4 a {
+        background: url(images/home/seg_diario.png) no-repeat scroll 39px -388px rgba(0, 0, 0, 0);
+        color: #7C9494;
+        float: right;
+        font-size: 13px;
+        padding-right: 20px;
+        text-transform: lowercase;
+    }
+
+    .webpart-panel .accesos_directos li a.mini_ficha {
+        min-width: 56px !important;
+    }
+
+    .webpart-panel li:hover .accesos_directos {
+        opacity: 1 !important;
+        background-color: #ffffff !important;
+        border-radius: 11px;
+    }
+
+    /* "Secciones" (em) y lista de grupos (.extra): en home.css se posicionan con float +
+   margin-top negativos calibrados al ancho exacto del detalle del Home; en el panel ese
+   truco descoloca la lista. Aqui se posicionan en absoluto DENTRO del item (que ya es
+   contexto posicionado: relative en alumnos / absolute en el resto), para que queden
+   arriba-derecha + grupos debajo, igual que en el Home, sea cual sea el ancho del panel. */
+    .webpart-panel .lienzo_listado > li em {
+        position: absolute;
+        top: 12px;
+        right: 14px;
+        float: none;
+        margin: 0;
+        font-weight: 200;
+        opacity: 1;
+    }
+
+    .webpart-panel .lienzo_listado .extra {
+        position: absolute;
+        top: 34px;
+        right: 14px;
+        float: none;
+        clear: none;
+        margin: 0;
+        padding: 0;
+        max-width: 55%;
+        text-align: right;
+        line-height: 1.2;
+        font-size: 13px;
+        font-weight: 200;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        list-style: none;
+    }
+
+        .webpart-panel .lienzo_listado .extra li {
+            display: inline;
+            list-style: none;
+        }
+
+            .webpart-panel .lienzo_listado .extra li:not(:last-child):after {
+                content: ", ";
+            }
+
+    .webpart-panel .lienzo_listado li:hover .extra {
+        display: none !important;
+    }
+
+    .webpart-panel .listado_item:hover > em {
+        display: none;
+    }
+
+    /* Foto / avatar */
+    .webpart-panel .lienzo_listado .listado_item .con_foto {
+        float: left;
+        margin-right: 0px;
+        height: auto;
+    }
+
+    .webpart-panel .lienzo_listado > li > div > span,
+    .webpart-panel .listado_item > div > span {
+        float: left;
+        height: 55px;
+        margin-left: 7px;
+        margin-right: 15px;
+        width: 55px;
+        margin-top: 3px;
+        border: solid 1px #d9dfec;
+        border-radius: 75px;
+        transition: all 0.10s ease-in-out 0s;
+        overflow: hidden;
+        background-size: 1905px 270px;
+    }
+
+        .webpart-panel .listado_item > div > span img {
+            background-color: White;
+            margin-left: 0px;
+            min-height: 60px;
+            min-width: 100%;
+        }
+
+    .webpart-panel .listado_item {
+        position: absolute;
+        left: 0;
+        right: 0;
+        width: 100%;
+        background-color: #F3F7FD;
+        min-height: 80px;
+        margin-bottom: 5px;
+        padding-top: 5px;
+        border-radius: 13px;
+        border: 0px solid #e0e1e4;
+        box-sizing: border-box;
+        transition: background-color 0.1s ease-in-out, box-shadow 0.1s ease-in-out;
+    }
+
+    /* En alumnos el item es relativo (no absoluto) */
+    .webpart-panel .listado_alumnos .listado_item {
+        position: relative;
+    }
+
+    /* Cebreado */
+    .webpart-panel .lienzo_listado > li:nth-child(odd) .listado_item {
+        background: linear-gradient(90deg, #F8FAFF 0%, #F6FAFE 100%);
+    }
+
+    .webpart-panel .lienzo_listado > li:nth-child(even) .listado_item {
+        background: linear-gradient(90deg, #F1F5FD 0%, #F4F7FD 100%);
+    }
+
+    .webpart-panel .listado_item:hover {
+        padding-top: 8px;
+        padding-bottom: 8px;
+        padding-left: 10px;
+        padding-right: 10px;
+        cursor: pointer;
+        background: #428bca00 !important;
+        border: 1px solid #6466d036;
+        border-radius: 11px;
+        box-shadow: 3px 3px 3px 1px #7ea2ff1f;
+        z-index: 1030;
+    }
+
+        .webpart-panel .listado_item:hover .previo_mensaje {
+            display: none;
+        }
+
+        /* Foto en hover */
+        .webpart-panel .lienzo_listado > li:hover > div > span,
+        .webpart-panel .listado_item:hover > div > span {
+            height: 60px;
+            width: 60px;
+            margin-top: -1px;
+            border: solid 1px #b0d4e985;
+        }
+
+        .webpart-panel .listado_item:hover > span:before {
+            background: radial-gradient(circle, #ffffffdb 0%, #dfe8fe 100%);
+            position: absolute;
+            content: "";
+            width: 57px;
+            height: 57px;
+            opacity: 0.3;
+            border-radius: 30px;
+            left: 19px;
+            top: 9px;
+        }
+
+    .webpart-panel .lienzo_listado > li:hover > div > span img {
+        min-width: 45px;
+    }
+
+    /* ===================================================================================
+   5) ACCESOS DIRECTOS (acciones por item) — extraido fiel de home.css
+   =================================================================================== */
+    .webpart-panel .accesos_directos {
+        margin-left: 76px;
+        position: absolute;
+        opacity: 0;
+        transition: all 0.10s ease-out 0s;
+        margin-top: 20px;
+    }
+
+        .webpart-panel .accesos_directos li {
+            display: inline;
+        }
+
+    .webpart-panel .lienzo_listado > li:hover .accesos_directos,
+    .webpart-panel .lienzo_listado > li.hovered .accesos_directos {
+        margin-left: 88px;
+        opacity: 1;
+    }
+
+    .webpart-panel .lienzo_listado li:hover .accesos_directos {
+        opacity: 1 !important;
+    }
+
+    .webpart-panel .lienzo_listado > li:hover .accesos_directos li a {
+        opacity: 1 !important;
+    }
+
+    .webpart-panel .lienzo_listado .accesos_directos li a {
+        float: left;
+        height: 44px;
+        padding-left: 6px;
+        padding-right: 6px;
+        margin-left: 6px;
+        margin-right: 6px;
+        border-radius: 10px;
+        color: black;
+        font-size: 12px;
+        line-height: 67px;
+        min-width: 46px;
+        text-align: center;
+        transition: 0.5s;
+        cursor: pointer;
+        border: 0px solid #c1d8e3;
+        background-color: white !important;
+        background-size: 40px 1250px !important;
+    }
+
+    .webpart-panel .accesos_directos li a {
+        opacity: 0;
+        transition: opacity .25s ease;
+    }
+
+        .webpart-panel .accesos_directos li a.activo {
+            background-color: #6f61b654 !important;
+            box-shadow: none;
+        }
+
+        .webpart-panel .accesos_directos li a:hover,
+        .webpart-panel .accesos_directos li a.hovered {
+            background-color: #dfeefc !important;
+        }
+
+    /* Iconos de accion (sprite ficha_lite_home.svg) */
+    .webpart-panel .accesos_directos .acceso_alumnos {
+        background: #f35619 url("../propio/images/home/ficha_lite_home.svg") no-repeat scroll center -7px;
+    }
+
+    .webpart-panel .accesos_directos .ver_ficha {
+        background: rgb(251, 104, 46) url("../propio/images/home/ficha_lite_home.svg") no-repeat scroll center -52px !important;
+    }
+
+    .webpart-panel .accesos_directos .ver_resultado_form {
+        background: rgb(251, 104, 46) url("../propio/images/home/ficha_lite_home.svg") no-repeat scroll center -418px !important;
+    }
+
+    .webpart-panel .accesos_directos .felicitar {
+        background: #fb682e url("../propio/images/home/ficha_lite_home.svg") no-repeat scroll center -514px;
+    }
+
+    .webpart-panel .accesos_directos .pasar_lista {
+        background: rgb(251, 120, 68) url("../propio/images/home/ficha_lite_home.svg") no-repeat scroll center -7px;
+    }
+
+    .webpart-panel .accesos_directos .evaluar {
+        background: rgb(251, 104, 46) url("../propio/images/home/ficha_lite_home.svg") no-repeat scroll center -138px;
+    }
+
+    .webpart-panel .accesos_directos .agenda {
+        background: rgb(252, 125, 74) url("../propio/images/home/ficha_lite_home.svg") no-repeat scroll center -182px;
+    }
+
+    .webpart-panel .accesos_directos .relacion_alumnos {
+        background: #fc7d4a url("../propio/images/home/ficha_lite_home.svg") no-repeat scroll center -1059px;
+    }
+
+    .webpart-panel .accesos_directos .comunicado {
+        background: #fc7d4a url("../propio/images/home/ficha_lite_home.svg") no-repeat scroll center -461px;
+    }
+
+    .webpart-panel .accesos_directos .enviarMail {
+        background: #fc7d4a url("../propio/images/home/ficha_lite_home.svg") no-repeat scroll center -333px;
+    }
+
+    .webpart-panel .accesos_directos .publicar {
+        background: #fc7d4a url("../propio/images/home/ficha_lite_home.svg") no-repeat scroll center -558px !important;
+    }
+
+    .webpart-panel .accesos_directos .despublicar {
+        background: #fc7d4a url("../propio/images/home/ficha_lite_home.svg") no-repeat scroll center -605px;
+    }
+
+    .webpart-panel .accesos_directos .responder {
+        background: #fc7d4a url("../propio/images/home/ficha_lite_home.svg") no-repeat scroll center -877px;
+    }
+
+    .webpart-panel .accesos_directos .reenviar {
+        background: #fc7d4a url("../propio/images/home/ficha_lite_home.svg") no-repeat scroll center -917px;
+    }
+
+    .webpart-panel .accesos_directos .enlace_wp_enlaces {
+        background: #f35619 url("../propio/images/home/ficha_lite_home.svg") no-repeat scroll center -689px;
+    }
+
+    .webpart-panel .accesos_directos .editar {
+        background: #fc7d4a url("../propio/images/home/ficha_lite_home.svg") no-repeat scroll center -877px;
+    }
+
+    .webpart-panel .accesos_directos .incidencias {
+        background: #fc7d4a url("../propio/images/home/ficha_lite_home.svg") no-repeat scroll center -558px;
+    }
+
+    .webpart-panel .accesos_directos .ver_galeria {
+        background: #fb682e url("../propio/images/home/ficha_lite_home.svg") no-repeat scroll center -645px;
+    }
+
+    .webpart-panel .accesos_directos .ver_productos {
+        background: #fb682e url("../propio/images/home/ficha_lite_home.svg") no-repeat scroll center -229px;
+    }
+
+    .webpart-panel .accesos_directos .ocultar_productos {
+        background: #fb682e url("../propio/images/home/ficha_lite_home.svg") no-repeat scroll center -736px;
+    }
+
+    .webpart-panel .accesos_directos .imprimir_pedido {
+        background: #fb682e url("../propio/images/home/ficha_lite_home.svg") no-repeat scroll center -1107px;
+    }
+
+    .webpart-panel .accesos_directos .cancelar_pedido {
+        background: #fb682e url("../propio/images/home/ficha_lite_home.svg") no-repeat scroll center -604px;
+    }
+
+    .webpart-panel .accesos_directos .eliminar {
+        background: #fb682e url("../propio/images/home/ficha_lite_home.svg") no-repeat scroll center -834px !important;
+    }
+
+    .webpart-panel .accesos_directos .aprobar {
+        background: #fb682e url("../propio/images/home/ficha_lite_home.svg") no-repeat scroll center -786px !important;
+    }
+
+    .webpart-panel .accesos_directos .justificar {
+        background: #fb682e url("../propio/images/home/ficha_lite_home.svg") no-repeat scroll center -1157px !important;
+    }
+
+    .webpart-panel .accesos_directos .cuaderno_profesor {
+        background: #fb682e url("../propio/images/home/ficha_lite_home.svg") no-repeat scroll center -1202px !important;
+    }
+
+    .webpart-panel .accesos_directos .realizar {
+        background: url("../propio/images/home/ficha_lite_home.svg") no-repeat scroll center -558px;
+    }
+
+        .webpart-panel .accesos_directos .realizar:hover {
+            background: none;
+        }
+
+    .webpart-panel .accesos_directos .cancelar:hover {
+        background: none;
+    }
+
+    .webpart-panel .accesos_directos .mini_ficha_alumno {
+        background: #fb682e url("../propio/images/home/ficha_lite_home.svg") no-repeat scroll center -1202px !important;
+    }
+
+    /* Acciones con icono mask (mini_ficha, aceptar, cancelar, realizar, cuaderno_profesor) */
+    .webpart-panel .accesos_directos .mini_ficha,
+    .webpart-panel .accesos_directos .mini_ficha_alumno,
+    .webpart-panel .accesos_directos .aceptar,
+    .webpart-panel .accesos_directos .cancelar,
+    .webpart-panel .accesos_directos .realizar,
+    .webpart-panel .accesos_directos .cuaderno_profesor {
+        display: flex;
+        justify-content: center;
+        position: relative;
+        background: none !important;
+    }
+
+        .webpart-panel .accesos_directos .mini_ficha::before,
+        .webpart-panel .accesos_directos .mini_ficha_alumno::before,
+        .webpart-panel .accesos_directos .aceptar::before,
+        .webpart-panel .accesos_directos .cancelar::before,
+        .webpart-panel .accesos_directos .realizar::before,
+        .webpart-panel .accesos_directos .cuaderno_profesor::before {
+            content: "";
+            position: absolute;
+            background-color: rgb(32 83 109);
+            -webkit-mask-repeat: no-repeat;
+            mask-repeat: no-repeat;
+            -webkit-mask-size: contain;
+            mask-size: contain;
+            -webkit-mask-position: center;
+            mask-position: center;
+        }
+
+        .webpart-panel .accesos_directos .mini_ficha::before {
+            top: 2px;
+            width: 22px;
+            height: 22px;
+            -webkit-mask-image: url("images/acciones/svg/mini_ficha.svg");
+            mask-image: url("images/acciones/svg/mini_ficha.svg");
+        }
+
+        .webpart-panel .accesos_directos .mini_ficha_alumno::before {
+            top: 2px;
+            width: 22px;
+            height: 22px;
+            -webkit-mask-image: url("images/acciones/svg/mini_ficha_alumno.svg");
+            mask-image: url("images/acciones/svg/mini_ficha_alumno.svg");
+        }
+
+        .webpart-panel .accesos_directos .aceptar::before {
+            top: 4px;
+            width: 20px;
+            height: 20px;
+            -webkit-mask-image: url("images/acciones/svg/thumb.svg");
+            mask-image: url("images/acciones/svg/thumb.svg");
+        }
+
+        .webpart-panel .accesos_directos .cancelar::before {
+            top: 5px;
+            width: 18px;
+            height: 18px;
+            -webkit-mask-image: url("images/acciones/svg/cruz.svg");
+            mask-image: url("images/acciones/svg/cruz.svg");
+        }
+
+        .webpart-panel .accesos_directos .realizar::before {
+            top: 4px;
+            width: 20px;
+            height: 20px;
+            -webkit-mask-image: url("images/acciones/svg/check.svg");
+            mask-image: url("images/acciones/svg/check.svg");
+        }
+
+        .webpart-panel .accesos_directos .cuaderno_profesor::before {
+            top: 2px;
+            width: 22px;
+            height: 22px;
+            -webkit-mask-image: url("images/acciones/svg/cuaderno.svg");
+            mask-image: url("images/acciones/svg/cuaderno.svg");
+        }
+
+    /* Boton "+" de mas acciones */
+    .webpart-panel .lienzo_listado > li .acciones_mas {
+        border: 0 none;
+        left: 57px;
+        position: absolute;
+        top: 54px;
+        z-index: 1;
+    }
+
+        .webpart-panel .lienzo_listado > li .acciones_mas div {
+            width: 34px;
+            height: 32px;
+            background-color: #A3CB6E;
+            border-radius: 75px;
+            cursor: pointer;
+            opacity: 0.6;
+        }
+
+        .webpart-panel .lienzo_listado > li .acciones_mas:hover div {
+            background-color: #fa8339;
+        }
+
+        .webpart-panel .lienzo_listado > li .acciones_mas button {
+            background: rgba(0, 0, 0, 0) url("../propio/images/home/icono_mas.png") no-repeat scroll 1px 1px !important;
+            border: 0 none;
+            height: 20px;
+            left: 6px;
+            position: absolute;
+            top: 6px;
+            width: 22px;
+            cursor: pointer;
+        }
+
+    /* ===================================================================================
+   6) ENVIAR COMUNICADO A ALUMNO (destinatarios) — extraido fiel de home.css
+   =================================================================================== */
+    .webpart-panel .listaDestinatarios {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        margin-top: 8px;
+    }
+
+        .webpart-panel .listaDestinatarios li {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: #f8f9fc;
+            padding: 2px 10px;
+            margin-top: 4px;
+            border-radius: 3px;
+            border: 1px solid #e5e7eb;
+            transition: 0.2s ease;
+        }
+
+            .webpart-panel .listaDestinatarios li.seleccion_todos {
+                border: 1px solid transparent;
+                background-color: white;
+                margin-bottom: 8px;
+            }
+
+            .webpart-panel .listaDestinatarios li:hover {
+                background: #f0f4ff;
+                box-shadow: 0 0 6px rgba(89, 151, 222, 0.25);
+            }
+
+        .webpart-panel .listaDestinatarios label {
+            width: 100%;
+            cursor: pointer;
+        }
+
+            .webpart-panel .listaDestinatarios label span {
+                display: block;
+                color: #6b7280;
+            }
+
+        .webpart-panel .listaDestinatarios .nombre {
+            font-weight: 600;
+            color: #1f2937;
+            display: block;
+            line-height: 1.1;
+        }
+
+        .webpart-panel .listaDestinatarios input[type="checkbox"] {
+            width: 21px;
+            height: 19px;
+            cursor: pointer;
+        }
+
+    .webpart-panel ul.listaDestinatarios p.sin_destinatarios {
+        all: unset;
+        width: 100% !important;
+        text-align: center;
+        font-size: 14px;
+        font-weight: 300;
+        font-style: italic;
+    }
+
+    .webpart-panel li.sinTutores {
+        all: unset;
+        padding: 10px 12px 10px 5px;
+        margin-top: 4px;
+        color: #6b7280;
+        font-style: italic;
+    }
+
+        .webpart-panel li.sinTutores:hover {
+            background: none;
+            box-shadow: none;
+            cursor: default;
+        }
+
+    /* Bloque de seleccion de destinatarios: OCULTO por defecto (estaba en home.css, global);
+   sin esta regla, fuera de la Home aparecia desplegado y rompia el item. */
+    .webpart-panel .divDestinatariosComunicadoAlumno {
+        visibility: hidden;
+        display: flex;
+        flex-direction: column;
+        width: 94%;
+        gap: 12px;
+        max-height: 0;
+        opacity: 0;
+        overflow: hidden;
+        padding: 0 10px;
+        transition: max-height 0.5s ease, opacity 0.5s ease, padding 0.5s ease;
+    }
+
+        .webpart-panel .divDestinatariosComunicadoAlumno.mostrar {
+            visibility: visible;
+            max-height: 500px;
+            opacity: 1;
+            padding: 29px 10px 10px 10px;
+        }
+
+    .webpart-panel div.divDestinatariosComunicadoAlumno span.cruzCerrar {
+        border: none !important;
+        position: absolute;
+        top: 65px;
+        right: 0;
+        cursor: pointer;
+        height: fit-content !important;
+        width: fit-content !important;
+        padding: 7px;
+        margin-right: 4px !important;
+    }
+
+    .webpart-panel div.divDestinatariosComunicadoAlumno p.enviar_destinatarios_p {
+        all: unset;
+        width: 100% !important;
+        font-size: 13px;
+        font-weight: 400;
+    }
+
+    .webpart-panel .divBotonesAccionEnviar a.btnEnviarTutores:hover {
+        background: #5997DE;
+        color: #ffffff;
+        box-shadow: 0 0 8px rgba(89, 151, 222, 0.5);
+    }
+
+    /* ===================================================================================
+   7) ENCUESTAS — extraido fiel de home.css
+   =================================================================================== */
+    .webpart-panel #encuestas_pendientes,
+    .webpart-panel #encuestas_enviadas {
+        float: left;
+        margin-left: 5%;
+        margin-right: 5%;
+        width: 90%;
+    }
+
+        .webpart-panel #encuestas_pendientes h4,
+        .webpart-panel #encuestas_enviadas h4 {
+            border-bottom: 1px dashed #FCD6B7;
+            color: #5C6E6E;
+            font-size: 15px;
+            margin-bottom: 15px;
+            margin-top: 20px;
+            padding-bottom: 5px;
+            text-transform: uppercase;
+        }
+
+            .webpart-panel #encuestas_pendientes h4 em,
+            .webpart-panel #encuestas_enviadas h4 em {
+                color: #F35619;
+                margin-left: 4px;
+            }
+
+    .webpart-panel .listado_encuestas_pendientes .encuesta,
+    .webpart-panel .listado_encuestas_enviadas .encuesta {
+        background: url("../propio/images/FotosDefecto/cuestionarios_imagenes_defecto.svg") no-repeat scroll -5px -5px white;
+        background-size: 150px 150px !important;
+    }
+
+    /* ===================================================================================
+   8) SCROLLBAR + SIN DATOS — extraido fiel de home.css
+   =================================================================================== */
+    .webpart-panel .lienzo_listado::-webkit-scrollbar {
+        width: 6px;
+        background-color: #F5F5F5;
+    }
+
+    .webpart-panel .lienzo_listado::-webkit-scrollbar-track {
+        border-radius: 10px;
+        background-color: #F5F5F5;
+    }
+
+    .webpart-panel .lienzo_listado::-webkit-scrollbar-thumb {
+        border-radius: 10px;
+        -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);
+    }
+
+    .webpart-panel .wp_vacio {
+        float: left;
+        width: 100%;
+        position: relative;
+        margin-top: 10%;
+    }
+
+    .webpart-panel .sinDatos {
+        padding: 16px;
+        text-align: center;
+        color: #4a5e6c;
+    }
+
+    /* ===================================================================================
+   10) ICONOS DE AREA Y ALARMA (origen: #lienzo ul li en home.css → .webpart-panel)
+   =================================================================================== */
+
+    /* Tipos de alarma */
+    .webpart-panel ul li .ausencia {
+        background: #FFF url(images/FotosDefecto/foto_default_alarma_ausencia.svg) no-repeat scroll 7px 13px;
+        background-size: 40px 40px !important;
+    }
+
+    .webpart-panel ul li .aniversario {
+        background: #fff url("images/FotosDefecto/foto_default_alarma_birthday.svg") no-repeat scroll 7px 13px;
+        background-size: 40px 40px !important;
+    }
+
+    .webpart-panel ul li .conducta {
+        background: #fff url("images/FotosDefecto/foto_default_alarma_conducta.svg") no-repeat scroll 7px 13px;
+        background-size: 40px 40px !important;
+    }
+
+    .webpart-panel ul li .incidencia {
+        background: #fff url("images/FotosDefecto/foto_default_alarma_incidencia.svg") no-repeat scroll 7px 13px;
+        background-size: 40px 40px !important;
+    }
+
+    .webpart-panel ul li .nota {
+        background: #fff url("images/FotosDefecto/foto_default_alarma_nota.svg") no-repeat scroll 7px 13px;
+        background-size: 40px 40px !important;
+    }
+
+    .webpart-panel ul li .retraso {
+        background: #fff url("images/FotosDefecto/foto_default_alarma_retraso.svg") no-repeat scroll 7px 13px;
+        background-size: 40px 40px !important;
+    }
+
+    /* Tipos de alerta FW */
+    .webpart-panel ul li .alarma_informacion {
+        background: #fff url("images/FotosDefecto/iconos_alertas.svg") no-repeat scroll -18px -7px;
+        background-size: 95px 320px !important;
+    }
+
+    .webpart-panel ul li .alarma_advertencia {
+        background: #fff url("images/FotosDefecto/iconos_alertas.svg") no-repeat scroll -18px -100px;
+        background-size: 95px 320px !important;
+    }
+
+    .webpart-panel ul li .alarma_error {
+        background: #fff url("images/FotosDefecto/iconos_alertas.svg") no-repeat scroll -18px -197px;
+        background-size: 95px 320px !important;
+    }
+
+    /* Tipos de área (sprite mis_areas_ico.svg) */
+    .webpart-panel ul li .algebra {
+        background: url("images/FotosDefecto/mis_areas_ico.svg") no-repeat scroll -10px -12px #fff;
+    }
+
+    .webpart-panel ul li .argumentacion {
+        background: url("images/FotosDefecto/mis_areas_ico.svg") no-repeat scroll -94px -12px #fff;
+    }
+
+    .webpart-panel ul li .biologia {
+        background: url("images/FotosDefecto/mis_areas_ico.svg") no-repeat scroll -180px -12px #fff;
+    }
+
+    .webpart-panel ul li .naturales {
+        background: url("images/FotosDefecto/mis_areas_ico.svg") no-repeat scroll -262px -12px #fff;
+    }
+
+    .webpart-panel ul li .comunicacion {
+        background: url("images/FotosDefecto/mis_areas_ico.svg") no-repeat scroll -347px -12px #fff;
+    }
+
+    .webpart-panel ul li .consejo {
+        background: url("images/FotosDefecto/mis_areas_ico.svg") no-repeat scroll -441px -12px #fff;
+    }
+
+    .webpart-panel ul li .educacion_artistica {
+        background: url("images/FotosDefecto/mis_areas_ico.svg") no-repeat scroll -531px -12px #fff;
+    }
+
+    .webpart-panel ul li .educacion_fisica {
+        background: url("images/FotosDefecto/mis_areas_ico.svg") no-repeat scroll -617px -12px #fff;
+    }
+
+    .webpart-panel ul li .educacion_matematica {
+        background: url("images/FotosDefecto/mis_areas_ico.svg") no-repeat scroll -699px -12px #fff;
+    }
+
+    .webpart-panel ul li .educacion_tecnologica {
+        background: url("images/FotosDefecto/mis_areas_ico.svg") no-repeat scroll -777px -12px #fff;
+    }
+
+    .webpart-panel ul li .estudio_naturaleza {
+        background: url("images/FotosDefecto/mis_areas_ico.svg") no-repeat scroll -860px -12px #fff;
+    }
+
+    .webpart-panel ul li .estudio_sociedad {
+        background: url("images/FotosDefecto/mis_areas_ico.svg") no-repeat scroll -940px -12px #fff;
+    }
+
+    .webpart-panel ul li .psico {
+        background: url("images/FotosDefecto/mis_areas_ico.svg") no-repeat scroll -1027px -12px #fff;
+    }
+
+    .webpart-panel ul li .fisica {
+        background: url("images/FotosDefecto/mis_areas_ico.svg") no-repeat scroll -10px -102px #fff;
+    }
+
+    .webpart-panel ul li .formacion_personal {
+        background: url("images/FotosDefecto/mis_areas_ico.svg") no-repeat scroll -94px -102px #fff;
+    }
+
+    .webpart-panel ul li .funciones_procesos {
+        background: url("images/FotosDefecto/mis_areas_ico.svg") no-repeat scroll -181px -102px #fff;
+    }
+
+    .webpart-panel ul li .historia_ciencias {
+        background: url("images/FotosDefecto/mis_areas_ico.svg") no-repeat scroll -263px -102px #fff;
+    }
+
+    .webpart-panel ul li .historia_ciencias_geografia {
+        background: url("images/FotosDefecto/mis_areas_ico.svg") no-repeat scroll -347px -102px #fff;
+    }
+
+    .webpart-panel ul li .idioma_extranjero {
+        background: url("images/FotosDefecto/mis_areas_ico.svg") no-repeat scroll -441px -102px #fff;
+    }
+
+    .webpart-panel ul li .idioma_extranjero_ingles {
+        background: url("images/FotosDefecto/mis_areas_ico.svg") no-repeat scroll -531px -102px #fff;
+    }
+
+    .webpart-panel ul li .idioma_extrangero_frances {
+        background: url("images/FotosDefecto/mis_areas_ico.svg") no-repeat scroll -617px -102px #fff;
+    }
+
+    .webpart-panel ul li .lengua_castellana {
+        background: url("images/FotosDefecto/mis_areas_ico.svg") no-repeat scroll -700px -102px #fff;
+    }
+
+    .webpart-panel ul li .lenguaje_comunicacion {
+        background: url("images/FotosDefecto/mis_areas_ico.svg") no-repeat scroll -777px -102px #fff;
+    }
+
+    .webpart-panel ul li .lenguaje_sociedad {
+        background: url("images/FotosDefecto/mis_areas_ico.svg") no-repeat scroll -860px -102px #fff;
+    }
+
+    .webpart-panel ul li .literatura_identidad {
+        background: url("images/FotosDefecto/mis_areas_ico.svg") no-repeat scroll -940px -102px #fff;
+    }
+
+    .webpart-panel ul li .matematica {
+        background: url("images/FotosDefecto/mis_areas_ico.svg") no-repeat scroll -1028px -102px #fff;
+    }
+
+    .webpart-panel ul li .mecanica {
+        background: url("images/FotosDefecto/mis_areas_ico.svg") no-repeat scroll -11px -198px #fff;
+    }
+
+    .webpart-panel ul li .orientacion {
+        background: url("images/FotosDefecto/mis_areas_ico.svg") no-repeat scroll -95px -198px #fff;
+    }
+
+    .webpart-panel ul li .problemas_conocimiento {
+        background: url("images/FotosDefecto/mis_areas_ico.svg") no-repeat scroll -181px -198px #fff;
+    }
+
+    .webpart-panel ul li .quimica {
+        background: url("images/FotosDefecto/mis_areas_ico.svg") no-repeat scroll -262px -198px #fff;
+    }
+
+    .webpart-panel ul li .religion {
+        background: url("images/FotosDefecto/mis_areas_ico.svg") no-repeat scroll -347px -198px #fff;
+    }
+
+    .webpart-panel ul li .termodinamica {
+        background: url("images/FotosDefecto/mis_areas_ico.svg") no-repeat scroll -441px -198px #fff;
+    }
+
+    .webpart-panel ul li .velocidad_lectora {
+        background: url("images/FotosDefecto/mis_areas_ico.svg") no-repeat scroll -533px -199px #fff;
+    }
+
+    .webpart-panel ul li .comunicado {
+        background-size: 150px 150px !important;
+        background: url(images/FotosDefecto/iconos_comunicados.svg) no-repeat scroll -6px -16px White;
+    }
+
+    .webpart-panel ul li .velocidad_lectora {
+        background: url(images/FotosDefecto/mis_areas_ico.svg) no-repeat scroll -533px -199px #fff;
+    }
+
+/* ===================================================================================
+   11) ESTILOS PARA CUADERNO DEL PROFESOR
+   =================================================================================== */
+
+body.cdp.con-botonera-webpart .webpart-botonera-fija {
+    z-index: 5 !important;
+    padding-top: 74px !important;
+    padding-bottom: 61px !important;
+}
+
+body.cdp.con-botonera-webpart .content_body.small-screen {
+    width: calc(100% - 60px) !important;
+}
+
+body.cdp.con-botonera-webpart .content_body.collapsed {
+    width: calc(100% - 109px) !important;
+}
+
+body.cdp.con-botonera-webpart .content_body {
+    width: calc(100% - 269px) !important;
+}
+
+body.cdp.con-botonera-webpart li#wc-usuario-logado {
+    width: 60px !important;
+}
+
+body.cdp.con-botonera-webpart #contienefoto {
+    width: 39px !important;
+    height: 39px !important;
+    margin-left: 0 !important;
+}
+
+body.cdp.con-botonera-webpart #divHistoricoTabla:before,
+body.cdp.con-botonera-webpart #divHistoricoTabla:after,
+body.cdp.con-botonera-webpart #btnRehacer,
+body.cdp.con-botonera-webpart #btnRollback {
+    z-index: 735 !important;
+}
+
+body.cdp.con-botonera-webpart .sa #contienefoto:before {
+    right: 36px !important;
+}
+
+body.cdp.con-botonera-webpart header {
+    z-index: 6 !important;
+}
+
+body.cdp.con-botonera-webpart .contenedor_detalle_cp_cabecera {
+    right: 60px !important;
+}
+
+body.cdp.con-botonera-webpart .modal .contenedor_detalle_cp_cabecera {
+    right: 1px !important;
+}
+
+body.cdp.con-botonera-webpart #menu_herramientas {
+    z-index: 6 !important;
+}
+
+body.cdp.con-botonera-webpart #boton {
+    z-index: 7 !important;
+}
+
+body.cdp.con-botonera-webpart #boton {
+    right: 8px !important;
+}
+
+body.cdp.con-botonera-webpart #menu_herramientas {
+    right: 11px !important;
+}
+
+/* ===================================================================================
+   Selector de hijos del listado de Boletines (Home). Ver _crearSelectorHijos en
+   webpart-botonera.js — ListadoWPDTO.Hijos, hoy solo lo rellena Boletines. Un div por
+   hijo (wc-image + wc-button de minificha + label), dentro de un shadow-container.
+   =================================================================================== */
+.wp_selector_hijos {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 40px;
+    padding-bottom: 12px;
+}
+
+.wp_hijo_item,
+.wp_hijo_item img,
+.wp_hijo_item label {
+    cursor: pointer !important;
+}
+
+    .wp_hijo_item.activo,
+    .wp_hijo_item.activo img,
+    .wp_hijo_item.activo label {
+        cursor: default !important;
+    }
+
+    .wp_hijo_item img {
+        opacity: 0.7;
+    }
+
+.wp_hijo_item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    text-align: center;
+}
+
+.wp_hijo_avatar_wrap {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    margin-bottom: 10px;
+}
+
+.wp_hijo_avatar {
+    width: 100%;
+    height: 100%;
+}
+
+.wp_hijo_boton_ficha {
+    position: absolute;
+    right: -4px;
+    bottom: -4px;
+}
+
+.wp_hijo_item label {
+    font-size: 14px;
+}
+
+.wp_hijo_item.activo .wp_hijo_avatar_wrap {
+    width: 115px;
+    height: 115px;
+    border-radius: 50%;
+    outline: 6px solid var(--wcb-color-info);
+    outline-offset: 3px;
+}
+
+.wp_hijo_item.activo img,
+.wp_hijo_item:not(.activo):hover img {
+    opacity: 1;
+}
+
+.wp_hijo_item.activo label {
+    font-weight: 600;
+}
+
+
+.wp_hijo_item:not(.activo):hover .wp_hijo_avatar_wrap {
+    opacity: 1;
+    border-radius: 50%;
+    outline: 4px solid var(--wcb-color-info);
+    outline-offset: 3px;
+}

@@ -1,0 +1,321 @@
+/* ===========================================================================
+   WC-BUTTON-BAR - Sistema de estilos
+   ===========================================================================
+   Indice:
+     01. Variables CSS
+     02. Host
+     03. Barra principal
+     04. Wrap de boton (medicion y alineacion)
+     05. Caret de submenu
+     06. Boton de overflow
+     07. Popover (overflow y submenu)
+     08. Items del popover
+     09. Separador y boton volver
+   =========================================================================== */
+
+@import url("internal-layout.css");
+
+
+/* 01. VARIABLES CSS ======================================================== */
+
+:host {
+    --wcbb-gap:             0.5rem;
+    --wcbb-popover-bg:      var(--rf-bg-white, #ffffff);
+    --wcbb-popover-border:  var(--rf-color-border, #e5e7eb);
+    --wcbb-popover-shadow:  0 4px 16px rgba(0, 0, 0, 0.12);
+    --wcbb-popover-radius:  var(--rf-radius);
+    --wcbb-item-hover:      var(--color-grey-200, #f3f4f6);
+    --wcbb-item-height:     2.25rem;
+    --wcbb-item-font:       0.875rem;
+    --wcbb-item-color:      var(--rf-color-label);
+    --wcbb-sep-color:       var(--rf-color-border-light, #f0f1f3);
+    --wcbb-z-popover:       10600;
+}
+
+
+/* 02. HOST ================================================================= */
+
+:host {
+    display: block;
+    width: 100%;
+}
+
+/* En modo wrap, el host contiene el desbordamiento para forzar el salto de linea */
+:host([wrap]) {
+    overflow: hidden;
+    max-width: 100%;
+    min-width: 0;          /* permite encogerse en contextos flex */
+    box-sizing: border-box;
+}
+
+
+/* 03. BARRA PRINCIPAL ====================================================== */
+
+.wcbb-bar {
+    display:     flex;
+    align-items: center;
+    gap:         var(--wcbb-gap);
+    width:       100%;
+    overflow:    visible; /* hidden recortaba los tooltips (::before absoluto).
+                            flex-wrap:nowrap ya evita el wrapping; el algoritmo JS
+                            de overflow oculta los botones sobrantes via display. */
+    flex-wrap:   nowrap;
+    box-sizing:  border-box;
+}
+
+/* Alineacion derecha: el spacer crece y empuja los botones a la derecha.
+   Se usa spacer (no justify-content:flex-end) para que el algoritmo de overflow
+   siga funcionando correctamente (detecta cuando el ultimo boton supera el borde). */
+.wcbb-spacer:not(.wcbb-group-spacer) {
+    display: none;  /* oculto por defecto (alineacion izquierda) */
+}
+
+.wcbb-bar.wcbb-align-end .wcbb-spacer:not(.wcbb-group-spacer) {
+    display: block;
+    flex: 1;    /* crece y empuja los botones a la derecha */
+}
+
+/* Spacer de grupo (insertado por group:'right'): siempre crece para separar
+   botones izquierda/derecha. Distinto del spacer de align (que solo crece
+   con align-end). */
+.wcbb-group-spacer {
+    flex: 1 !important;
+}
+
+
+/* 03c. ORIENTACIÓN VERTICAL ================================================= */
+/* Los botones se apilan en columna. El overflow aparece abajo como un boton
+   adicional con el "...". */
+
+.wcbb-bar.wcbb-vertical {
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+/* En vertical, el spacer de align permanece oculto, pero el group-spacer
+   sigue separando grupos */
+.wcbb-bar.wcbb-vertical .wcbb-group-spacer {
+    flex: 1;
+    height: auto;
+}
+
+
+/* 03d. MODO WRAP ============================================================ */
+/* Los botones que no caben pasan a la siguiente linea en lugar de agruparse
+   en el menu "...". Util cuando se prefiere ver todos los botones en pantalla
+   aunque ocupen mas de una fila. El boton "..." permanece oculto. */
+
+.wcbb-bar.wcbb-wrap {
+    flex-wrap: wrap !important;
+    row-gap: var(--wcbb-gap);
+    width: 100%;           /* ocupa todo el ancho disponible */
+    max-width: 100%;       /* fuerza que respete el ancho del contenedor */
+    min-width: 0;          /* permite encogerse en contextos flex */
+    box-sizing: border-box;
+    overflow: hidden;      /* fuerza que los hijos respeten el ancho */
+}
+
+/* En modo wrap, los spacers no tienen sentido (alineacion en multilinea es confusa) */
+.wcbb-bar.wcbb-wrap .wcbb-spacer {
+    display: none;
+}
+
+/* Los wraps de botones en modo wrap no deben comprimirse */
+.wcbb-bar.wcbb-wrap .wcbb-btn-wrap {
+    flex-shrink: 0;
+}
+
+.wcbb-bar.wcbb-wrap .wcbb-more-btn {
+    display: none !important;
+}
+
+
+/* 03b. MODO ADHERIDO (estilo input-group) ================================== */
+/* Botones pegados entre si con bordes compartidos y esquinas internas
+   cuadradas. Pensado para botoneras adosadas a un input (replica el patron
+   input + botones adheridos). Solo button-bar.css puede estilar el .wcb-btn
+   interno porque vive en el mismo shadow tree que la botonera. */
+
+.wcbb-bar.wcbb-attached {
+    gap: 0;
+    align-items: center;   /* los botones se centran; la altura la fija cada .wcb-btn */
+}
+
+    /* Botones y boton "...": borde neutro compartido, esquinas cuadradas y
+       ALTURA igualada a la del input (--input-height). El modo attached significa
+       "boton adherido a un input", asi que se fuerza la altura al input y se anula
+       el padding vertical del size (que hacia el boton mas alto que el input).
+       --input-height se hereda del contexto (DynamicForm); fallback 37px.
+       Para otra altura, basta con redefinir --input-height sobre la botonera. */
+    .wcbb-bar.wcbb-attached .wcbb-btn-wrap .wcb-btn,
+    .wcbb-bar.wcbb-attached .wcbb-more-btn .wcb-btn {
+        height:           var(--input-height, 37px);
+        min-height:       0;                /* anula el min-height del size (md=37, etc.) */
+        padding-top:      0;                /* sin padding vertical: la altura la fija height */
+        padding-bottom:   0;
+        min-width:        35px;
+        border:           1px solid var(--rf-color-border, #d1d5db);
+        border-right:     0;
+        border-radius:    var(--radius-none);
+        margin-left:      -1px;             /* solapa el borde con el elemento previo */
+    }
+
+    /* El "..." no se empuja a la derecha en modo adherido */
+    .wcbb-bar.wcbb-attached .wcbb-more-btn {
+        margin-left: 0;
+    }
+
+    /* Primer boton: sin solape */
+    .wcbb-bar.wcbb-attached .wcbb-btn-wrap:first-child .wcb-btn {
+        margin-left: 0;
+    }
+
+    /* Ultimo elemento visible: recupera borde y esquinas derechas.
+       - sin overflow: el ultimo wrap es el visible
+       - con overflow: el boton "..." es el visible (los wraps sobrantes van display:none) */
+    .wcbb-bar.wcbb-attached .wcbb-btn-wrap:last-of-type .wcb-btn,
+    .wcbb-bar.wcbb-attached .wcbb-more-btn .wcb-btn {
+        border-right:               1px solid var(--rf-color-border, #d1d5db);
+        border-top-right-radius:    var(--rf-radius);
+        border-bottom-right-radius: var(--rf-radius);
+    }
+
+
+/* 04. WRAP DE BOTON ======================================================== */
+
+.wcbb-btn-wrap {
+    display:     inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+/* 04b. WRAP FULL-WIDTH ====================================================== */
+
+.wcbb-btn-wrap--full {
+    flex: 1;
+}
+
+
+/* 05. CARET DE SUBMENU ===================================================== */
+
+.wcbb-caret {
+    pointer-events: none;
+    display:        flex;
+    align-items:    center;
+    flex-shrink:    0;
+    color:          currentColor;
+    opacity:        0.45;
+    margin-left:    -2px;  /* solapamiento visual con el botón */
+}
+
+    .wcbb-caret svg {
+        width:  14px;
+        height: 14px;
+    }
+
+
+/* 05b. SEPARADOR ============================================================ */
+
+.wcbb-separator {
+    flex-shrink: 0;
+    width:      1px;
+    height:     20px;
+    background: var(--rf-color-border-light, #e5e7eb);
+    margin:     0 0.25rem;
+}
+
+/* En orientación vertical, el separador es horizontal */
+.wcbb-bar.wcbb-vertical .wcbb-separator {
+    width:    100%;
+    height:   1px;
+    margin:   0.25rem 0;
+}
+
+
+/* 06. BOTON DE OVERFLOW ==================================================== */
+
+.wcbb-more-btn {
+    flex-shrink: 0;
+}
+
+/* «…» text-out sin label: mide su marco (36px), no los 74px reservados para el texto de debajo */
+.wcbb-more-btn[text-out]:not([label]) {
+    min-width: 0;
+    max-width: none;
+}
+
+/* 07. POPOVER ============================================================== */
+
+/* El popover se promueve al TOP LAYER via la API nativa (popover="manual" +
+   showPopover()), por lo que se pinta encima de todo el documento sin depender del
+   contexto de apilamiento del ancestro. Ojo: al llevar el atributo [popover], el
+   navegador le aplica su hoja de estilos UA (inset:0; margin:auto; border:solid;
+   padding:.25em; color:CanvasText) y hay que neutralizar lo que rompe el layout.
+   El z-index se mantiene para el fallback en navegadores sin la API. */
+.wcbb-popover {
+    position:      fixed;
+    inset:         auto;   /* anula inset:0 del UA (right/bottom:0 fijarian el ancho) */
+    margin:        0;      /* anula margin:auto del UA */
+    color:         inherit;/* anula color:CanvasText del UA (hereda del host, como antes) */
+    z-index:       var(--wcbb-z-popover);
+    background:    var(--wcbb-popover-bg);
+    border:        1px solid var(--wcbb-popover-border);
+    border-radius: var(--wcbb-popover-radius);
+    box-shadow:    var(--wcbb-popover-shadow);
+    /*min-width:     160px;    */
+    max-height:    320px;
+    overflow-y:    auto;
+    padding:       0.25rem 0;
+    box-sizing:    border-box;
+}
+
+
+/* 08. ITEMS DEL POPOVER ==================================================== */
+
+/* Fila flex que envuelve cada item (wc-button + chevron externo opcional) */
+    .wcbb-popover-row:hover:not(.is-disabled) {
+        background: var(--wcbb-item-hover);
+    }
+
+    .wcbb-popover-row.is-disabled {
+        opacity:        var(--wcb-opacity-disabled, 0.45);
+        cursor:         not-allowed;
+        pointer-events: none;
+    }
+
+    /* Badge de un item sin relleno (ghost): no hay botón visible al que pegarlo en la esquina, así que va
+       dentro de la fila, centrado a la derecha y con hueco para no pisar el final del texto. */
+    .wcbb-popover-row wc-button:not([aria-pressed="true"]) .wcb-badge {
+        top:       50%;
+        right:     0.5rem;
+        transform: translateY(-50%);
+    }
+
+    .wcbb-popover-row wc-button[badge]:not([aria-pressed="true"]) .wcb-btn {
+        padding-right: 1.75rem;
+    }
+
+    /* Item activo (relleno con su variante): separado de los bordes del popover y de los items vecinos.
+       Su badge queda en la esquina, como en la barra; los 5px de padding son lo que sobresale (top/right
+       -5px), para que no se salga del popover ni pise la fila de al lado. */
+    .wcbb-popover-row:has(> wc-button[aria-pressed="true"]) {
+        padding: 5px;
+    }
+
+/* Chevron externo (solo cuando el item tiene icono propio + children) */
+.wcbb-popover-chevron {
+    display:      flex;
+    align-items:  center;
+    flex-shrink:  0;
+    opacity:      0.45;
+    padding-right: 0.875rem;
+}
+
+
+/* 09. SEPARADOR Y BOTON VOLVER ============================================= */
+
+.wcbb-popover-sep {
+    height:     1px;
+    background: var(--wcbb-sep-color);
+    margin:     0.25rem 0;
+}

@@ -1,0 +1,226 @@
+/* ===========================================================================
+   DYNAMIC-LAYOUT - Sistema de estilos
+   ===========================================================================
+   Índice:
+     01. Variables CSS
+     02. Host (:host)
+     03. Grid container (.dl-grid)
+     04. Celdas base (.dl-cell)
+     05. Sticky (top / bottom / left / right)
+     06. Modo Responsivo - apilado vertical
+   =========================================================================== */
+
+@import url("internal-layout.css");
+
+
+/* 01. VARIABLES CSS ======================================================== */
+
+:host {
+    /* Columnas y espacio — se sobreescriben vía atributos del componente */
+    --dl-columns: 3;
+    --dl-gap: 1rem;
+    /* En px (no rem): el wc-button mide en px fijos (~38px md). Con rem la franja
+       encogeria en apps con font-size raiz < 16px y cortaria el boton. */
+    --dl-collapse-handle: 44px;
+
+    /* Estilo de celdas — personalizables desde fuera */
+    --dl-cell-bg: transparent;
+    --dl-cell-border: transparent;
+    --dl-cell-radius: var(--radius-none);
+    --dl-cell-padding: 0;
+}
+
+
+/* 02. HOST ================================================================= */
+
+:host {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+
+/* 03. GRID CONTAINER ======================================================= */
+
+.dl-grid {
+    display: grid;
+    grid-template-columns: repeat(var(--dl-columns, 3), minmax(0, 1fr));
+    grid-auto-flow: row dense;
+    gap: var(--dl-gap, 1rem);
+    width: 100%;
+    height: 100%;
+    min-height: 100%;
+    box-sizing: border-box;
+    transition: grid-template-columns 0.3s ease, grid-template-rows 0.3s ease;
+}
+
+
+/* 04. CELDAS BASE ========================================================== */
+
+.dl-cell {
+    background: var(--dl-cell-bg, transparent);
+    border: 1px solid var(--dl-cell-border, transparent);
+    border-radius: var(--dl-cell-radius, 0);
+    padding: var(--dl-cell-padding, 0);
+    box-sizing: border-box;
+    position: relative;
+
+    /* Crítico para que las celdas no desborden su área en el grid */
+    min-width: 0;
+    min-height: 0;
+
+    /* Las celdas son contenedores flex para que el contenido sloteado fluya bien */
+    display: flex;
+    flex-direction: column;
+}
+/*
+ * OJO: NO poner `isolation: isolate` aqui (ni en ninguna celda, colapsable o no).
+ * Se probo para que .dl-cell__collapse-btns (z-index:100) ganara siempre al contenido
+ * sloteado, pero NO protege ese caso: el boton y el contenido de SU PROPIA celda compiten
+ * dentro del mismo aislamiento, asi que isolation no cambia nada ahi (verificado: un
+ * wc-select con el dropdown solapando el boton lo tapa exactamente igual con o sin
+ * isolation). Lo unico que aislar conseguia de verdad era crear un muro CONTRA LAS CELDAS
+ * HERMANAS, y ese muro tiene un efecto secundario real y ya visto: atrapa cualquier overlay
+ * propio del contenido sloteado (el dropdown de un wc-select, por ejemplo) detras de la
+ * celda hermana pintada despues, sin poder hacer click. Ni siquiera position:fixed escapa
+ * de un contexto de apilamiento ajeno (a diferencia del recorte por overflow, el
+ * apilamiento se hereda por el arbol de nodos, no por el "containing block"). Ver
+ * ButtonBar.js y su comentario "TOP LAYER" para el mismo problema con su propio popover.
+ */
+
+/* El slot es transparente para el layout: el contenido se comporta como hijo directo */
+.dl-cell > slot {
+    display: contents;
+}
+
+
+/* 04b. BOTONES DE COLAPSO ================================================== */
+
+.dl-cell__collapse-btns {
+    position: absolute;
+    top: 0.35rem;
+    right: 0.35rem;
+    z-index: 100; /* Alto para estar siempre encima del contenido sloteado y sticky */
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    pointer-events: none; /* el contenedor no captura clicks */
+}
+
+.dl-cell__collapse-btns wc-button {
+    pointer-events: all;
+}
+
+/* Estado colapsado: ocultar contenido del slot */
+.dl-cell--collapsed > slot {
+    display: none;
+}
+
+/* Evitar scrollbars al colapsar. Necesita !important porque las reglas de scroll
+   (.dl-cell--scroll-v/-h/-both) van despues en la cascada con la misma
+   especificidad y reactivarian overflow. Una celda colapsada nunca debe
+   scrollear: la scrollbar comeria espacio de la franja y cortaria el boton. */
+.dl-cell--col-collapsed,
+.dl-cell--row-collapsed {
+    overflow: hidden !important;
+}
+
+/* Track de columna colapsado: boton arriba y centrado horizontalmente en la franja */
+.dl-cell--col-collapsed .dl-cell__collapse-btns {
+    top: 0.35rem;
+    right: 50%;
+    transform: translateX(50%);
+}
+
+/* Track de fila colapsado (sin colapso de columna): centrar verticalmente */
+.dl-cell--row-collapsed:not(.dl-cell--col-collapsed) .dl-cell__collapse-btns {
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+
+/* 05. STICKY (posición fija al scroll) ===================================== */
+
+/*
+ * sticky: 'top'|'bottom'|'left'|'right'
+ * El layout aplica position:sticky a la celda — no depende del elemento HTML que se añada.
+ * NOTA: No añadimos z-index aquí para evitar conflictos con el stacking context
+ * de los botones de colapso. Si se necesita z-index para sticky, usar CSS externo.
+ */
+.dl-cell--sticky-top {
+    position: sticky;
+    top: 0;
+    align-self: stretch;
+}
+
+.dl-cell--sticky-bottom {
+    position: sticky;
+    bottom: 0;
+    align-self: stretch;
+}
+
+.dl-cell--sticky-left {
+    position: sticky;
+    left: 0;
+}
+
+.dl-cell--sticky-right {
+    position: sticky;
+    right: 0;
+}
+
+
+/* 05b. SCROLL DENTRO DE LA CELDA ========================================== */
+
+/*
+ * Cuando una celda tiene scroll:'vertical'|'horizontal'|'both', el layout
+ * añade una de estas clases. El contenido scrollea DENTRO del área asignada
+ * por el grid sin desplazar las celdas vecinas.
+ *
+ * IMPORTANTE: para que el scroll sea visible, el grid debe tener filas con
+ * altura definida (1fr con host de altura explícita, o px fijos). Usa el
+ * atributo row-sizes="56px 1fr 44px" junto con una altura en el host.
+ */
+
+.dl-cell--scroll-v    { overflow-y: auto; }
+.dl-cell--scroll-h    { overflow-x: auto; }
+.dl-cell--scroll-both { overflow: auto; }
+
+
+/* 06. MODO RESPONSIVO ====================================================== */
+
+/*
+ * Cuando el ResizeObserver detecta que el ancho cae bajo `responsive-breakpoint`,
+ * se añade la clase `dl-grid--responsive` al grid. Las celdas se apilan
+ * verticalmente en el orden en que están definidas.
+ */
+.dl-grid--responsive {
+    display: flex !important;
+    flex-direction: column !important;
+    height: auto !important;
+}
+
+.dl-grid--responsive .dl-cell {
+    width: 100% !important;
+    height: var(--dl-cell-fixed-h, auto) !important;
+    min-height: 0 !important;
+    flex: none;
+}
+
+/*
+ * En modo responsivo (flex) el grid-template-rows no tiene efecto visual.
+ * Las celdas con eje row colapsado necesitan que su altura se fuerce a la
+ * franja handle directamente sobre el elemento para que funcione en flex.
+ */
+.dl-grid--responsive .dl-cell--row-collapsed {
+    height: var(--dl-collapse-handle, 28px) !important;
+    overflow: hidden;
+}
+
+/* En modo responsivo, quitar sticky (pero mantener relative para el botón de colapso) */
+.dl-grid--responsive .dl-cell--sticky-top,
+.dl-grid--responsive .dl-cell--sticky-bottom,
+.dl-grid--responsive .dl-cell--sticky-left,
+.dl-grid--responsive .dl-cell--sticky-right {
+    position: relative !important;
+}

@@ -1,0 +1,281 @@
+﻿@import url("internal-layout.css");
+
+:host {
+    display: block;
+    position: relative;
+    z-index: 10501;
+}
+
+.backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.45);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+:host([backdrop]) .backdrop.open {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.sidebar {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 30%;
+    min-width: 420px;
+    max-width: 100vw;
+    height: 100vh;
+    background: var(--rf-bg-white);
+    box-shadow: -5px 0 25px rgba(0,0,0,0.1);
+    border-left: 1px solid var(--rf-color-border);
+    transition: right 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+}
+
+    .sidebar.expanded {
+        width: 50%;
+    }
+
+    .sidebar.open {
+        right: 0;
+    }
+
+/* --- HEADER --- */
+.header-area {
+    padding: 0 1.5rem;
+    height: 70px;
+    background-color: var(--color-grey-200);
+    border-bottom: 1px solid var(--rf-color-border-light);
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.header-left-addon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.header-icon-style,
+::slotted(.header-icon-style) {
+    font-size: 1.4rem;
+    color: #1f4e79;
+    margin-right: 12px;
+}
+
+.header-accent-line {
+    width: 3px;
+    height: 34px;
+    border-radius: var(--radius-sm);
+    background-color: var(--rs-accent-color, #1d4ed8);
+    flex-shrink: 0;
+    margin: 0 12px 0 0;
+    display: none;
+}
+
+.header-accent-line.visible {
+    display: block;
+}
+
+/* EXCEPCION DEL navBtn "pagina_completa" (la flechita).
+   Cuando queda encajada entre otra pieza (icono o boton volver) y la barra de
+   acento, los dos huecos que la rodean bajan de 12px a 6px: pesa menos que un
+   icono con caja y ese trio necesita leerse como un grupo.
+   Fuera de ese caso (flechita sola, sin barra detras) se queda en los 12px
+   normales de la cabecera.
+   Ojo: 'wc-button' delante es obligatorio. El <button> interno del componente
+   repite las mismas clases, y sin el qualificador la regla tambien le caeria
+   encima: le mete margen, lo encoge dentro del host de 40px y el circulo del
+   shape="pill" sale ovalado. */
+.header-icon-style:not(:last-child) {
+    margin-right: 2px;
+}
+
+.header-left-addon:has(+ .header-accent-line.visible) wc-button.header-ext-btn {
+    margin-right: 2px;
+}
+
+wc-button.back-btn:has(+ .header-left-addon wc-button.header-ext-btn) {
+    margin-right: 2px;
+}
+
+
+/* --- TÍTULOS Y TEXTOS --- */
+.title-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    overflow: hidden;
+    line-height: 1.2;
+}
+
+.title-text {
+    font-family: var(--font-family-title);
+    font-size: var(--font-size-title);
+    font-weight: var(--font-weight-title);
+    line-height: var(--line-height-title);
+    letter-spacing: var(--letter-spacing-title);
+    color: var(--rf-color-text);
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.subtitle-text {
+    font-family: var(--font-family-subtitle);
+    font-size: var(--font-size-subtitle);
+    color: var(--rf-color-text);
+    font-weight: var(--font-weight-subtitle);
+    letter-spacing: var(--letter-spacing-subtitle);
+    margin-top: 2px;
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: var(--line-height-subtitle);
+}
+
+
+/* ── AREAS PRINCIPALES ────────────────────────────────────────────────────── */
+
+.actions-area {
+    padding: 10px 1.5rem;
+    border-bottom: 1px solid #f0f0f0;
+    background: var(--color-grey-100);
+    display: flex;
+    gap: 10px;
+    min-height: 60px;
+}
+
+    .actions-area .actions-container wc-button {
+        display: inline-block;
+    }
+
+    .actions-container {
+        display: flex;
+        gap: 8px;
+    }
+
+.body-area {
+    flex: 1;
+    background-color: var(--rf-bg-white);
+    position: relative;
+    overflow-y: auto;
+}
+
+::slotted([slot="body"]) {
+    position: absolute;
+    top: 0.9rem;
+    bottom: 0.9rem;
+    left: 0.9rem;
+    right: 0.9rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.footer-area {
+    padding: 1rem 1.5rem;
+    background-color: var(--color-grey-200);
+    border-top: 1px solid var(--rf-color-border-light);
+    min-height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 4px;
+}
+
+::slotted([slot="footer"]),
+slot[name="footer"]::slotted(*) {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    width: 100%;
+}
+
+
+@keyframes menuFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+wc-button.back-btn, wc-button.header-ext-btn, wc-button.close-btn, wc-button.expand-btn {
+    display: inline-flex;
+    font-weight: 400;
+    width: 40px;
+    height: 40px;
+}
+
+/* back-btn: 12px antes de lo que venga despues (addon, barra de acento o titulo) */
+wc-button.back-btn {
+    margin-right: 12px;
+}
+
+/* navBtn "pagina_completa": 12px por defecto; baja a 6px solo cuando va seguido
+   de la barra de acento (ver bloque de la cabecera) */
+wc-button.header-ext-btn {
+    margin-right: 12px;
+}
+
+/* close-btn/expand-btn: se mantienen en 6px, sin cambios */
+wc-button.close-btn, wc-button.expand-btn {
+    margin-right: 6px;
+}
+
+/* El .wcb-btn interno hereda padding:12px 16px y min-height:36px de button.css,
+   pensados para un boton con texto. Dentro de un host de 40x40 eso deja una caja
+   de contenido real de 6x14px (verificado). El font-size:1.4rem que llevaban
+   header-ext-btn y close-btn no corregia eso: solo agrandaba el icono para que
+   desbordara visualmente esa caja, y por eso back-btn/expand-btn (sin ese parche)
+   se veian rotos. Se quita el padding heredado para que el icono tenga los 40x40
+   reales y quede centrado sin depender de un font-size mas grande. */
+    wc-button.back-btn .wcb-btn,
+    wc-button.header-ext-btn .wcb-btn,
+    wc-button.close-btn .wcb-btn,
+    wc-button.expand-btn .wcb-btn {
+        padding: 0;
+        min-height: 40px;
+    }
+
+/* Iconos por clase de catalogo (.wcb-mask-icon::before) usan 1.25em en button.css,
+   una regla compartida por TODO el sistema, no especifica de estos botones. Aqui se
+   sobreescribe solo para estos cuatro, al mismo --wcb-icon-size-md (16px) que ya usan
+   back-btn/expand-btn via SVG, para que los cuatro icono-solo midan lo mismo. No se
+   toca la regla de button.css: cambiar 1.25em ahi afectaria a cualquier otro boton
+   de mascara del sistema, fuera de este bug. */
+    wc-button.back-btn .wcb-mask-icon::before,
+    wc-button.header-ext-btn .wcb-mask-icon::before,
+    wc-button.close-btn .wcb-mask-icon::before,
+    wc-button.expand-btn .wcb-mask-icon::before {
+        width: var(--wcb-icon-size-md);
+        height: var(--wcb-icon-size-md);
+    }
+
+/* button.css fuerza background-color: var(--rf-color-primary) (azul) en cualquier
+   boton variant="white" con icono de mascara. back-btn/expand-btn (SVG, stroke
+   currentColor) ya heredan --rf-color-text (#333333) correctamente; el icono de
+   mascara del catalogo lo ignora porque usa background-color, no color. Se
+   sobreescribe aqui para igualar los cuatro, sin tocar la regla global. */
+    wc-button.back-btn .wcb-mask-icon::before,
+    wc-button.header-ext-btn .wcb-mask-icon::before,
+    wc-button.close-btn .wcb-mask-icon::before,
+    wc-button.expand-btn .wcb-mask-icon::before {
+        background-color: var(--rf-color-text, #333333);
+    }
